@@ -353,7 +353,7 @@
       "permission": "CAR_DRIVE",
       "console": "listed",
       "verification": "none",
-      "note": "콘솔은 true를 페달이 눌린 상태로 설명한다."
+      "note": "API 문서와 콘솔은 true를 페달이 눌린 상태로 설명한다. 실행 대조 전이다."
     },
     {
       "id": "TEMPERATURE_DISPLAY_UNIT",
@@ -457,7 +457,8 @@
       "unit": "km/kWh",
       "permission": "CAR_ENERGY",
       "console": "listed",
-      "verification": "none"
+      "verification": "none",
+      "note": "API 문서는 추후 Deprecated 예정이라고 적는다. 채택 전에 다시 확인한다."
     },
     {
       "id": "SINCE_CHARGE_EV_EFFICIENCY",
@@ -548,7 +549,8 @@
       "unit": "L/100 km",
       "permission": "CAR_ENERGY",
       "console": "listed",
-      "verification": "none"
+      "verification": "none",
+      "note": "API 문서는 추후 Deprecated 예정이라고 적는다. 채택 전에 다시 확인한다."
     },
     {
       "id": "SINCE_CHARGE_FUEL_ECONOMY",
@@ -773,7 +775,7 @@
       "fixedArgs": {
         "unit": "CELSIUS"
       },
-      "note": "SDK 소스는 목표 온도, 콘솔은 온도 임계값으로 설명한다. 현재 온도(HVAC_TEMPERATURE_CURRENT)와 구분한다."
+      "note": "SDK 소스와 API 문서는 목표 온도, 콘솔은 온도 임계값으로 설명한다. 현재 온도(HVAC_TEMPERATURE_CURRENT)와 구분한다."
     },
     {
       "id": "HVAC_TEMPERATURE_CURRENT",
@@ -995,7 +997,7 @@
       "permission": "CAR_LIGHTS",
       "console": "listed",
       "verification": "none",
-      "note": "콘솔은 32비트 ARGB로 설명한다."
+      "note": "API 문서와 콘솔은 32비트 ARGB로 설명하며, API 문서는 알파를 0xFF 고정으로 적는다. 밝기 값이 아니다."
     },
     {
       "id": "AMBIENT_LIGHT_SWITCH",
@@ -1047,7 +1049,8 @@
       "unit": "km",
       "permission": "CAR_DRIVE",
       "console": "listed",
-      "verification": "none"
+      "verification": "none",
+      "note": "API 문서는 현재 주행거리계 값으로 설명한다. 이번 주행 거리는 TRIP_CURRENT_DRIVING_DISTANCE다."
     },
     {
       "id": "TRIP_CURRENT_DRIVING_TIME",
@@ -1177,7 +1180,8 @@
       "unit": null,
       "permission": "CAR_SAFETY",
       "console": "listed",
-      "verification": "none"
+      "verification": "none",
+      "note": "API 문서는 true를 워셔액 문제로 설명한다. 실행 대조 전이다."
     },
     {
       "id": "SEAT_AIRBAG_BEEN_DEPLOYED",
@@ -1190,7 +1194,8 @@
       "unit": null,
       "permission": "CAR_SAFETY",
       "console": "listed",
-      "verification": "none"
+      "verification": "none",
+      "note": "API 문서는 true를 에어백 전개로 설명한다. 실행 대조 전이다."
     },
     {
       "id": "POWER_DOWN_WARNING_INDICATOR",
@@ -1203,7 +1208,8 @@
       "unit": null,
       "permission": "CAR_SAFETY",
       "console": "listed",
-      "verification": "none"
+      "verification": "none",
+      "note": "API 문서는 true를 엔진 문제로 설명한다. 실행 대조 전이다."
     },
     {
       "id": "SEAT_AIRBAG_ENABLED",
@@ -1217,7 +1223,7 @@
       "permission": "CAR_SAFETY",
       "console": "listed",
       "verification": "none",
-      "note": "콘솔은 true를 에어백 문제로 설명한다(OQ-13). 값 의미를 확정하지 않는다."
+      "note": "API 문서와 콘솔은 true를 해당 좌석 에어백의 문제로 설명한다. 이름과 반대로 읽힐 수 있으며 실행 대조 전이다(OQ-13)."
     },
     {
       "id": "SEAT_BELT_NOT_BUCKLED_WARNING",
@@ -1230,7 +1236,8 @@
       "unit": null,
       "permission": "CAR_SAFETY",
       "console": "listed",
-      "verification": "none"
+      "verification": "none",
+      "note": "API 문서는 true를 안전벨트 미착용으로 설명한다. 실행 대조 전이다."
     },
     {
       "id": "SEAT_OCCUPANCY",
@@ -1464,7 +1471,8 @@
       "unit": "deg",
       "permission": "CAR_DRIVE",
       "console": "listed",
-      "verification": "none"
+      "verification": "none",
+      "note": "API 문서는 앞바퀴 조향각으로 설명하며 왼쪽이 음수다. 핸들 회전각이 아니다."
     },
     {
       "id": "LOW_TIRE_PRESSURE",
@@ -1478,7 +1486,7 @@
       "permission": "CAR_SAFETY",
       "console": "listed",
       "verification": "none",
-      "note": "SDK 소스는 저압 임계값(kPa), 콘솔(2026-11-01)은 낮은 공기압 상태로 설명한다. 현재 공기압으로 표현하지 않는다."
+      "note": "SDK 소스와 API 문서는 저압 임계값(kPa), 콘솔(2026-11-01)은 낮은 공기압 상태로 설명한다. 현재 공기압으로 표현하지 않는다."
     },
     {
       "id": "ETCS_VOICE_GUIDANCE_VOLUME",

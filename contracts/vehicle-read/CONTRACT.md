@@ -21,6 +21,7 @@
 - 제어, 구독, 비공개·Deprecated API, 내비게이션(COM-11)은 대상이 아니다.
 - VIN은 요구사항 부록 B.1에 따라 제외한다. SDK가 조회 값을 logcat에 남기는 경로이기도 하다.
 - 필수 도구는 기존 4개다(요구사항 3.4.3). 나머지 18개는 검증 후 채택하는 후보다.
+- 카탈로그는 SDK 2.3.2 소스·클래스와 [API Reference](https://document.pleos.ai/docs/pleos-only/connect-sdk-pleos/Vehicle/entry)로 대조했다. API Reference는 소스 주석에서 생성된 문서로 보이므로 일치해도 실제 동작의 증거가 아니다.
 
 ## 요청 생명주기
 
@@ -74,10 +75,10 @@
 
 `property`, `area`, `status`, `capability`, `rawValue`, `meaning`, `unit`, `receivedAt`, `errorType`, `errorCode` 10개를 항상 보낸다. 없으면 `null`이다.
 
-- `area`: 영역이 없는 속성은 `null`. 묶음 영역은 capability가 보고한 대로 `A+B+C`로 적고 나누지 않는다. 에뮬레이터의 `DOOR_LOCK`이 이 형태다(`sdk_emulator`).
+- `area`: 영역이 없는 속성은 `null`. 묶음 영역은 capability가 보고한 대로 `A+B+C`로 적고 나누지 않는다. API 문서의 `DoorArea`는 하나 이상의 영역을 받고, 에뮬레이터의 `DOOR_LOCK` capability가 이 형태로 보고한다(`sdk_emulator`). 묶음 영역 조회 자체는 아직 실행하지 않았다.
 - `capability`: `{access, matchingAreas, reportedAreas, minimum, maximum}`. 범위는 capability가 보고할 때만 있다.
 - `rawValue`: 카탈로그 `valueType`을 따른다. `int`는 SDK의 `Int`와 같은 32비트 범위이고, `float`는 유한한 수다. enum은 이름 문자열, `smart_glass_config`는 `{zoneCount, levelCount}`.
-- `meaning`: `DOOR_POSITION`(0=closed, 1=open, 범위 0..1일 때만), `DOOR_LOCK`(true=locked)에만 쓴다. 다른 속성의 값 의미는 해석하지 않는다. `DOOR_LOCK`의 의미도 메서드 이름에서 온 해석이다.
+- `meaning`: `DOOR_POSITION`(0=closed, 1=open, 범위 0..1일 때만), `DOOR_LOCK`(true=locked)에만 쓴다. 둘 다 API 문서에 값 의미가 없다. `DOOR_POSITION`은 공식 샘플 README와 PoC 앱의 에뮬레이터 대조에서, `DOOR_LOCK`은 메서드 이름에서 온 해석이다. 다른 속성의 값 의미는 해석하지 않으며, 문서 설명은 카탈로그 `note`에 참고로만 둔다.
 - `unit`: 카탈로그 `unit`과 같아야 한다. 값이 capability가 보고한 범위나 문서 범위를 벗어나거나 단위를 확정할 수 없으면 `UNKNOWN_VALUE`로 보낸다.
 - `receivedAt`: 앱이 콜백을 받은 UTC ISO 8601 시각. 측정 시각이 아니며 `observedAt`은 SDK가 제공하지 않아 보내지 않는다.
 - `errorType`: 진단용 클래스 이름. 배포 AAR의 `VehicleException`은 `a`로 난독화되어 있어(`sdk_emulator`에서 관찰) 판정에 쓰지 않는다. 예외 메시지 원문은 내보내지 않는다.
