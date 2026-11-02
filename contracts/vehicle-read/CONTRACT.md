@@ -1,6 +1,6 @@
 # 차량 조회 계약
 
-상태: **제안**. [ADR-0004](../../docs/decisions/0004-vehicle-read-contract.md)와 함께 상대 개발자가 승인하면 채택한다.
+상태: **채택** ([ADR-0004](../../docs/decisions/0004-vehicle-read-contract.md)).
 
 이 문서는 규칙만 적는다. 속성·도구·한도의 값은 [catalog.json](catalog.json), 판정 사례는 [fixtures/](fixtures/)가 기준이다. Android와 Node 테스트가 같은 파일을 읽는다.
 
