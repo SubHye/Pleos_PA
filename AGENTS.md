@@ -6,6 +6,7 @@
 
 Linear Issue → Coding Agent(Codex, Claude Code) → 구현·테스트·검증·PR → 코드 리뷰·통합. 세부 구현 방법은 제한하지 않는다.
 
+- 상위 Issue는 사용자 관점에서 완성되는 기능, 하위 Issue는 독립 개발이 유리한 구현 작업(Android Adapter, MCP Tool, E2E 검증 등)이다.
 - Linear의 Todo가 착수 가능 상태다. 선택한 개발자가 착수할 때 배정한다.
 - 짧은 feature branch에서 작업한다. main에 직접 쓰지 않고 사용자 변경을 보존한다. PR은 [템플릿](.github/pull_request_template.md)을 따른다.
 - 완료 기준: 수용 기준 증거, CI 통과, 상대 개발자 승인, main 병합, 코드와 문서 일치, Linear에 결과 링크. Agent 리뷰는 사람 리뷰를 대체하지 않는다.
