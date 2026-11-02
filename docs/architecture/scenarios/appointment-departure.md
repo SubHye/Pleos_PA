@@ -1,11 +1,11 @@
 # 약속에 맞춰 출발하기 (목표 시나리오, 미구현)
 
-SDK 목적지 설정·ETA 및 동일 외부 AI의 일정/메시지 연동이 지원되는지 먼저 검증한다. Gleo는 필수가 아니다.
+SDK 목적지 설정·ETA 및 동일 ChatGPT 환경의 일정/메시지 연동이 지원되는지 먼저 검증한다 (COM-8, COM-10). Gleo 연동은 사용하지 않는다.
 
 ```mermaid
 sequenceDiagram
     actor User as 사용자
-    participant AI as 외부 AI
+    participant AI as ChatGPT
     participant Calendar as 일정 도구
     participant MCP as 외부 Node MCP
     participant App as Android Bridge/Adapter
@@ -21,6 +21,7 @@ sequenceDiagram
     MCP->>App: Bridge 요청
     App->>Navi: 권한·지원·주행 규제 확인 후 호출
     Navi-->>App: 실제 결과·시간 정보
+    App-->>User: 차량 화면에 변경 결과 표시
     App-->>MCP: 결과·오류·수신 시각
     MCP-->>AI: 검증된 응답
     alt 시간 정보 부족/실패
@@ -41,12 +42,12 @@ sequenceDiagram
     end
 ```
 
-목적지 변경 승인이 거절되면 SDK 변경 호출을 하지 않는다. 변경 요청 후 timeout은 결과 불명으로 표시하고 자동 재시도하지 않는다.
+목적지 변경 승인이 거절되면 SDK 변경 호출을 하지 않는다. AI 프롬프트만을 승인 강제 장치로 보지 않으며, 승인 검증이 성립하지 않으면 변경 도구를 제외한다. 변경 요청 후 timeout은 결과 불명으로 표시하고 자동 재시도하지 않는다.
 ETA/약속 시간은 시간대·기준 시각·단위를 확인해 비교한다.
 
 ## 인수 기준
 
-정상·지연 분기를 각각 증명해야 통합 경험 완료로 판정한다. 횟수와 시간 목표는 [요구사항 6.2](https://linear.app/wonsub/document/요구사항-정의서-1b7e6fcd5721)를 따른다.
+정상·지연 분기를 각각 증명해야 통합 경험 완료로 판정한다. 증명하지 못하면 단일 통합 작업의 성공으로만 기록한다. 횟수와 시간 목표는 [요구사항 6.2](https://linear.app/wonsub/document/요구사항-정의서-1b7e6fcd5721)를 따른다.
 
 - 정상 도착: 일정/내비 결과 안내, 메시지 도구 호출 없음.
 - 지연 도착: 수신자·초안 확인 → 승인/권한 후 전송 → 실제 결과 안내.

@@ -16,18 +16,19 @@ workspace "Pleos_PA" "Current scaffold, first-phase target and separately identi
         driver = person "Driver - target" "Asks for departure help and approves destination changes and messages."
         targetSystem = softwareSystem "Pleos_PA - first-phase target (not implemented)" "Goal structure; nothing here exists in the repository yet." {
             targetMcp = container "External MCP server - target" "MCP protocol, input validation, request and error mapping. No vehicle SDK logic." "Node.js / stdio"
-            targetApp = container "Android app - target" "Owns SDK permissions, execution, session lifecycle and result visibility through Service, Bridge and Adapter." "Kotlin / Pleos SDK"
+            targetApp = container "Android app - target" "Owns SDK permissions, execution, session lifecycle, driving restrictions and result display through Service, Bridge and Adapter. Keeps call records in memory only." "Kotlin / Vehicle SDK, NaviHelper"
         }
-        targetAi = softwareSystem "External AI - target" "Interprets schedule, selects tools and runs approval dialogue. Product must be verified."
+        targetAi = softwareSystem "ChatGPT - target" "Interprets schedule, selects tools and runs approval dialogue. Exact product, version and connection path must be verified."
         targetCalendar = softwareSystem "Calendar service - target" "Schedule source connected to the AI; account data is not copied into the vehicle app."
         targetMessaging = softwareSystem "Messaging service - target" "Sends only after explicit approval; support must be verified."
         targetVehicle = softwareSystem "Pleos navigation and vehicle services - target" "Destination, ETA and vehicle data; support must be verified."
         driver -> targetAi "Requests departure help and approves actions"
+        driver -> targetApp "Checks results and stops or resumes the connection"
         targetAi -> targetCalendar "Reads appointment"
         targetAi -> targetMessaging "Sends approved message"
-        targetAi -> targetMcp "Calls tools" "MCP / stdio"
+        targetAi -> targetMcp "Calls tools" "MCP; client connection path must be verified"
         targetMcp -> targetApp "Forwards validated requests" "Loopback HTTP / ADB forward (development)"
-        targetApp -> targetVehicle "Sets destination and reads ETA and vehicle data" "Pleos SDK"
+        targetApp -> targetVehicle "Sets destination and reads ETA and vehicle data" "Vehicle SDK / NaviHelper"
 
         deploymentEnvironment "Scaffold installation target - unverified" {
             deploymentNode "Development Android device or emulator" "Intended APK installation target, not a confirmed deployment." "Android" {
