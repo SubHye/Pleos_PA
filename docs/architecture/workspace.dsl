@@ -1,4 +1,4 @@
-workspace "Pleos_PA and reference PoC" "Current scaffold and separately identified reference implementation; no migration claimed." {
+workspace "Pleos_PA" "Current scaffold, first-phase target and separately identified reference implementation; no migration claimed." {
     model {
         current = softwareSystem "Pleos_PA - current scaffold" "Android resources and manifest only; no Activity, SDK, Bridge or MCP." {
             scaffold = container "Android scaffold APK" "Empty app module; no user workflow implemented." "Android / Gradle"
@@ -12,6 +12,23 @@ workspace "Pleos_PA and reference PoC" "Current scaffold and separately identifi
         client -> mcp "Calls read tools" "MCP / stdio"
         mcp -> android "Reads via PC loopback and ADB forward" "HTTP POST /v2/vehicle-read :18765"
         android -> vehicle "Queries supported vehicle properties" "Vehicle SDK"
+
+        driver = person "Driver - target" "Asks for departure help and approves destination changes and messages."
+        targetSystem = softwareSystem "Pleos_PA - first-phase target (not implemented)" "Goal structure; nothing here exists in the repository yet." {
+            targetMcp = container "External MCP server - target" "MCP protocol, input validation, request and error mapping. No vehicle SDK logic." "Node.js / stdio"
+            targetApp = container "Android app - target" "Owns SDK permissions, execution, session lifecycle and result visibility through Service, Bridge and Adapter." "Kotlin / Pleos SDK"
+        }
+        targetAi = softwareSystem "External AI - target" "Interprets schedule, selects tools and runs approval dialogue. Product must be verified."
+        targetCalendar = softwareSystem "Calendar service - target" "Schedule source connected to the AI; account data is not copied into the vehicle app."
+        targetMessaging = softwareSystem "Messaging service - target" "Sends only after explicit approval; support must be verified."
+        targetVehicle = softwareSystem "Pleos navigation and vehicle services - target" "Destination, ETA and vehicle data; support must be verified."
+        driver -> targetAi "Requests departure help and approves actions"
+        targetAi -> targetCalendar "Reads appointment"
+        targetAi -> targetMessaging "Sends approved message"
+        targetAi -> targetMcp "Calls tools" "MCP / stdio"
+        targetMcp -> targetApp "Forwards validated requests" "Loopback HTTP / ADB forward (development)"
+        targetApp -> targetVehicle "Sets destination and reads ETA and vehicle data" "Pleos SDK"
+
         deploymentEnvironment "Scaffold installation target - unverified" {
             deploymentNode "Development Android device or emulator" "Intended APK installation target, not a confirmed deployment." "Android" {
                 containerInstance scaffold
@@ -37,6 +54,14 @@ workspace "Pleos_PA and reference PoC" "Current scaffold and separately identifi
             autoLayout lr
         }
         deployment current "Scaffold installation target - unverified" "CurrentDeploymentTarget" {
+            include *
+            autoLayout lr
+        }
+        systemContext targetSystem "TargetContext" {
+            include *
+            autoLayout lr
+        }
+        container targetSystem "TargetContainers" {
             include *
             autoLayout lr
         }
