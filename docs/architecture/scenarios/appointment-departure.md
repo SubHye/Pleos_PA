@@ -1,11 +1,11 @@
 # 약속에 맞춰 출발하기 (목표 시나리오, 미구현)
 
-SDK 목적지 설정·ETA 및 동일 ChatGPT 환경의 일정/메시지 연동이 지원되는지 먼저 검증한다 (COM-8, COM-10). Gleo 연동은 사용하지 않는다.
+SDK 목적지 설정·ETA 및 동일 AI 환경(ChatGPT·Claude)의 일정/메시지 연동이 지원되는지 먼저 검증한다 (COM-8, COM-10). 도구 결합이 확인된 AI로 판정한다. Gleo 연동은 사용하지 않는다.
 
 ```mermaid
 sequenceDiagram
     actor User as 사용자
-    participant AI as ChatGPT
+    participant AI as 대상 AI
     participant Calendar as 일정 도구
     participant MCP as 외부 Node MCP
     participant App as Android Bridge/Adapter
@@ -47,7 +47,7 @@ ETA/약속 시간은 시간대·기준 시각·단위를 확인해 비교한다.
 
 ## 인수 기준
 
-정상·지연 분기를 각각 증명해야 통합 경험 완료로 판정한다. 증명하지 못하면 단일 통합 작업의 성공으로만 기록한다. 횟수와 시간 목표는 [요구사항 6.2](https://linear.app/wonsub/document/요구사항-정의서-1b7e6fcd5721)를 따른다.
+정상·지연 분기를 각각 증명해야 통합 경험 완료로 판정한다. 증명하지 못하면 단일 통합 작업의 성공으로만 기록한다. 기능 기준은 [요구사항](https://linear.app/wonsub/document/요구사항-정의서-1b7e6fcd5721) 4.7, 횟수와 시간 목표는 6.2를 따른다.
 
 - 정상 도착: 일정/내비 결과 안내, 메시지 도구 호출 없음.
 - 지연 도착: 수신자·초안 확인 → 승인/권한 후 전송 → 실제 결과 안내.
