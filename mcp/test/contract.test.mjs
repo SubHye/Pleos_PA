@@ -38,6 +38,14 @@ test('malformed and oversized replies are invalid', () => {
   assert.deepEqual(validateResponse(catalog, { ...common, text: ' '.repeat(catalog.bridge.maxResponseBytes + 1) }), invalid);
 });
 
+test('a non-finite value is invalid', () => {
+  const item = { property: 'LOW_TIRE_PRESSURE', area: 'LEFT_FRONT', status: 'OK', capability: { access: 'READ', matchingAreas: 1, reportedAreas: 'LEFT_FRONT', minimum: null, maximum: null }, rawValue: 0, meaning: null, unit: 'kPa', receivedAt: '2026-11-02T09:30:00.123Z', errorType: null, errorCode: null };
+  const requestId = '22222222-2222-4222-8222-222222222222';
+  const body = { requestId, query: 'tire_status', outcome: 'COMPLETE', source: 'simulation', sdkVersion: catalog.sdk.version, items: [item] };
+  const text = JSON.stringify(body).replace('"rawValue":0', '"rawValue":1e999');
+  assert.deepEqual(validateResponse(catalog, { http: 200, text, requestId, query: 'tire_status' }), { ok: false, code: 'INVALID_RESPONSE', origin: 'pc' });
+});
+
 test('fixtures only claim mock or observed evidence', () => {
   const evidence = new Set(['mock', 'source_only', 'sdk_emulator']);
   for (const name of ['requests', 'responses', 'failures', 'tool-inputs', 'tool-results']) {

@@ -274,6 +274,7 @@ class VehicleReadValidator(private val catalog: VehicleReadCatalog) {
         val maximum =
             if (raw.isNull("maximum")) null
             else (raw.opt("maximum") as? Number ?: return null).toDouble()
+        if (minimum?.isFinite() == false || maximum?.isFinite() == false) return null
         if ((minimum == null) != (maximum == null)) return null
         if (minimum != null && maximum != null && minimum > maximum) return null
         if (entry.areaType == null && (matching != null || reported != null)) return null
@@ -285,7 +286,7 @@ class VehicleReadValidator(private val catalog: VehicleReadCatalog) {
         when (raw) {
             is Boolean,
             is String -> raw
-            is Number -> wholeNumber(raw) ?: raw.toDouble()
+            is Number -> wholeNumber(raw) ?: raw.toDouble().takeIf { it.isFinite() }
             is JSONObject -> {
                 val zones = wholeNumber(raw.opt("zoneCount"))
                 val levels = wholeNumber(raw.opt("levelCount"))
@@ -355,15 +356,23 @@ class VehicleReadValidator(private val catalog: VehicleReadCatalog) {
         capability: ItemCapability?,
     ): Boolean {
         val raw = item.rawValue
-        val typed = isValueType(raw, entry.valueType)
+        val typed = isValueType(raw, entry.valueType) && withinBounds(raw, capability)
         return when (entry.id) {
             "DOOR_POSITION" ->
                 capability?.minimum == 0.0 && capability.maximum == 1.0 && (raw == 0 || raw == 1)
             "WINDOW_POSITION" -> typed && capability?.minimum != null
             "FUEL_PERCENT",
-            "EV_BATTERY_PERCENT" -> raw is Int && raw in 0..100
+            "EV_BATTERY_PERCENT" -> typed && raw is Int && raw in 0..100
             else -> typed
         }
+    }
+
+    /** A value outside the range capability reports is not a confirmed reading. */
+    private fun withinBounds(raw: Any?, capability: ItemCapability?): Boolean {
+        val value = (raw as? Number)?.toDouble() ?: return true
+        val minimum = capability?.minimum ?: return true
+        val maximum = capability.maximum ?: return true
+        return value in minimum..maximum
     }
 
     private fun isValueType(raw: Any?, valueType: String): Boolean =
@@ -395,7 +404,8 @@ class VehicleReadValidator(private val catalog: VehicleReadCatalog) {
     private fun wholeNumber(raw: Any?): Int? {
         val number = raw as? Number ?: return null
         val value = number.toDouble()
-        return if (value == Math.rint(value) && !value.isInfinite()) value.toInt() else null
+        val fits = value >= Int.MIN_VALUE && value <= Int.MAX_VALUE
+        return if (fits && value == Math.rint(value)) value.toInt() else null
     }
 
     private fun outcomeOf(name: String): Outcome? = Outcome.entries.firstOrNull { it.name == name }

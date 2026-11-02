@@ -2760,6 +2760,531 @@
     }
   },
   {
+    "name": "window above the reported range is not OK",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "window_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "window_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 11,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "window below the reported range is not OK",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "window_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "window_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": -1,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "window outside the reported range is an unknown value",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "window_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "window_status",
+      "outcome": "PARTIAL",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "UNKNOWN_VALUE",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 11,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "PARTIAL"
+    }
+  },
+  {
+    "name": "window at the range edge is OK",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "window_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "window_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 10,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 0,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 0,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 0,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "COMPLETE"
+    }
+  },
+  {
+    "name": "other properties respect a reported range",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "tire_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "tire_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "LOW_TIRE_PRESSURE",
+          "area": "LEFT_FRONT",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 1,
+            "reportedAreas": "LEFT_FRONT",
+            "minimum": 100.0,
+            "maximum": 200.0
+          },
+          "rawValue": 250.5,
+          "meaning": null,
+          "unit": "kPa",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "int property beyond 32 bits is not OK",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "toll_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "toll_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "ETCS_VOICE_GUIDANCE_VOLUME",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 2147483648,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "float property keeps a value beyond 32 bits",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "tire_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "tire_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "LOW_TIRE_PRESSURE",
+          "area": "LEFT_FRONT",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 1,
+            "reportedAreas": "LEFT_FRONT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 2147483648,
+          "meaning": null,
+          "unit": "kPa",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "COMPLETE"
+    }
+  },
+  {
+    "name": "matching areas beyond 32 bits",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "tire_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "tire_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "LOW_TIRE_PRESSURE",
+          "area": "LEFT_FRONT",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 2147483648,
+            "reportedAreas": "LEFT_FRONT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 165.5,
+          "meaning": null,
+          "unit": "kPa",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
     "name": "extra item field",
     "evidence": "mock",
     "requestId": "22222222-2222-4222-8222-222222222222",

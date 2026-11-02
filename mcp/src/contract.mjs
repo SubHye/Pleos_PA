@@ -31,12 +31,12 @@ const nullableText = z.string().nullable();
 const number = z.number().nullable();
 const capabilitySchema = z.strictObject({
   access: z.string(),
-  matchingAreas: z.number().int().nullable(),
+  matchingAreas: z.int32().nullable(),
   reportedAreas: nullableText,
   minimum: number,
   maximum: number,
 }).refine(({ minimum, maximum }) => (minimum === null) === (maximum === null) && (minimum === null || minimum <= maximum));
-const smartGlassSchema = z.strictObject({ zoneCount: z.number().int(), levelCount: z.number().int() });
+const smartGlassSchema = z.strictObject({ zoneCount: z.int32(), levelCount: z.int32() });
 const itemSchema = z.strictObject({
   property: z.string(),
   area: nullableText,
@@ -104,8 +104,10 @@ export function parseRequest(catalog, text) {
   return request;
 }
 
+const isInt32 = (value) => Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
+
 function isValueType(catalog, raw, valueType) {
-  if (valueType === 'int') return Number.isInteger(raw);
+  if (valueType === 'int') return isInt32(raw);
   if (valueType === 'float') return typeof raw === 'number';
   if (valueType === 'boolean') return typeof raw === 'boolean';
   if (valueType === 'smart_glass_config') return typeof raw === 'object' && raw !== null;
@@ -113,15 +115,21 @@ function isValueType(catalog, raw, valueType) {
   return false;
 }
 
+/** A value outside the range capability reports is not a confirmed reading. */
+function withinBounds(raw, capability) {
+  if (typeof raw !== 'number' || capability === null || capability.minimum === null) return true;
+  return raw >= capability.minimum && raw <= capability.maximum;
+}
+
 /** Whether the value's type, range and unit are confirmed for this property. */
 function confirmed(catalog, item, entry) {
   const { rawValue: raw, capability } = item;
-  const typed = isValueType(catalog, raw, entry.valueType);
+  const typed = isValueType(catalog, raw, entry.valueType) && withinBounds(raw, capability);
   switch (entry.id) {
     case 'DOOR_POSITION': return capability?.minimum === 0 && capability.maximum === 1 && (raw === 0 || raw === 1);
     case 'WINDOW_POSITION': return typed && capability?.minimum !== null && capability?.minimum !== undefined;
     case 'FUEL_PERCENT':
-    case 'EV_BATTERY_PERCENT': return Number.isInteger(raw) && raw >= 0 && raw <= 100;
+    case 'EV_BATTERY_PERCENT': return typed && raw >= 0 && raw <= 100;
     default: return typed;
   }
 }

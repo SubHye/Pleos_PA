@@ -86,6 +86,19 @@ class VehicleReadContractTest {
         )
     }
 
+    @Test
+    fun nonFiniteValueIsInvalid() {
+        val case =
+            ContractFixtures.cases("responses").first {
+                it.getString("name") == "float property keeps a value beyond 32 bits"
+            }
+        val text = case.getJSONObject("body").toString().replace("2147483648", "1e999")
+        assertEquals(
+            BridgeResult.Failed("INVALID_RESPONSE", FailureOrigin.PC),
+            validator.validate(200, text, case.getString("requestId"), case.getString("query")),
+        )
+    }
+
     private fun validate(case: JSONObject): BridgeResult {
         val selection = case.optJSONObject("selection") ?: JSONObject()
         return validator.validate(

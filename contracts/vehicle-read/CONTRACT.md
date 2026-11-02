@@ -76,9 +76,9 @@
 
 - `area`: 영역이 없는 속성은 `null`. 묶음 영역은 capability가 보고한 대로 `A+B+C`로 적고 나누지 않는다. 에뮬레이터의 `DOOR_LOCK`이 이 형태다(`sdk_emulator`).
 - `capability`: `{access, matchingAreas, reportedAreas, minimum, maximum}`. 범위는 capability가 보고할 때만 있다.
-- `rawValue`: 카탈로그 `valueType`을 따른다. enum은 이름 문자열, `smart_glass_config`는 `{zoneCount, levelCount}`.
+- `rawValue`: 카탈로그 `valueType`을 따른다. `int`는 SDK의 `Int`와 같은 32비트 범위이고, `float`는 유한한 수다. enum은 이름 문자열, `smart_glass_config`는 `{zoneCount, levelCount}`.
 - `meaning`: `DOOR_POSITION`(0=closed, 1=open, 범위 0..1일 때만), `DOOR_LOCK`(true=locked)에만 쓴다. 다른 속성의 값 의미는 해석하지 않는다. `DOOR_LOCK`의 의미도 메서드 이름에서 온 해석이다.
-- `unit`: 카탈로그 `unit`과 같아야 한다. 값이 문서 범위를 벗어나거나 단위를 확정할 수 없으면 `UNKNOWN_VALUE`로 보낸다.
+- `unit`: 카탈로그 `unit`과 같아야 한다. 값이 capability가 보고한 범위나 문서 범위를 벗어나거나 단위를 확정할 수 없으면 `UNKNOWN_VALUE`로 보낸다.
 - `receivedAt`: 앱이 콜백을 받은 UTC ISO 8601 시각. 측정 시각이 아니며 `observedAt`은 SDK가 제공하지 않아 보내지 않는다.
 - `errorType`: 진단용 클래스 이름. 배포 AAR의 `VehicleException`은 `a`로 난독화되어 있어(`sdk_emulator`에서 관찰) 판정에 쓰지 않는다. 예외 메시지 원문은 내보내지 않는다.
 - `errorCode`: 확인한 SDK `ErrorCode` 이름. 없으면 `null`.
