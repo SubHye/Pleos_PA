@@ -41,6 +41,8 @@ CI가 같은 검사를 실행한다. 실행하지 못한 검사, NO-SOURCE/skip,
 해당 영역을 작업하기 전에 그 AGENTS.md를 읽는다. 도구가 하위 파일을 자동으로 읽는다고 가정하지 않는다. CLAUDE.md에는 지침을 복제하지 않는다.
 
 - [app/src](app/src/AGENTS.md): Android 소스
+- [contracts/vehicle-read](contracts/vehicle-read/CONTRACT.md): 차량 조회 계약, 카탈로그, 공용 fixture
+- `mcp/`: Node 측 계약 코드와 테스트. MCP 서버는 아직 없다(`npm --prefix mcp test`)
 - [docs](docs/AGENTS.md): 문서
 - [docs/architecture](docs/architecture/AGENTS.md): C4 모델과 런타임 시나리오
 - [docs/decisions](docs/decisions/AGENTS.md): ADR

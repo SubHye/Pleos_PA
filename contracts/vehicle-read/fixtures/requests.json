@@ -1,0 +1,86 @@
+[
+  {
+    "name": "legacy query without selectors",
+    "evidence": "mock",
+    "body": {"requestId": "11111111-1111-4111-8111-111111111111", "remainingMs": 9000, "query": "door_status"},
+    "accept": true
+  },
+  {
+    "name": "domain query with selectors",
+    "evidence": "mock",
+    "body": {"requestId": "11111111-1111-4111-8111-111111111111", "remainingMs": 10000, "query": "seat_status", "properties": ["SEAT_OCCUPANCY"], "areas": ["ROW_1_LEFT"]},
+    "accept": true
+  },
+  {
+    "name": "grouped area selector",
+    "evidence": "mock",
+    "body": {"requestId": "11111111-1111-4111-8111-111111111111", "remainingMs": 1, "query": "seat_status", "areas": ["ROW_1_LEFT+ROW_1_RIGHT"]},
+    "accept": true
+  },
+  {
+    "name": "legacy query rejects selectors",
+    "evidence": "mock",
+    "body": {"requestId": "11111111-1111-4111-8111-111111111111", "remainingMs": 9000, "query": "door_status", "areas": ["ROW_1_LEFT"]},
+    "accept": false
+  },
+  {
+    "name": "unknown query",
+    "evidence": "mock",
+    "body": {"requestId": "11111111-1111-4111-8111-111111111111", "remainingMs": 9000, "query": "vin"},
+    "accept": false
+  },
+  {
+    "name": "unknown key",
+    "evidence": "mock",
+    "body": {"requestId": "11111111-1111-4111-8111-111111111111", "remainingMs": 9000, "query": "door_status", "extra": true},
+    "accept": false
+  },
+  {
+    "name": "not a uuid",
+    "evidence": "mock",
+    "body": {"requestId": "abc", "remainingMs": 9000, "query": "door_status"},
+    "accept": false
+  },
+  {
+    "name": "budget above deadline",
+    "evidence": "mock",
+    "body": {"requestId": "11111111-1111-4111-8111-111111111111", "remainingMs": 10001, "query": "door_status"},
+    "accept": false
+  },
+  {
+    "name": "zero budget",
+    "evidence": "mock",
+    "body": {"requestId": "11111111-1111-4111-8111-111111111111", "remainingMs": 0, "query": "door_status"},
+    "accept": false
+  },
+  {
+    "name": "property of another query",
+    "evidence": "mock",
+    "body": {"requestId": "11111111-1111-4111-8111-111111111111", "remainingMs": 9000, "query": "seat_status", "properties": ["HVAC_AC_STATE"]},
+    "accept": false
+  },
+  {
+    "name": "excluded property",
+    "evidence": "mock",
+    "body": {"requestId": "11111111-1111-4111-8111-111111111111", "remainingMs": 9000, "query": "toll_status", "properties": ["VIN_INFO"]},
+    "accept": false
+  },
+  {
+    "name": "area outside the query vocabulary",
+    "evidence": "mock",
+    "body": {"requestId": "11111111-1111-4111-8111-111111111111", "remainingMs": 9000, "query": "seat_status", "areas": ["HOOD"]},
+    "accept": false
+  },
+  {
+    "name": "empty selector",
+    "evidence": "mock",
+    "body": {"requestId": "11111111-1111-4111-8111-111111111111", "remainingMs": 9000, "query": "seat_status", "properties": []},
+    "accept": false
+  },
+  {
+    "name": "duplicate selector",
+    "evidence": "mock",
+    "body": {"requestId": "11111111-1111-4111-8111-111111111111", "remainingMs": 9000, "query": "seat_status", "areas": ["ROW_1_LEFT", "ROW_1_LEFT"]},
+    "accept": false
+  }
+]

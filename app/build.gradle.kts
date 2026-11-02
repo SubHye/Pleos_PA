@@ -30,6 +30,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    testOptions {
+        unitTests.all {
+            it.inputs
+                .dir(rootProject.layout.projectDirectory.dir("contracts/vehicle-read"))
+                .withPathSensitivity(PathSensitivity.RELATIVE)
+        }
+    }
 }
 
 dependencies {
@@ -37,6 +44,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
     testImplementation(libs.junit)
+    testImplementation(libs.org.json)
+    testImplementation(libs.vehicle.sdk)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
 }

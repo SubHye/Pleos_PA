@@ -8,6 +8,8 @@ appcompat = "1.8.0"
 material = "1.14.0"
 spotless = "8.10.4"
 ktfmt = "0.64"
+vehicleSdk = "2.3.2"
+orgJson = "20250517"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -16,6 +18,8 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+org-json = { group = "org.json", name = "json", version.ref = "orgJson" }
+vehicle-sdk = { group = "ai.pleos.playground", name = "Vehicle", version.ref = "vehicleSdk" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
