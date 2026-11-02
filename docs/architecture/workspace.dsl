@@ -18,7 +18,7 @@ workspace "Pleos_PA" "Current scaffold, first-phase target and separately identi
             targetMcp = container "External MCP server - target" "MCP protocol, input validation, request and error mapping. No vehicle SDK logic." "Node.js / stdio"
             targetApp = container "Android app - target" "Owns SDK permissions, execution, session lifecycle, driving restrictions and result display through Service, Bridge and Adapter. Keeps call records in memory only." "Kotlin / Vehicle SDK, NaviHelper"
         }
-        targetAi = softwareSystem "ChatGPT - target" "Interprets schedule, selects tools and runs approval dialogue. Exact product, version and connection path must be verified."
+        targetAi = softwareSystem "ChatGPT or Claude - target" "Interprets schedule, selects tools and runs approval dialogue. Exact product, version and connection path must be verified per client."
         targetCalendar = softwareSystem "Calendar service - target" "Schedule source connected to the AI; account data is not copied into the vehicle app."
         targetMessaging = softwareSystem "Messaging service - target" "Sends only after explicit approval; support must be verified."
         targetVehicle = softwareSystem "Pleos navigation and vehicle services - target" "Destination, ETA and vehicle data; support must be verified."
