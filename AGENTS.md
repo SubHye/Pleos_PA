@@ -11,6 +11,7 @@ Linear Issue → Coding Agent(Codex, Claude Code) → 구현·테스트·검증�
 - 짧은 feature branch에서 작업한다. main에 직접 쓰지 않고 사용자 변경을 보존한다. PR은 [템플릿](.github/pull_request_template.md)을 따른다.
 - 완료 기준: 수용 기준 증거, CI 통과, 상대 개발자 승인, main 병합, 코드와 문서 일치, Linear에 결과 링크. Agent 리뷰는 사람 리뷰를 대체하지 않는다.
 - 현재 저장소 요금제에서는 브랜치 보호를 쓸 수 없다. 병합하는 사람이 CI 통과와 상대 승인을 직접 확인한다.
+- Linear는 [wonsub의 COM 팀](https://linear.app/wonsub/team/COM/overview)을 쓴다. 커넥터가 다른 워크스페이스에 연결되어 있으면 추측하지 말고 알린다.
 - Linear는 요구·우선순위·진행의 원천, 저장소는 코드·계약·아키텍처의 원천이다. 충돌하면 사실과 제안을 분리해 보고한다. 기획서와 요구사항 정의서가 다르면 요구사항 정의서를 우선한다.
 
 ## 환경과 검증
