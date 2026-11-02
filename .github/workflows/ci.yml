@@ -26,6 +26,8 @@ jobs:
       - uses: android-actions/setup-android@v4
       - name: Install project SDK packages
         run: sdkmanager "platforms;android-37.0" "build-tools;36.0.0"
+      - name: Check formatting
+        run: bash ./gradlew :spotlessCheck --no-daemon --console=plain
       - name: Build, unit test and lint
         run: bash ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug --no-daemon --console=plain
 
