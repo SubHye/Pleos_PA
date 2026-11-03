@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { loadCatalog, parseRequest, validateResponse } from '../src/contract.mjs';
-import { TOOL_ANNOTATIONS, toToolResult, toolInputSchema } from '../src/tool-result.mjs';
+import { loadCatalog, parseRequest, validateResponse } from '../src/contract.ts';
+import { TOOL_ANNOTATIONS, toToolResult, toolInputSchema } from '../src/tool-result.ts';
 
-const fixture = (name) => JSON.parse(readFileSync(new URL(`../../contracts/vehicle-read/fixtures/${name}.json`, import.meta.url), 'utf8'));
+const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../../contracts/vehicle-read/fixtures/${name}.json`, import.meta.url), 'utf8'));
 const catalog = loadCatalog();
-const toolNamed = (name) => catalog.tools.find((tool) => tool.name === name);
+const toolNamed = (name: string) => catalog.tools.find((tool) => tool.name === name)!;
 
 test('tool inputs match their fixtures', () => {
   for (const { name, tool, args, accept } of fixture('tool-inputs')) {

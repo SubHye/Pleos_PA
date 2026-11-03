@@ -1,10 +1,13 @@
 // MCP side of contracts/vehicle-read: tool input schemas and tool results built from a validated bridge result.
 import * as z from 'zod';
-import { isArea, propertiesOf, propertyOf, toolOf } from './contract.mjs';
+import { isArea, propertiesOf, propertyOf, toolOf } from './contract.ts';
+import type { BridgeResponse, BridgeResult, Catalog, ToolEntry } from './contract.ts';
 
 export const TOOL_ANNOTATIONS = Object.freeze({
   readOnlyHint: true, destructiveHint: false, idempotentHint: false, openWorldHint: false,
 });
+
+type Item = BridgeResponse['items'][number];
 
 const RECEIPT_NOTE = '수신 시각은 앱이 콜백을 받은 시각이며 차량 측 측정 시각이나 값의 최신성을 보장하지 않습니다.';
 const SNAPSHOT_NOTE = '항목들은 순차로 읽었으며 동시에 읽은 스냅샷이 아닙니다.';
@@ -13,39 +16,39 @@ const NO_GUESS = '확인하지 못한 값을 추정하지 마세요. 자동 재�
 const SIMULATION_NOTE = '시뮬레이션 결과이며 실제 차량 값이 아닙니다.';
 
 /** Zod schema of one tool's arguments. Legacy tools take none; areas exist only where a property has one. */
-export function toolInputSchema(catalog, tool) {
+export function toolInputSchema(catalog: Catalog, tool: ToolEntry) {
   if (tool.legacy) return z.strictObject({});
-  const unique = (values) => new Set(values).size === values.length;
+  const unique = (values: string[]) => new Set(values).size === values.length;
   const ids = [...propertiesOf(catalog, tool)];
-  const shape = { properties: z.array(z.enum(ids)).min(1).refine(unique).optional() };
-  const vocabulary = new Set(ids.flatMap((id) => catalog.areas[propertyOf(catalog, id).areaType] ?? []));
+  const shape: Record<string, z.ZodType> = { properties: z.array(z.enum(ids)).min(1).refine(unique).optional() };
+  const vocabulary = new Set(ids.flatMap((id) => catalog.areas[propertyOf(catalog, id)?.areaType ?? ''] ?? []));
   if (vocabulary.size > 0) {
     shape.areas = z.array(z.string().refine((area) => isArea(area, vocabulary))).min(1).refine(unique).optional();
   }
   return z.strictObject(shape);
 }
 
-const textResult = (lines, structuredContent, isError) => ({
-  content: [{ type: 'text', text: lines.join('\n') }], structuredContent, ...(isError ? { isError: true } : {}),
+const textResult = (lines: string[], structuredContent: Record<string, unknown>, isError: boolean) => ({
+  content: [{ type: 'text' as const, text: lines.join('\n') }], structuredContent, ...(isError ? { isError: true } : {}),
 });
 
-const notes = (...entries) => entries.filter(Boolean);
-const failureLines = (code, origin) => [`확인하지 못했습니다 [${code}, ${origin}].`, NO_GUESS];
-const sourceNote = (source) => (source === 'simulation' ? SIMULATION_NOTE : null);
+const notes = (...entries: (string | false | null)[]) => entries.filter((entry): entry is string => Boolean(entry));
+const failureLines = (code: string, origin: string) => [`확인하지 못했습니다 [${code}, ${origin}].`, NO_GUESS];
+const sourceNote = (source: string) => (source === 'simulation' ? SIMULATION_NOTE : null);
 
-function value(item) {
+function value(item: Item) {
   const raw = typeof item.rawValue === 'object' ? JSON.stringify(item.rawValue) : item.rawValue;
   return `${raw}${item.unit ? ` ${item.unit}` : ''}${item.meaning ? ` (${item.meaning})` : ''}`;
 }
 
-function itemLine(item) {
+function itemLine(item: Item) {
   const name = `[${item.property}]${item.area ? ` ${item.area}` : ''}`;
   if (item.status === 'OK') return `${name}: ${value(item)}, 콜백 수신 ${item.receivedAt}.`;
   const observed = item.receivedAt === null ? '' : ` 관측 원시값 ${JSON.stringify(item.rawValue)}, 콜백 수신 ${item.receivedAt}.`;
   return `${name}: 확인 실패 [${item.status}].${observed}`;
 }
 
-function itemsResult(response) {
+function itemsResult(response: BridgeResponse) {
   const { items, outcome, query, source, sdkVersion } = response;
   const isError = outcome !== 'COMPLETE';
   return textResult(notes(
@@ -59,7 +62,7 @@ function itemsResult(response) {
   ), response, isError);
 }
 
-function scalarResult(response, area) {
+function scalarResult(response: BridgeResponse, area: string | null) {
   const { items, outcome, requestId, source, sdkVersion } = response;
   const item = items[0] ?? null;
   if (item?.status === 'OK') {
@@ -73,7 +76,7 @@ function scalarResult(response, area) {
     }, false);
   }
   const unfinished = outcome === 'TIMEOUT' || outcome === 'CANCELLED';
-  const code = unfinished ? outcome : item.status;
+  const code = unfinished ? outcome : item!.status;
   const observation = item && item.receivedAt !== null ? { rawValue: item.rawValue, receivedAt: item.receivedAt } : null;
   return textResult(notes(
     ...failureLines(code, 'android'),
@@ -91,8 +94,8 @@ function scalarResult(response, area) {
  * Builds the MCP result of one call. `result` comes from validateResponse, or is a Node-side failure such as
  * ANDROID_UNREACHABLE, TIMEOUT or CANCELLED. Text and structuredContent always come from that one result.
  */
-export function toToolResult(catalog, query, result, requestId) {
-  const tool = toolOf(catalog, query);
+export function toToolResult(catalog: Catalog, query: string, result: BridgeResult, requestId: string) {
+  const tool = toolOf(catalog, query)!;
   const scalar = tool.resultForm === 'scalar';
   const area = scalar ? tool.fixedItems[0].area : null;
   if (result.ok) return scalar ? scalarResult(result.response, area) : itemsResult(result.response);

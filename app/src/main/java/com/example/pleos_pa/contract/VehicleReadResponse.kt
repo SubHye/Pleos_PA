@@ -121,7 +121,7 @@ data class ReadSelection(
 )
 
 /**
- * The same verdicts as `mcp/src/contract.mjs`, over the same fixtures. Android runs it on its own
+ * The same verdicts as `mcp/src/contract.ts`, over the same fixtures. Android runs it on its own
  * output so a contract violation fails here rather than at the Node validator.
  */
 class VehicleReadValidator(private val catalog: VehicleReadCatalog) {

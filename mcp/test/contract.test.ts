@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { loadCatalog, parseRequest, validateResponse } from '../src/contract.mjs';
+import { loadCatalog, parseRequest, validateResponse } from '../src/contract.ts';
 
-const fixture = (name) => JSON.parse(readFileSync(new URL(`../../contracts/vehicle-read/fixtures/${name}.json`, import.meta.url), 'utf8'));
+const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../../contracts/vehicle-read/fixtures/${name}.json`, import.meta.url), 'utf8'));
 const catalog = loadCatalog();
 
 test('requests match their fixtures', () => {
@@ -22,7 +22,7 @@ test('responses match their fixtures', () => {
   for (const { name, http, body, requestId, query, selection, expect } of fixture('responses')) {
     const result = validateResponse(catalog, { http, text: JSON.stringify(body), requestId, query, selection });
     if (expect.ok) {
-      assert.equal(result.ok, true, name);
+      assert.ok(result.ok, name);
       assert.equal(result.response.outcome, expect.outcome, name);
       assert.deepEqual(result.response, body, name);
     } else {
