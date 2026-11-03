@@ -35,5 +35,11 @@ object DiagnosticSession {
 
     fun unknown() = boundary.observeUx(ExecutionBoundary.UxState.UNKNOWN)
 
-    fun navigationAllowed() = boundary.allows(ExecutionBoundary.Action.NAVIGATION_CHANGE)
+    fun allows(action: ExecutionBoundary.Action) = boundary.allows(action)
+
+    fun navigationAllowed() = allows(ExecutionBoundary.Action.NAVIGATION_CHANGE)
+
+    /** Effective decisions, not an inference that raw UX establishes parked/driver evidence. */
+    fun policySummary(): String =
+        ExecutionBoundary.Action.entries.joinToString(" ") { "${it.name}=${allows(it)}" }
 }

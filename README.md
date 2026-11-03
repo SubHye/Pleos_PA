@@ -33,6 +33,8 @@ npm --prefix mcp test
 
 PR과 main push에서 CI가 같은 검사와 Structurizr 모델 검증을 실행한다.
 
+COM-9 로컬 Pleos 검증은 [Windows 수집 스크립트](scripts/verify-com9-local.ps1)를 쓴다. 명시한 에뮬레이터에서 `Install` → `RuntimeTest` → `Start` → 상태별 `Capture` 순으로 실행하며, 실제 기어·규제 전환과 화면/알림 접근성은 담당자가 별도로 관찰한다. 수집 성공과 JVM 테스트 통과를 실제 차량 동작 검증으로 간주하지 않는다.
+
 ## 문서
 
 - [작업 지침](AGENTS.md): 협업 흐름, 환경, 검증, 문서 맵

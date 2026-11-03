@@ -27,8 +27,8 @@ public final class Com9DiagnosticActivity extends Activity {
             };
     private void event(String value) {
         Log.i("COM9_DIAG", value);
-        runOnUiThread(() -> output.setText(value + "\n" + output.getText().toString().substring(
-                0, Math.min(output.length(), 6000))));
+        // Keep the screen to the latest diagnostic event; full history is only in filtered logs.
+        runOnUiThread(() -> output.setText(value));
     }
     private void button(LinearLayout layout, String title, Runnable action) {
         Button button = new Button(this);
@@ -54,7 +54,8 @@ public final class Com9DiagnosticActivity extends Activity {
         button(layout, "Create diagnostic stop notification", this::showStopNotification);
         layout.addView(output);
         setContentView(layout);
-        event("boundary=UNKNOWN navigation disabled; approval UI/request authentication absent");
+        event("boundary=UNKNOWN navigation disabled; approval UI/request authentication absent "
+                + DiagnosticSession.INSTANCE.policySummary());
     }
     private void showStopNotification() {
         if (android.os.Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)

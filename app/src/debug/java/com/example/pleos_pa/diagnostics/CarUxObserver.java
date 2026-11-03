@@ -82,7 +82,7 @@ public final class CarUxObserver {
                 + " displayId=" + displayId()
                 + " DO=" + value.isRequiresDistractionOptimization()
                 + " activeRestrictions=" + value.getActiveRestrictions()
-                + " boundary=UNKNOWN parkedVerified=false");
+                + " boundary=UNKNOWN parkedVerified=false " + DiagnosticSession.INSTANCE.policySummary());
     }
 
     @SuppressWarnings("deprecation")
@@ -97,7 +97,7 @@ public final class CarUxObserver {
     private void unknown(String reason) {
         latestObservation = null;
         DiagnosticSession.INSTANCE.unknown();
-        sink.event("UNKNOWN reason=" + reason);
+        sink.event("UNKNOWN reason=" + reason + " " + DiagnosticSession.INSTANCE.policySummary());
     }
 
     public Observation latestObservation() { return latestObservation; }

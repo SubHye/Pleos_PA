@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import com.example.pleos_pa.safety.ExecutionBoundary;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import org.junit.Test;
@@ -19,6 +20,14 @@ import static org.junit.Assert.*;
 /** Real API read, no shell permission adoption or vehicle state writes. Run explicitly on Pleos. */
 @RunWith(AndroidJUnit4.class)
 public final class CarUxRuntimeTest {
+    private void assertConservativePolicy(String checkpoint) {
+        for (ExecutionBoundary.Action action : ExecutionBoundary.Action.values()) {
+            assertEquals(checkpoint + " / " + action, action == ExecutionBoundary.Action.STOP,
+                    DiagnosticSession.INSTANCE.allows(action));
+        }
+        Log.i("COM9_TEST", "checkpoint=" + checkpoint + " " + DiagnosticSession.INSTANCE.policySummary());
+    }
+
     @Test public void readsActualUxThenBothStopEntrypointsReleaseObserver() throws Exception {
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         Context context = instrumentation.getTargetContext();
@@ -48,8 +57,16 @@ public final class CarUxRuntimeTest {
             assertTrue(first.receivedElapsedMs > 0);
             assertTrue(first.displayId >= 0);
             assertFalse("Raw unrestricted UX must not enable navigation", DiagnosticSession.INSTANCE.navigationAllowed());
+            assertConservativePolicy("real_initial_raw_ux");
+            instrumentation.runOnMainSync(() -> reference.get().close("manual_disconnect_injection"));
+            assertNull("Injected information loss must drop the observation", reference.get().latestObservation());
+            assertConservativePolicy("local_loss_injection_not_platform_failure");
+            instrumentation.runOnMainSync(() -> reference.get().connect());
+            assertNotNull("No real initial UX after information-loss injection: " + lastEvent.get(),
+                    initials.poll(15, TimeUnit.SECONDS));
             instrumentation.runOnMainSync(() -> DiagnosticSession.INSTANCE.stop("app_stop"));
             assertNull("App stop must drop the observation", reference.get().latestObservation());
+            assertConservativePolicy("app_stop");
             instrumentation.runOnMainSync(() -> reference.get().connect());
             String reconnected = initials.poll(15, TimeUnit.SECONDS);
             assertNotNull("No real UX after reconnect: " + lastEvent.get(), reconnected);
@@ -59,6 +76,7 @@ public final class CarUxRuntimeTest {
                     new Intent(context, Com9StopReceiver.class).setAction("com.example.pleos_pa.COM9_STOP")));
             assertNull(reference.get().latestObservation());
             assertFalse(DiagnosticSession.INSTANCE.navigationAllowed());
+            assertConservativePolicy("notification_receiver_handler_not_panel_click");
         } finally {
             instrumentation.runOnMainSync(() -> {
                 DiagnosticSession.INSTANCE.detachObserver(owner);
