@@ -291,6 +291,19 @@ class BridgeServerTest {
         next.stop()
     }
 
+    @Test
+    fun aPortReleasedAMomentLaterStillBinds() {
+        val port = server.localPort
+        server.stop()
+        val holder = ServerSocket(port, 1, InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1)))
+        pool.schedule({ holder.close() }, 100, TimeUnit.MILLISECONDS)
+
+        val next = BridgeServer(catalog, gateway, events, { scheduler.nowMillis() }, port = port)
+        next.start()
+        assertEquals(port, next.localPort)
+        next.stop()
+    }
+
     private fun boundListener(target: BridgeServer = server): ServerSocket {
         val field = BridgeServer::class.java.getDeclaredField("listener")
         field.isAccessible = true

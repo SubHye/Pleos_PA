@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream
 import java.io.Closeable
 import java.io.IOException
 import java.io.InputStream
+import java.net.BindException
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.ServerSocket
@@ -179,21 +180,33 @@ class BridgeServer(
     /** Binds 127.0.0.1 only. Blocking; call off the main thread. */
     @Throws(IOException::class)
     override fun start() {
-        val socket = ServerSocket()
-        try {
-            socket.reuseAddress = true
-            socket.bind(
-                InetSocketAddress(InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1)), port),
-                WORKERS,
-            )
-        } catch (error: IOException) {
-            socket.close()
-            throw error
-        }
+        val socket = bindListener()
         http = BridgeHttp(limits.path, "127.0.0.1:${socket.localPort}", limits.maxRequestBytes)
         listener = socket
         if (stopped) socket.close()
         Thread({ acceptLoop(socket) }, "bridge-accept").apply { isDaemon = true }.start()
+    }
+
+    /**
+     * A listener closed a moment ago can hold the port until its acceptor wakes, so wait briefly.
+     */
+    private fun bindListener(): ServerSocket {
+        var retries = BIND_RETRIES
+        while (true) {
+            val socket = ServerSocket()
+            try {
+                socket.reuseAddress = true
+                socket.bind(
+                    InetSocketAddress(InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1)), port),
+                    WORKERS,
+                )
+                return socket
+            } catch (error: IOException) {
+                socket.close()
+                if (error !is BindException || retries-- == 0) throw error
+                Thread.sleep(BIND_RETRY_MILLIS)
+            }
+        }
     }
 
     private fun acceptLoop(server: ServerSocket) {
@@ -405,6 +418,8 @@ class BridgeServer(
     }
 
     private companion object {
+        const val BIND_RETRIES = 5
+        const val BIND_RETRY_MILLIS = 50L
         const val WORKERS = 8
         const val MAX_HEAD_BYTES = 8 * 1024
         const val DRAIN_MILLIS = 250
