@@ -8,7 +8,7 @@
     "node": ">=24.15.0"
   },
   "scripts": {
-    "test": "node --test \"test/**/*.test.ts\"",
+    "test": "node --test --test-timeout=30000 \"test/**/*.test.ts\"",
     "start": "node src/server.ts",
     "typecheck": "tsc -p .",
     "lint": "oxlint --deny-warnings src test test-support",
@@ -16,9 +16,11 @@
     "format:check": "oxfmt --check \"src/**/*.ts\" \"test/**/*.ts\" \"test-support/**/*.ts\""
   },
   "dependencies": {
+    "@modelcontextprotocol/server": "2.4.0",
     "zod": "4.2.0"
   },
   "devDependencies": {
+    "@modelcontextprotocol/client": "2.4.0",
     "@types/node": "24.19.2",
     "oxfmt": "0.75.0",
     "oxlint": "1.90.0",

@@ -1479,5 +1479,31 @@
       ],
       "textExcludes": []
     }
+  },
+  {
+    "name": "items form request over the limit is never sent",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "seat_status",
+    "bridge": {
+      "ok": false,
+      "code": "INVALID_REQUEST",
+      "origin": "pc"
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "ok": false,
+        "origin": "pc",
+        "code": "INVALID_REQUEST",
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "seat_status"
+      },
+      "textIncludes": [
+        "INVALID_REQUEST",
+        "추정하지"
+      ],
+      "textExcludes": []
+    }
   }
 ]

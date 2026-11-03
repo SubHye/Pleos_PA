@@ -108,6 +108,7 @@
 | 503 | `{requestId, ok:false, code:"APP_NOT_READY" 또는 "CONNECTION_STOPPED"}` | `origin:"android"` |
 | 400, 413, 415 | `{ok:false, code:"INVALID_REQUEST"}` | `origin:"android"` |
 | 403 | `{ok:false, code:"REQUEST_FORBIDDEN"}` | `origin:"android"` |
+| 보내기 전 요청 본문이 계약을 어김(실제 본문 기준 `maxRequestBytes` 초과 등) | 없음, HTTP를 보내지 않음 | `INVALID_REQUEST`, `origin:"pc"` |
 | 연결 실패 | 없음 | `ANDROID_UNREACHABLE`, `origin:"pc"` |
 | 형식 위반, 다른 `requestId`, 크기 초과 | 없음 | `INVALID_RESPONSE`, `origin:"pc"` |
 | 데드라인 초과, MCP 취소 | 없음 | `TIMEOUT`, `CANCELLED`, `origin:"pc"` |
