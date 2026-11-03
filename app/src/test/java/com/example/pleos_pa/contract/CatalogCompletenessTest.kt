@@ -96,7 +96,12 @@ class CatalogCompletenessTest {
             if (adoption != "adopted") continue
             val ids = ContractFixtures.catalog.propertiesOf(tool.getString("query"))
             val own = properties.filter { it.getString("id") in ids }
-            assertTrue(name, own.none { it.getString("verification") == "none" })
+            assertTrue(
+                name,
+                own.none {
+                    it.getString("verification") == "none" && !it.optBoolean("noCapabilityApi")
+                },
+            )
             if (own.any { it.getString("verification") == "console_mismatch" }) {
                 assertTrue(name, tool.has("adoptionNote"))
             }

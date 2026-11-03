@@ -56,6 +56,9 @@ export const TOOL_TEXTS: Readonly<Record<string, { title: string; description: s
   ),
   get_toll_status: text('하이패스', '하이패스 안내 음량을 조회합니다.'),
   get_turn_signal_status: text('방향지시등', '방향지시등 상태를 조회합니다.'),
-  get_window_detail_status: text('창문 상세', '창문 잠금, 블라인드 위치, 스마트 글라스 상태와 단계를 조회합니다.'),
+  get_window_detail_status: text(
+    '창문 상세',
+    '창문 잠금, 블라인드 위치, 스마트 글라스 상태와 단계를 조회합니다. SMART_GLASS_CONFIG는 읽을 수 없어 항상 실패로 나옵니다.',
+  ),
   get_wiper_status: text('와이퍼', '와이퍼 상태와 스위치를 조회합니다.'),
 });

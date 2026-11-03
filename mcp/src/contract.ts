@@ -35,6 +35,7 @@ export interface PropertyEntry {
   valueType: string;
   unit: string | null;
   verification: 'none' | 'executed' | 'console_matched' | 'console_mismatch';
+  noCapabilityApi?: boolean;
 }
 export interface Catalog {
   verifiedOn: string | null;

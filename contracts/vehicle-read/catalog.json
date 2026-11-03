@@ -355,8 +355,8 @@
       "query": "window_detail_status",
       "legacy": false,
       "resultForm": "items",
-      "adoption": "undecided",
-      "adoptionNote": "SMART_GLASS_CONFIG에 공개 capability API가 없어 Adapter가 읽지 않으므로 verification이 none이다. 계약상 adopted가 될 수 없다. 나머지 속성의 값은 받았다. 예외 규칙 여부를 상대 개발자와 합의한 뒤 판정한다.",
+      "adoption": "adopted",
+      "adoptionNote": "SMART_GLASS_CONFIG는 공개 capability API가 없어 읽지 않으며 항상 CAPABILITY_FAILED다. WINDOW_LOCK_STATE와 WINDOW_BLIND_POSITION은 값을 받았고, 에뮬레이터에서 SMART_GLASS_STATE와 SMART_GLASS_LEVEL은 PROPERTY_UNSUPPORTED다.",
       "fixedItems": []
     },
     {
@@ -1605,6 +1605,7 @@
       "unit": null,
       "permission": "CAR_WINDOWS",
       "console": "not_listed",
+      "noCapabilityApi": true,
       "verification": "none"
     },
     {

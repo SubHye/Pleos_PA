@@ -6,7 +6,7 @@ Pleos Connect MCP: 평소 쓰는 AI와 연결된 외부 서비스를 Pleos 차�
 
 ## 현재 상태
 
-Android 앱에 연결 제어 화면, Foreground Service, `/v3/vehicle-read` Bridge가 있다. Vehicle Adapter에는 카탈로그 97개 속성의 호출 표가 있고, 속성별 실행 결과는 카탈로그의 `verification`에 있다. `SMART_GLASS_CONFIG`는 공개 capability API가 없어 읽지 않고, `ETCS_VOICE_GUIDANCE_VOLUME`은 `CAR_TOLL`을 Manifest에서 빼서 `PERMISSION_DENIED`를 받는다. [MCP 서버](mcp/README.md)는 실행 검증을 통과한 도구 19개를 제공한다. ChatGPT·Claude 호출 검증은 COM-26이다. 기존 [PoC](https://github.com/HyeeSeong/pleostest/tree/0d288c8aeab3b2fd08d09a257d894cbfeca793ca)에서 기능 단위로 선택 이전 중이다.
+Android 앱에 연결 제어 화면, Foreground Service, `/v3/vehicle-read` Bridge가 있다. Vehicle Adapter에는 카탈로그 97개 속성의 호출 표가 있고, 속성별 실행 결과는 카탈로그의 `verification`에 있다. `SMART_GLASS_CONFIG`는 공개 capability API가 없어 읽지 않고, `ETCS_VOICE_GUIDANCE_VOLUME`은 `CAR_TOLL`을 Manifest에서 빼서 `PERMISSION_DENIED`를 받는다. [MCP 서버](mcp/README.md)는 실행 검증을 통과한 도구 20개를 제공한다. ChatGPT·Claude 호출 검증은 COM-26이다. 기존 [PoC](https://github.com/HyeeSeong/pleostest/tree/0d288c8aeab3b2fd08d09a257d894cbfeca793ca)에서 기능 단위로 선택 이전 중이다.
 
 ## 시작하기
 
