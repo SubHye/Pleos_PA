@@ -1,0 +1,15 @@
+[
+  {"name": "legacy tool without arguments", "evidence": "mock", "tool": "get_door_status", "args": {}, "accept": true},
+  {"name": "legacy tool rejects a selector", "evidence": "mock", "tool": "get_door_status", "args": {"areas": ["ROW_1_LEFT"]}, "accept": false},
+  {"name": "single door tool rejects any argument", "evidence": "mock", "tool": "get_front_left_door_position", "args": {"area": "ROW_1_RIGHT"}, "accept": false},
+  {"name": "candidate tool without arguments", "evidence": "mock", "tool": "get_seat_status", "args": {}, "accept": true},
+  {"name": "candidate tool with both selectors", "evidence": "mock", "tool": "get_seat_status", "args": {"properties": ["SEAT_OCCUPANCY"], "areas": ["ROW_1_LEFT"]}, "accept": true},
+  {"name": "grouped area", "evidence": "mock", "tool": "get_seat_status", "args": {"areas": ["ROW_1_LEFT+ROW_1_RIGHT"]}, "accept": true},
+  {"name": "property of another tool", "evidence": "mock", "tool": "get_seat_status", "args": {"properties": ["HVAC_AC_STATE"]}, "accept": false},
+  {"name": "area outside the vocabulary", "evidence": "mock", "tool": "get_seat_status", "args": {"areas": ["HOOD"]}, "accept": false},
+  {"name": "empty selector", "evidence": "mock", "tool": "get_seat_status", "args": {"properties": []}, "accept": false},
+  {"name": "duplicate selector", "evidence": "mock", "tool": "get_seat_status", "args": {"areas": ["ROW_1_LEFT", "ROW_1_LEFT"]}, "accept": false},
+  {"name": "unknown argument", "evidence": "mock", "tool": "get_seat_status", "args": {"timeoutMs": 1000}, "accept": false},
+  {"name": "tool without areas has no area argument", "evidence": "mock", "tool": "get_brake_status", "args": {"areas": ["ROW_1_LEFT"]}, "accept": false},
+  {"name": "tool without areas still accepts properties", "evidence": "mock", "tool": "get_brake_status", "args": {"properties": ["BRAKE_PEDAL_STATUS"]}, "accept": true}
+]

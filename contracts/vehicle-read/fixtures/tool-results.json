@@ -1,0 +1,1483 @@
+[
+  {
+    "name": "complete is not an error",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "energy_level",
+        "outcome": "COMPLETE",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "FUEL_PERCENT",
+            "area": null,
+            "status": "OK",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": null,
+              "reportedAreas": null,
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": 62,
+            "meaning": null,
+            "unit": "%",
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          },
+          {
+            "property": "EV_BATTERY_PERCENT",
+            "area": null,
+            "status": "OK",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": null,
+              "reportedAreas": null,
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": 100,
+            "meaning": null,
+            "unit": "%",
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": false,
+      "structuredContent": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "energy_level",
+        "outcome": "COMPLETE",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "FUEL_PERCENT",
+            "area": null,
+            "status": "OK",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": null,
+              "reportedAreas": null,
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": 62,
+            "meaning": null,
+            "unit": "%",
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          },
+          {
+            "property": "EV_BATTERY_PERCENT",
+            "area": null,
+            "status": "OK",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": null,
+              "reportedAreas": null,
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": 100,
+            "meaning": null,
+            "unit": "%",
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      },
+      "textIncludes": [
+        "FUEL_PERCENT",
+        "EV_BATTERY_PERCENT",
+        "62",
+        "%",
+        "측정 시각",
+        "스냅샷"
+      ],
+      "textExcludes": [
+        "추정하지"
+      ]
+    }
+  },
+  {
+    "name": "partial is an error and keeps the value",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "energy_level",
+        "outcome": "PARTIAL",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "FUEL_PERCENT",
+            "area": null,
+            "status": "PROPERTY_UNSUPPORTED",
+            "capability": null,
+            "rawValue": null,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": null,
+            "errorType": "a",
+            "errorCode": "ERROR_NOT_SUPPORTED_PROPERTY"
+          },
+          {
+            "property": "EV_BATTERY_PERCENT",
+            "area": null,
+            "status": "OK",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": null,
+              "reportedAreas": null,
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": 100,
+            "meaning": null,
+            "unit": "%",
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "energy_level",
+        "outcome": "PARTIAL",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "FUEL_PERCENT",
+            "area": null,
+            "status": "PROPERTY_UNSUPPORTED",
+            "capability": null,
+            "rawValue": null,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": null,
+            "errorType": "a",
+            "errorCode": "ERROR_NOT_SUPPORTED_PROPERTY"
+          },
+          {
+            "property": "EV_BATTERY_PERCENT",
+            "area": null,
+            "status": "OK",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": null,
+              "reportedAreas": null,
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": 100,
+            "meaning": null,
+            "unit": "%",
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      },
+      "textIncludes": [
+        "PARTIAL",
+        "PROPERTY_UNSUPPORTED",
+        "EV_BATTERY_PERCENT",
+        "100",
+        "추정하지",
+        "재시도",
+        "측정 시각"
+      ],
+      "textExcludes": []
+    }
+  },
+  {
+    "name": "all failed",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "energy_level",
+        "outcome": "FAILED",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "FUEL_PERCENT",
+            "area": null,
+            "status": "PROPERTY_UNSUPPORTED",
+            "capability": null,
+            "rawValue": null,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": null,
+            "errorType": "a",
+            "errorCode": "ERROR_NOT_SUPPORTED_PROPERTY"
+          },
+          {
+            "property": "EV_BATTERY_PERCENT",
+            "area": null,
+            "status": "PERMISSION_DENIED",
+            "capability": null,
+            "rawValue": null,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": null,
+            "errorType": "SecurityException",
+            "errorCode": null
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "energy_level",
+        "outcome": "FAILED",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "FUEL_PERCENT",
+            "area": null,
+            "status": "PROPERTY_UNSUPPORTED",
+            "capability": null,
+            "rawValue": null,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": null,
+            "errorType": "a",
+            "errorCode": "ERROR_NOT_SUPPORTED_PROPERTY"
+          },
+          {
+            "property": "EV_BATTERY_PERCENT",
+            "area": null,
+            "status": "PERMISSION_DENIED",
+            "capability": null,
+            "rawValue": null,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": null,
+            "errorType": "SecurityException",
+            "errorCode": null
+          }
+        ]
+      },
+      "textIncludes": [
+        "FAILED",
+        "PROPERTY_UNSUPPORTED",
+        "PERMISSION_DENIED",
+        "추정하지",
+        "재시도"
+      ],
+      "textExcludes": [
+        "측정 시각"
+      ]
+    }
+  },
+  {
+    "name": "android timeout keeps finished items",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "energy_level",
+        "outcome": "TIMEOUT",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "EV_BATTERY_PERCENT",
+            "area": null,
+            "status": "OK",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": null,
+              "reportedAreas": null,
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": 100,
+            "meaning": null,
+            "unit": "%",
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          },
+          {
+            "property": "FUEL_PERCENT",
+            "area": null,
+            "status": "NOT_READ",
+            "capability": null,
+            "rawValue": null,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": null,
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "energy_level",
+        "outcome": "TIMEOUT",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "EV_BATTERY_PERCENT",
+            "area": null,
+            "status": "OK",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": null,
+              "reportedAreas": null,
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": 100,
+            "meaning": null,
+            "unit": "%",
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          },
+          {
+            "property": "FUEL_PERCENT",
+            "area": null,
+            "status": "NOT_READ",
+            "capability": null,
+            "rawValue": null,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": null,
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      },
+      "textIncludes": [
+        "TIMEOUT",
+        "100",
+        "NOT_READ",
+        "추정하지",
+        "재시도"
+      ],
+      "textExcludes": []
+    }
+  },
+  {
+    "name": "android cancel without items",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "seat_status",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "seat_status",
+        "outcome": "CANCELLED",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": []
+      }
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "seat_status",
+        "outcome": "CANCELLED",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": []
+      },
+      "textIncludes": [
+        "CANCELLED",
+        "추정하지",
+        "재시도"
+      ],
+      "textExcludes": []
+    }
+  },
+  {
+    "name": "lock note appears with a lock value",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "door_status",
+        "outcome": "COMPLETE",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "DOOR_POSITION",
+            "area": "ROW_1_LEFT",
+            "status": "OK",
+            "capability": {
+              "access": "READ_WRITE",
+              "matchingAreas": 1,
+              "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "rawValue": 0,
+            "meaning": "closed",
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          },
+          {
+            "property": "DOOR_POSITION",
+            "area": "ROW_1_RIGHT",
+            "status": "OK",
+            "capability": {
+              "access": "READ_WRITE",
+              "matchingAreas": 1,
+              "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "rawValue": 0,
+            "meaning": "closed",
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          },
+          {
+            "property": "DOOR_POSITION",
+            "area": "ROW_2_LEFT",
+            "status": "OK",
+            "capability": {
+              "access": "READ_WRITE",
+              "matchingAreas": 1,
+              "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "rawValue": 0,
+            "meaning": "closed",
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          },
+          {
+            "property": "DOOR_POSITION",
+            "area": "ROW_2_RIGHT",
+            "status": "OK",
+            "capability": {
+              "access": "READ_WRITE",
+              "matchingAreas": 1,
+              "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "rawValue": 0,
+            "meaning": "closed",
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          },
+          {
+            "property": "DOOR_LOCK",
+            "area": "ROW_1_LEFT+ROW_1_RIGHT+ROW_2_LEFT+ROW_2_RIGHT",
+            "status": "OK",
+            "capability": {
+              "access": "READ_WRITE",
+              "matchingAreas": 1,
+              "reportedAreas": "HOOD, ROW_1_LEFT+ROW_1_RIGHT+ROW_2_LEFT+ROW_2_RIGHT",
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": true,
+            "meaning": "locked",
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": false,
+      "structuredContent": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "door_status",
+        "outcome": "COMPLETE",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "DOOR_POSITION",
+            "area": "ROW_1_LEFT",
+            "status": "OK",
+            "capability": {
+              "access": "READ_WRITE",
+              "matchingAreas": 1,
+              "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "rawValue": 0,
+            "meaning": "closed",
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          },
+          {
+            "property": "DOOR_POSITION",
+            "area": "ROW_1_RIGHT",
+            "status": "OK",
+            "capability": {
+              "access": "READ_WRITE",
+              "matchingAreas": 1,
+              "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "rawValue": 0,
+            "meaning": "closed",
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          },
+          {
+            "property": "DOOR_POSITION",
+            "area": "ROW_2_LEFT",
+            "status": "OK",
+            "capability": {
+              "access": "READ_WRITE",
+              "matchingAreas": 1,
+              "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "rawValue": 0,
+            "meaning": "closed",
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          },
+          {
+            "property": "DOOR_POSITION",
+            "area": "ROW_2_RIGHT",
+            "status": "OK",
+            "capability": {
+              "access": "READ_WRITE",
+              "matchingAreas": 1,
+              "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "rawValue": 0,
+            "meaning": "closed",
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          },
+          {
+            "property": "DOOR_LOCK",
+            "area": "ROW_1_LEFT+ROW_1_RIGHT+ROW_2_LEFT+ROW_2_RIGHT",
+            "status": "OK",
+            "capability": {
+              "access": "READ_WRITE",
+              "matchingAreas": 1,
+              "reportedAreas": "HOOD, ROW_1_LEFT+ROW_1_RIGHT+ROW_2_LEFT+ROW_2_RIGHT",
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": true,
+            "meaning": "locked",
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      },
+      "textIncludes": [
+        "DOOR_LOCK",
+        "ROW_1_LEFT+ROW_1_RIGHT+ROW_2_LEFT+ROW_2_RIGHT",
+        "locked",
+        "메서드 이름",
+        "스냅샷"
+      ],
+      "textExcludes": []
+    }
+  },
+  {
+    "name": "simulation is labelled",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "brake_status",
+        "outcome": "COMPLETE",
+        "source": "simulation",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "BRAKE_PEDAL_STATUS",
+            "area": null,
+            "status": "OK",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": null,
+              "reportedAreas": null,
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": true,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": false,
+      "structuredContent": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "brake_status",
+        "outcome": "COMPLETE",
+        "source": "simulation",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "BRAKE_PEDAL_STATUS",
+            "area": null,
+            "status": "OK",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": null,
+              "reportedAreas": null,
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": true,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      },
+      "textIncludes": [
+        "실제 차량 값이 아닙니다",
+        "측정 시각"
+      ],
+      "textExcludes": [
+        "스냅샷",
+        "추정하지"
+      ]
+    }
+  },
+  {
+    "name": "emulator is not labelled as simulation",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "brake_status",
+        "outcome": "COMPLETE",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "BRAKE_PEDAL_STATUS",
+            "area": null,
+            "status": "OK",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": null,
+              "reportedAreas": null,
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": true,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": false,
+      "structuredContent": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "brake_status",
+        "outcome": "COMPLETE",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "BRAKE_PEDAL_STATUS",
+            "area": null,
+            "status": "OK",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": null,
+              "reportedAreas": null,
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": true,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      },
+      "textIncludes": [
+        "pleos_emulator"
+      ],
+      "textExcludes": [
+        "실제 차량 값이 아닙니다"
+      ]
+    }
+  },
+  {
+    "name": "structured value is readable",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "window_detail_status",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "window_detail_status",
+        "outcome": "COMPLETE",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "SMART_GLASS_CONFIG",
+            "area": "ROOF_TOP_1",
+            "status": "OK",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": 1,
+              "reportedAreas": "ROOF_TOP_1",
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": {
+              "zoneCount": 2,
+              "levelCount": 4
+            },
+            "meaning": null,
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": false,
+      "structuredContent": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "window_detail_status",
+        "outcome": "COMPLETE",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "SMART_GLASS_CONFIG",
+            "area": "ROOF_TOP_1",
+            "status": "OK",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": 1,
+              "reportedAreas": "ROOF_TOP_1",
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": {
+              "zoneCount": 2,
+              "levelCount": 4
+            },
+            "meaning": null,
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      },
+      "textIncludes": [
+        "zoneCount",
+        "levelCount"
+      ],
+      "textExcludes": []
+    }
+  },
+  {
+    "name": "error details stay out of the text",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "brake_status",
+        "outcome": "FAILED",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "BRAKE_PEDAL_STATUS",
+            "area": null,
+            "status": "READ_FAILED",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": null,
+              "reportedAreas": null,
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": null,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": null,
+            "errorType": "Exception",
+            "errorCode": "ERROR_INTERNAL_SERVICE"
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "brake_status",
+        "outcome": "FAILED",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "BRAKE_PEDAL_STATUS",
+            "area": null,
+            "status": "READ_FAILED",
+            "capability": {
+              "access": "READ",
+              "matchingAreas": null,
+              "reportedAreas": null,
+              "minimum": null,
+              "maximum": null
+            },
+            "rawValue": null,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": null,
+            "errorType": "Exception",
+            "errorCode": "ERROR_INTERNAL_SERVICE"
+          }
+        ]
+      },
+      "textIncludes": [
+        "READ_FAILED",
+        "추정하지"
+      ],
+      "textExcludes": [
+        "area ID"
+      ]
+    }
+  },
+  {
+    "name": "items form call failure",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "bridge": {
+      "ok": false,
+      "code": "BUSY",
+      "origin": "android"
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "BUSY",
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "door_status"
+      },
+      "textIncludes": [
+        "BUSY",
+        "추정하지",
+        "재시도"
+      ],
+      "textExcludes": []
+    }
+  },
+  {
+    "name": "items form connection failure",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "bridge": {
+      "ok": false,
+      "code": "ANDROID_UNREACHABLE",
+      "origin": "pc"
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "ok": false,
+        "origin": "pc",
+        "code": "ANDROID_UNREACHABLE",
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "door_status"
+      },
+      "textIncludes": [
+        "ANDROID_UNREACHABLE",
+        "추정하지"
+      ],
+      "textExcludes": []
+    }
+  },
+  {
+    "name": "items form stop",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "bridge": {
+      "ok": false,
+      "code": "CONNECTION_STOPPED",
+      "origin": "android"
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "CONNECTION_STOPPED",
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "door_status"
+      },
+      "textIncludes": [
+        "CONNECTION_STOPPED"
+      ],
+      "textExcludes": []
+    }
+  },
+  {
+    "name": "scalar value",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "front_left_door_position",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "front_left_door_position",
+        "outcome": "COMPLETE",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "DOOR_POSITION",
+            "area": "ROW_1_LEFT",
+            "status": "OK",
+            "capability": {
+              "access": "READ_WRITE",
+              "matchingAreas": 1,
+              "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "rawValue": 1,
+            "meaning": "open",
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": false,
+      "structuredContent": {
+        "ok": true,
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "source": "pleos_emulator",
+        "area": "ROW_1_LEFT",
+        "status": "OPEN",
+        "state": "open",
+        "rawValue": 1,
+        "receivedAt": "2026-11-02T09:30:00.123Z",
+        "sdkVersion": "2.3.2",
+        "capability": {
+          "access": "READ_WRITE",
+          "matchingAreas": 1,
+          "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      },
+      "textIncludes": [
+        "open",
+        "ROW_1_LEFT",
+        "측정 시각"
+      ],
+      "textExcludes": [
+        "추정하지"
+      ]
+    }
+  },
+  {
+    "name": "scalar simulation is labelled",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "front_left_door_position",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "front_left_door_position",
+        "outcome": "COMPLETE",
+        "source": "simulation",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "DOOR_POSITION",
+            "area": "ROW_1_LEFT",
+            "status": "OK",
+            "capability": {
+              "access": "READ_WRITE",
+              "matchingAreas": 1,
+              "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "rawValue": 1,
+            "meaning": "open",
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": false,
+      "structuredContent": {
+        "ok": true,
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "source": "simulation",
+        "area": "ROW_1_LEFT",
+        "status": "OPEN",
+        "state": "open",
+        "rawValue": 1,
+        "receivedAt": "2026-11-02T09:30:00.123Z",
+        "sdkVersion": "2.3.2",
+        "capability": {
+          "access": "READ_WRITE",
+          "matchingAreas": 1,
+          "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      },
+      "textIncludes": [
+        "실제 차량 값이 아닙니다"
+      ],
+      "textExcludes": []
+    }
+  },
+  {
+    "name": "scalar unknown value keeps the observation",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "front_left_door_position",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "front_left_door_position",
+        "outcome": "FAILED",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "DOOR_POSITION",
+            "area": "ROW_1_LEFT",
+            "status": "UNKNOWN_VALUE",
+            "capability": {
+              "access": "READ_WRITE",
+              "matchingAreas": 1,
+              "reportedAreas": "ROW_1_LEFT",
+              "minimum": 0.0,
+              "maximum": 10.0
+            },
+            "rawValue": 5,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "UNKNOWN_VALUE",
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "source": "pleos_emulator",
+        "area": "ROW_1_LEFT",
+        "status": "UNKNOWN_VALUE",
+        "sdkVersion": "2.3.2",
+        "capability": {
+          "access": "READ_WRITE",
+          "matchingAreas": 1,
+          "reportedAreas": "ROW_1_LEFT",
+          "minimum": 0.0,
+          "maximum": 10.0
+        },
+        "errorType": null,
+        "errorCode": null,
+        "observation": {
+          "rawValue": 5,
+          "receivedAt": "2026-11-02T09:30:00.123Z"
+        }
+      },
+      "textIncludes": [
+        "UNKNOWN_VALUE",
+        "추정하지",
+        "재시도",
+        "측정 시각"
+      ],
+      "textExcludes": []
+    }
+  },
+  {
+    "name": "scalar item failure",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "front_left_door_position",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "front_left_door_position",
+        "outcome": "FAILED",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "DOOR_POSITION",
+            "area": "ROW_1_LEFT",
+            "status": "PERMISSION_DENIED",
+            "capability": null,
+            "rawValue": null,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": null,
+            "errorType": "SecurityException",
+            "errorCode": null
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "PERMISSION_DENIED",
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "source": "pleos_emulator",
+        "area": "ROW_1_LEFT",
+        "status": "PERMISSION_DENIED",
+        "sdkVersion": "2.3.2",
+        "capability": null,
+        "errorType": "SecurityException",
+        "errorCode": null,
+        "observation": null
+      },
+      "textIncludes": [
+        "PERMISSION_DENIED",
+        "추정하지"
+      ],
+      "textExcludes": [
+        "측정 시각"
+      ]
+    }
+  },
+  {
+    "name": "scalar timeout without a value",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "front_left_door_position",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "front_left_door_position",
+        "outcome": "TIMEOUT",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "DOOR_POSITION",
+            "area": "ROW_1_LEFT",
+            "status": "NOT_READ",
+            "capability": null,
+            "rawValue": null,
+            "meaning": null,
+            "unit": null,
+            "receivedAt": null,
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "TIMEOUT",
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "source": "pleos_emulator",
+        "area": "ROW_1_LEFT",
+        "status": "TIMEOUT",
+        "sdkVersion": "2.3.2",
+        "capability": null,
+        "errorType": null,
+        "errorCode": null,
+        "observation": null
+      },
+      "textIncludes": [
+        "TIMEOUT",
+        "추정하지"
+      ],
+      "textExcludes": []
+    }
+  },
+  {
+    "name": "scalar cancel without items",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "front_left_door_position",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "front_left_door_position",
+        "outcome": "CANCELLED",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": []
+      }
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "CANCELLED",
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "source": "pleos_emulator",
+        "area": "ROW_1_LEFT",
+        "status": "CANCELLED",
+        "sdkVersion": "2.3.2",
+        "capability": null,
+        "errorType": null,
+        "errorCode": null,
+        "observation": null
+      },
+      "textIncludes": [
+        "CANCELLED",
+        "추정하지"
+      ],
+      "textExcludes": []
+    }
+  },
+  {
+    "name": "scalar timeout with a confirmed value",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "front_left_door_position",
+    "bridge": {
+      "ok": true,
+      "response": {
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "query": "front_left_door_position",
+        "outcome": "TIMEOUT",
+        "source": "pleos_emulator",
+        "sdkVersion": "2.3.2",
+        "items": [
+          {
+            "property": "DOOR_POSITION",
+            "area": "ROW_1_LEFT",
+            "status": "OK",
+            "capability": {
+              "access": "READ_WRITE",
+              "matchingAreas": 1,
+              "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "rawValue": 1,
+            "meaning": "open",
+            "unit": null,
+            "receivedAt": "2026-11-02T09:30:00.123Z",
+            "errorType": null,
+            "errorCode": null
+          }
+        ]
+      }
+    },
+    "expect": {
+      "isError": false,
+      "structuredContent": {
+        "ok": true,
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "source": "pleos_emulator",
+        "area": "ROW_1_LEFT",
+        "status": "OPEN",
+        "state": "open",
+        "rawValue": 1,
+        "receivedAt": "2026-11-02T09:30:00.123Z",
+        "sdkVersion": "2.3.2",
+        "capability": {
+          "access": "READ_WRITE",
+          "matchingAreas": 1,
+          "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      },
+      "textIncludes": [
+        "open"
+      ],
+      "textExcludes": [
+        "추정하지"
+      ]
+    }
+  },
+  {
+    "name": "scalar call failure",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "front_left_door_position",
+    "bridge": {
+      "ok": false,
+      "code": "TIMEOUT",
+      "origin": "pc"
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "ok": false,
+        "origin": "pc",
+        "code": "TIMEOUT",
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "area": "ROW_1_LEFT"
+      },
+      "textIncludes": [
+        "TIMEOUT",
+        "추정하지",
+        "재시도"
+      ],
+      "textExcludes": []
+    }
+  },
+  {
+    "name": "scalar invalid response",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "front_left_door_position",
+    "bridge": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    },
+    "expect": {
+      "isError": true,
+      "structuredContent": {
+        "ok": false,
+        "origin": "pc",
+        "code": "INVALID_RESPONSE",
+        "requestId": "22222222-2222-4222-8222-222222222222",
+        "area": "ROW_1_LEFT"
+      },
+      "textIncludes": [
+        "INVALID_RESPONSE",
+        "추정하지"
+      ],
+      "textExcludes": []
+    }
+  }
+]

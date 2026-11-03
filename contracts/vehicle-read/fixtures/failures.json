@@ -1,0 +1,93 @@
+[
+  {
+    "name": "missing permission at capability stage",
+    "evidence": "sdk_emulator",
+    "stage": "CAPABILITY",
+    "exception": {"type": "security", "message": "checkBrakePedalStatusCapabilities need Permission"},
+    "expect": {"status": "PERMISSION_DENIED", "errorCode": null}
+  },
+  {
+    "name": "single door area rejected for a grouped lock property",
+    "evidence": "sdk_emulator",
+    "stage": "READ",
+    "exception": {"type": "plain", "message": "java.lang.IllegalArgumentException: area ID: 0x1 not supported for property ID: DOOR_LOCK"},
+    "expect": {"status": "AREA_UNSUPPORTED", "errorCode": null}
+  },
+  {
+    "name": "missing permission at read stage",
+    "evidence": "source_only",
+    "stage": "READ",
+    "exception": {"type": "security", "message": "getFuelPercent need Permission"},
+    "expect": {"status": "PERMISSION_DENIED", "errorCode": null}
+  },
+  {
+    "name": "service not connected",
+    "evidence": "source_only",
+    "stage": "READ",
+    "exception": {"type": "vehicle", "error": "40001"},
+    "expect": {"status": "SERVICE_UNAVAILABLE", "errorCode": "ERROR_SERVICE_CONNECTION_FAILURE"}
+  },
+  {
+    "name": "global bounds missing wraps the code in a plain exception",
+    "evidence": "source_only",
+    "stage": "CAPABILITY",
+    "exception": {"type": "plain", "cause": {"type": "vehicle", "error": "60001"}},
+    "expect": {"status": "PROPERTY_UNSUPPORTED", "errorCode": "ERROR_NOT_SUPPORTED_PROPERTY"}
+  },
+  {
+    "name": "internal service error at capability stage",
+    "evidence": "source_only",
+    "stage": "CAPABILITY",
+    "exception": {"type": "vehicle", "error": "30001"},
+    "expect": {"status": "CAPABILITY_FAILED", "errorCode": "ERROR_INTERNAL_SERVICE"}
+  },
+  {
+    "name": "numeric id in a plain message",
+    "evidence": "mock",
+    "stage": "READ",
+    "exception": {"type": "plain", "message": "60003"},
+    "expect": {"status": "AREA_UNSUPPORTED", "errorCode": "ERROR_NOT_SUPPORTED_AREA"}
+  },
+  {
+    "name": "driving restricted",
+    "evidence": "mock",
+    "stage": "READ",
+    "exception": {"type": "plain", "message": "50001"},
+    "expect": {"status": "DRIVING_RESTRICTED", "errorCode": "ERROR_DRIVING_RESTRICTED"}
+  },
+  {
+    "name": "empty result",
+    "evidence": "mock",
+    "stage": "READ",
+    "exception": {"type": "plain", "message": "70001"},
+    "expect": {"status": "NO_VALUE", "errorCode": "ERROR_EMPTY_RESULT"}
+  },
+  {
+    "name": "permission code",
+    "evidence": "mock",
+    "stage": "READ",
+    "exception": {"type": "plain", "message": "800001"},
+    "expect": {"status": "PERMISSION_DENIED", "errorCode": "ERROR_SECURITY_PERMISSION"}
+  },
+  {
+    "name": "area code at capability stage is not an area verdict",
+    "evidence": "mock",
+    "stage": "CAPABILITY",
+    "exception": {"type": "plain", "message": "60003"},
+    "expect": {"status": "CAPABILITY_FAILED", "errorCode": "ERROR_NOT_SUPPORTED_AREA"}
+  },
+  {
+    "name": "unrelated message falls back by stage",
+    "evidence": "mock",
+    "stage": "READ",
+    "exception": {"type": "plain", "message": "binder died near 60001 somewhere"},
+    "expect": {"status": "READ_FAILED", "errorCode": null}
+  },
+  {
+    "name": "no message falls back by stage",
+    "evidence": "mock",
+    "stage": "CAPABILITY",
+    "exception": {"type": "plain"},
+    "expect": {"status": "CAPABILITY_FAILED", "errorCode": null}
+  }
+]

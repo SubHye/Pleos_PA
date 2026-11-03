@@ -1,0 +1,1696 @@
+{
+  "sdk": {
+    "artifact": "ai.pleos.playground:Vehicle",
+    "version": "2.3.2"
+  },
+  "bridge": {
+    "host": "127.0.0.1",
+    "port": 18765,
+    "path": "/v3/vehicle-read",
+    "maxRequestBytes": 4096,
+    "maxResponseBytes": 65536,
+    "deadlineMs": 10000
+  },
+  "areas": {
+    "DoorArea": [
+      "ROW_1_LEFT",
+      "ROW_1_RIGHT",
+      "ROW_2_LEFT",
+      "ROW_2_RIGHT",
+      "ROW_3_LEFT",
+      "ROW_3_RIGHT",
+      "HOOD",
+      "REAR"
+    ],
+    "MirrorArea": [
+      "DRIVER_LEFT",
+      "DRIVER_RIGHT",
+      "DRIVER_CENTER"
+    ],
+    "SeatArea": [
+      "ROW_1_LEFT",
+      "ROW_1_CENTER",
+      "ROW_1_RIGHT",
+      "ROW_2_LEFT",
+      "ROW_2_CENTER",
+      "ROW_2_RIGHT",
+      "ROW_3_LEFT",
+      "ROW_3_CENTER",
+      "ROW_3_RIGHT"
+    ],
+    "WheelArea": [
+      "UNKNOWN",
+      "LEFT_FRONT",
+      "RIGHT_FRONT",
+      "LEFT_REAR",
+      "RIGHT_REAR"
+    ],
+    "WindowArea": [
+      "FRONT_WINDSHIELD",
+      "REAR_WINDSHIELD",
+      "ROW_1_LEFT",
+      "ROW_1_RIGHT",
+      "ROW_2_LEFT",
+      "ROW_2_RIGHT",
+      "ROOF_TOP_1",
+      "ROOF_TOP_2"
+    ]
+  },
+  "enums": {
+    "CruiseControl": [
+      "OTHER",
+      "ENABLED",
+      "ACTIVATED",
+      "USER_OVERRIDE",
+      "SUSPENDED",
+      "FORCED_DEACTIVATION_WARNING"
+    ],
+    "DrivingModeType": [
+      "NORMAL",
+      "ECO",
+      "SPORT"
+    ],
+    "FanDirectionType": [
+      "UNKNOWN",
+      "FACE",
+      "FLOOR",
+      "FACE_AND_FLOOR",
+      "DEFROST",
+      "FACE_AND_DEFROST",
+      "DEFROST_AND_FLOOR",
+      "FACE_AND_FLOOR_AND_DEFROST"
+    ],
+    "LightState": [
+      "OFF",
+      "ON",
+      "DAYTIME_RUNNING"
+    ],
+    "LightSwitch": [
+      "OFF",
+      "ON",
+      "DAYTIME_RUNNING",
+      "AUTOMATIC"
+    ],
+    "OilLevelState": [
+      "LOW",
+      "HIGH",
+      "NORMAL",
+      "ERROR",
+      "CRITICALLY_LOW"
+    ],
+    "TemperatureUnit": [
+      "CELSIUS",
+      "FAHRENHEIT"
+    ],
+    "TurnSignalValue": [
+      "OFF",
+      "RIGHT",
+      "LEFT"
+    ],
+    "WiperState": [
+      "OTHER",
+      "OFF",
+      "ON",
+      "SERVICE"
+    ],
+    "WiperSwitch": [
+      "OTHER",
+      "OFF",
+      "MIST",
+      "INTERMITTENT_LEVEL_1",
+      "INTERMITTENT_LEVEL_2",
+      "INTERMITTENT_LEVEL_3",
+      "INTERMITTENT_LEVEL_4",
+      "INTERMITTENT_LEVEL_5",
+      "CONTINUOUS_LEVEL_1",
+      "CONTINUOUS_LEVEL_2",
+      "CONTINUOUS_LEVEL_3",
+      "CONTINUOUS_LEVEL_4",
+      "CONTINUOUS_LEVEL_5",
+      "AUTO",
+      "SERVICE"
+    ]
+  },
+  "excludedOperations": {
+    "check*": "capability는 조회의 내부 단계이며 도구로 노출하지 않는다",
+    "set*, move*, select*": "1차는 차량 직접 제어를 넣지 않는다",
+    "register*, unregister*": "요청 1회·응답 1회 경로에 맞지 않고, 같은 값을 일회성 조회로 읽을 수 있다"
+  },
+  "tools": [
+    {
+      "name": "get_door_status",
+      "query": "door_status",
+      "legacy": true,
+      "resultForm": "items",
+      "fixedItems": [
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_LEFT"
+        },
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_RIGHT"
+        },
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_2_LEFT"
+        },
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_2_RIGHT"
+        }
+      ]
+    },
+    {
+      "name": "get_window_status",
+      "query": "window_status",
+      "legacy": true,
+      "resultForm": "items",
+      "fixedItems": [
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_LEFT"
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_RIGHT"
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_LEFT"
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_RIGHT"
+        }
+      ]
+    },
+    {
+      "name": "get_energy_level",
+      "query": "energy_level",
+      "legacy": true,
+      "resultForm": "items",
+      "fixedItems": [
+        {
+          "property": "FUEL_PERCENT",
+          "area": null
+        },
+        {
+          "property": "EV_BATTERY_PERCENT",
+          "area": null
+        }
+      ]
+    },
+    {
+      "name": "get_front_left_door_position",
+      "query": "front_left_door_position",
+      "legacy": true,
+      "resultForm": "scalar",
+      "fixedItems": [
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_LEFT"
+        }
+      ]
+    },
+    {
+      "name": "get_brake_status",
+      "query": "brake_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_display_units",
+      "query": "display_units",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_glove_box_status",
+      "query": "glove_box_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_driving_mode_status",
+      "query": "driving_mode_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_ev_status",
+      "query": "ev_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_fuel_economy",
+      "query": "fuel_economy",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_hvac_status",
+      "query": "hvac_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_light_status",
+      "query": "light_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_trip_status",
+      "query": "trip_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_safety_status",
+      "query": "safety_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_seat_status",
+      "query": "seat_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_side_mirror_status",
+      "query": "side_mirror_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_steering_wheel_status",
+      "query": "steering_wheel_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_tire_status",
+      "query": "tire_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_toll_status",
+      "query": "toll_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_turn_signal_status",
+      "query": "turn_signal_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_window_detail_status",
+      "query": "window_detail_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    },
+    {
+      "name": "get_wiper_status",
+      "query": "wiper_status",
+      "legacy": false,
+      "resultForm": "items",
+      "fixedItems": []
+    }
+  ],
+  "properties": [
+    {
+      "id": "BRAKE_PEDAL_STATUS",
+      "query": "brake_status",
+      "api": "Brake",
+      "method": "getCurrentBrakePedalStatus",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_DRIVE",
+      "console": "listed",
+      "verification": "none",
+      "note": "API 문서와 콘솔은 true를 페달이 눌린 상태로 설명한다. 실행 대조 전이다."
+    },
+    {
+      "id": "TEMPERATURE_DISPLAY_UNIT",
+      "query": "display_units",
+      "api": "Display",
+      "method": "getCurrentTemperatureDisplayUnit",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:TemperatureUnit",
+      "unit": null,
+      "permission": "CAR_INFO",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "DOOR_LOCK",
+      "query": "door_status",
+      "api": "Door",
+      "method": "getDoorLockState",
+      "arity": 3,
+      "areaType": "DoorArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_DOORS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "GLOVE_BOX_LOCK_STATE",
+      "query": "glove_box_status",
+      "api": "Door",
+      "method": "getCurrentGloveBoxLockState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_DOORS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "DOOR_POSITION",
+      "query": "door_status",
+      "api": "Door",
+      "method": "getCurrentDoorPosition",
+      "arity": 3,
+      "areaType": "DoorArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_DOORS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "CRUISE_CONTROL_TARGET_SPEED",
+      "query": "driving_mode_status",
+      "api": "DrivingMode",
+      "method": "getCruiseControlTargetSpeed",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "m/s",
+      "permission": "CAR_DRIVE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "CRUISE_CONTROL_STATE",
+      "query": "driving_mode_status",
+      "api": "DrivingMode",
+      "method": "getCruiseControlState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:CruiseControl",
+      "unit": null,
+      "permission": "CAR_DRIVE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "DRIVING_MODE_STATE",
+      "query": "driving_mode_status",
+      "api": "DrivingMode",
+      "method": "getCurrentDrivingModeState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:DrivingModeType",
+      "unit": null,
+      "permission": "CAR_DRIVE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "INSTANTANEOUS_EV_EFFICIENCY",
+      "query": "ev_status",
+      "api": "EvBattery",
+      "method": "getInstantaneousEvEfficiency",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "km/kWh",
+      "permission": "CAR_ENERGY",
+      "console": "listed",
+      "verification": "none",
+      "note": "API 문서는 추후 Deprecated 예정이라고 적는다. 채택 전에 다시 확인한다."
+    },
+    {
+      "id": "SINCE_CHARGE_EV_EFFICIENCY",
+      "query": "ev_status",
+      "api": "EvBattery",
+      "method": "getSinceChargeEvEfficiency",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "km/kWh",
+      "permission": "CAR_ENERGY",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "CUMULATIVE_EV_EFFICIENCY",
+      "query": "ev_status",
+      "api": "EvBattery",
+      "method": "getCumulativeEvEfficiency",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "km/kWh",
+      "permission": "CAR_ENERGY",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "EV_EFFICIENCY",
+      "query": "ev_status",
+      "api": "EvBattery",
+      "method": "getCurrentEvEfficiency",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "km/kWh",
+      "permission": "CAR_ENERGY",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "EV_BATTERY_PERCENT",
+      "query": "energy_level",
+      "api": "EvBattery",
+      "method": "getEvBatteryStateOfCharge",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "int",
+      "unit": "%",
+      "permission": "CAR_ENERGY",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "EV_CHARGE_CURRENT_DRAW_LIMIT",
+      "query": "ev_status",
+      "api": "EvBattery",
+      "method": "getEvChargeCurrentDrawLimit",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "A",
+      "permission": "CAR_ENERGY",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "EV_CHARGE_SWITCH_STATE",
+      "query": "ev_status",
+      "api": "EvBattery",
+      "method": "getEvChargeSwitchState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_ENERGY",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "INSTANTANEOUS_FUEL_ECONOMY",
+      "query": "fuel_economy",
+      "api": "Fuel",
+      "method": "getInstantaneousFuelEconomy",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "L/100 km",
+      "permission": "CAR_ENERGY",
+      "console": "listed",
+      "verification": "none",
+      "note": "API 문서는 추후 Deprecated 예정이라고 적는다. 채택 전에 다시 확인한다."
+    },
+    {
+      "id": "SINCE_CHARGE_FUEL_ECONOMY",
+      "query": "fuel_economy",
+      "api": "Fuel",
+      "method": "getSinceChargeFuelEconomy",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "L/100 km",
+      "permission": "CAR_ENERGY",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "CUMULATIVE_FUEL_ECONOMY",
+      "query": "fuel_economy",
+      "api": "Fuel",
+      "method": "getCumulativeFuelEconomy",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "L/100 km",
+      "permission": "CAR_ENERGY",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "FUEL_ECONOMY",
+      "query": "fuel_economy",
+      "api": "Fuel",
+      "method": "getCurrentFuelEconomy",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "L/100 km",
+      "permission": "CAR_ENERGY",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "FUEL_PERCENT",
+      "query": "energy_level",
+      "api": "Fuel",
+      "method": "getFuelPercent",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "int",
+      "unit": "%",
+      "permission": "CAR_ENERGY",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_AC_STATE",
+      "query": "hvac_status",
+      "api": "HVAC",
+      "method": "getHvacAcState",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_AUTO_STATE",
+      "query": "hvac_status",
+      "api": "HVAC",
+      "method": "getHvacAutoState",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_AUTO_RECIRCULATION_STATE",
+      "query": "hvac_status",
+      "api": "HVAC",
+      "method": "getHvacAutoRecirculationState",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_DEFROSTER_STATE",
+      "query": "hvac_status",
+      "api": "HVAC",
+      "method": "getHvacDefrosterState",
+      "arity": 3,
+      "areaType": "WindowArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_DUAL_STATE",
+      "query": "hvac_status",
+      "api": "HVAC",
+      "method": "getHvacDualState",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_FAN_DIRECTION",
+      "query": "hvac_status",
+      "api": "HVAC",
+      "method": "getHvacFanDirection",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "enum:FanDirectionType",
+      "unit": null,
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_FAN_SPEED",
+      "query": "hvac_status",
+      "api": "HVAC",
+      "method": "getHvacFanSpeed",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_MAX_AC_STATE",
+      "query": "hvac_status",
+      "api": "HVAC",
+      "method": "getHvacMaxAcState",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_MAX_DEFROST_STATE",
+      "query": "hvac_status",
+      "api": "HVAC",
+      "method": "getHvacMaxDefrostState",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_POWER_STATE",
+      "query": "hvac_status",
+      "api": "HVAC",
+      "method": "getHvacPowerState",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_RECIRCULATION_STATE",
+      "query": "hvac_status",
+      "api": "HVAC",
+      "method": "getHvacRecirculationState",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_AIR_CLEANER_STATE",
+      "query": "hvac_status",
+      "api": "HVAC",
+      "method": "getHvacAirCleanerState",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_TEMPERATURE",
+      "query": "hvac_status",
+      "api": "HVAC",
+      "method": "getHvacTemperature",
+      "arity": 4,
+      "areaType": "SeatArea",
+      "valueType": "float",
+      "unit": "°C",
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none",
+      "fixedArgs": {
+        "unit": "CELSIUS"
+      },
+      "note": "SDK 소스와 API 문서는 목표 온도, 콘솔은 온도 임계값으로 설명한다. 현재 온도(HVAC_TEMPERATURE_CURRENT)와 구분한다."
+    },
+    {
+      "id": "HVAC_TEMPERATURE_CURRENT",
+      "query": "hvac_status",
+      "api": "HVAC",
+      "method": "getHvacTemperatureCurrent",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "float",
+      "unit": "°C",
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "READING_LIGHT_SWITCH",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getReadingLightSwitch",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "enum:LightSwitch",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "READING_LIGHT_STATE",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getCurrentReadingLightState",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "enum:LightState",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "CABIN_LIGHT_SWITCH",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getCabinLightSwitch",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:LightSwitch",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "CABIN_LIGHT_STATE",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getCurrentCabinLightState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:LightState",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HIGH_BEAM_LIGHT_STATE",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getCurrentHighBeamLightState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:LightState",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HIGH_BEAM_LIGHT_SWITCH",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getHighBeamLightSwitch",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:LightSwitch",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "LOW_BEAM_LIGHT_SWITCH",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getLowBeamLightSwitch",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:LightSwitch",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "LOW_BEAM_LIGHT_STATE",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getCurrentLowBeamLightState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:LightState",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "TAIL_LAMP_LIGHT_STATE",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getCurrentTailLampLightState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:LightState",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "TAIL_LAMP_LIGHT_SWITCH",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getTailLampLightSwitch",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:LightSwitch",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "FRONT_FOG_LIGHT_STATE",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getCurrentFrontFogLightState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:LightState",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "FRONT_FOG_LIGHT_SWITCH",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getFrontFogLightSwitch",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:LightSwitch",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "REAR_FOG_LIGHT_STATE",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getCurrentRearFogLightState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:LightState",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "REAR_FOG_LIGHT_SWITCH",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getRearFogLightSwitch",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:LightSwitch",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "AMBIENT_LIGHT_BRIGHTNESS",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getAmbientLightBrightness",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "AMBIENT_LIGHT_BRIGHTNESS_COLOR",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getAmbientLightBrightnessColor",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none",
+      "note": "API 문서와 콘솔은 32비트 ARGB로 설명하며, API 문서는 알파를 0xFF 고정으로 적는다. 밝기 값이 아니다."
+    },
+    {
+      "id": "AMBIENT_LIGHT_SWITCH",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getAmbientLightSwitch",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "enum:LightSwitch",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "AMBIENT_LIGHT_STATE",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getAmbientLightState",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "enum:LightState",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "AMBIENT_COLOR_AUTO_BY_DRIVE_MODE_ENABLED",
+      "query": "light_status",
+      "api": "Light",
+      "method": "getAmbientColorAutoByDriveModeEnabled",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "DISTANCE_DRIVEN",
+      "query": "trip_status",
+      "api": "Odometer",
+      "method": "getCurrentDistanceDriven",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "km",
+      "permission": "CAR_DRIVE",
+      "console": "listed",
+      "verification": "none",
+      "note": "API 문서는 현재 주행거리계 값으로 설명한다. 이번 주행 거리는 TRIP_CURRENT_DRIVING_DISTANCE다."
+    },
+    {
+      "id": "TRIP_CURRENT_DRIVING_TIME",
+      "query": "trip_status",
+      "api": "Odometer",
+      "method": "getTripCurrentDrivingTime",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "int",
+      "unit": "min",
+      "permission": "CAR_DRIVE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "TRIP_CUMULATIVE_DRIVING_TIME",
+      "query": "trip_status",
+      "api": "Odometer",
+      "method": "getTripCumulativeDrivingTime",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "int",
+      "unit": "min",
+      "permission": "CAR_DRIVE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "TRIP_SINCE_REFILL_DRIVING_TIME",
+      "query": "trip_status",
+      "api": "Odometer",
+      "method": "getTripSinceRefillDrivingTime",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "int",
+      "unit": "min",
+      "permission": "CAR_DRIVE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "TRIP_CURRENT_DRIVING_DISTANCE",
+      "query": "trip_status",
+      "api": "Odometer",
+      "method": "getTripCurrentDrivingDistance",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "m",
+      "permission": "CAR_DRIVE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "TRIP_CUMULATIVE_DRIVING_DISTANCE",
+      "query": "trip_status",
+      "api": "Odometer",
+      "method": "getTripCumulativeDrivingDistance",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "m",
+      "permission": "CAR_DRIVE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "TRIP_SINCE_REFILL_DRIVING_DISTANCE",
+      "query": "trip_status",
+      "api": "Odometer",
+      "method": "getTripSinceRefillDrivingDistance",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "m",
+      "permission": "CAR_DRIVE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "ENGINE_OIL_LEVEL_STATE",
+      "query": "safety_status",
+      "api": "Safety",
+      "method": "getEngineOilLevelState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:OilLevelState",
+      "unit": null,
+      "permission": "CAR_SAFETY",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "BRAKE_FLUID_LEVEL_STATE",
+      "query": "safety_status",
+      "api": "Safety",
+      "method": "getBrakeFluidLevelState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:OilLevelState",
+      "unit": null,
+      "permission": "CAR_SAFETY",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "TRANSMISSION_OIL_LEVEL_STATE",
+      "query": "safety_status",
+      "api": "Safety",
+      "method": "getTransmissionOilLevelState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:OilLevelState",
+      "unit": null,
+      "permission": "CAR_SAFETY",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "LOW_WASHER_FLUID_WARNING",
+      "query": "safety_status",
+      "api": "Safety",
+      "method": "hasLowWasherFluidWarning",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_SAFETY",
+      "console": "listed",
+      "verification": "none",
+      "note": "API 문서는 true를 워셔액 문제로 설명한다. 실행 대조 전이다."
+    },
+    {
+      "id": "SEAT_AIRBAG_BEEN_DEPLOYED",
+      "query": "safety_status",
+      "api": "Safety",
+      "method": "hasSeatAirbagBeenDeployed",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_SAFETY",
+      "console": "listed",
+      "verification": "none",
+      "note": "API 문서는 true를 에어백 전개로 설명한다. 실행 대조 전이다."
+    },
+    {
+      "id": "POWER_DOWN_WARNING_INDICATOR",
+      "query": "safety_status",
+      "api": "Safety",
+      "method": "hasPowerDownWarningIndicator",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_SAFETY",
+      "console": "listed",
+      "verification": "none",
+      "note": "API 문서는 true를 엔진 문제로 설명한다. 실행 대조 전이다."
+    },
+    {
+      "id": "SEAT_AIRBAG_ENABLED",
+      "query": "safety_status",
+      "api": "Safety",
+      "method": "hasSeatAirbagEnabled",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_SAFETY",
+      "console": "listed",
+      "verification": "none",
+      "note": "API 문서와 콘솔은 true를 해당 좌석 에어백의 문제로 설명한다. 이름과 반대로 읽힐 수 있으며 실행 대조 전이다(OQ-13)."
+    },
+    {
+      "id": "SEAT_BELT_NOT_BUCKLED_WARNING",
+      "query": "safety_status",
+      "api": "Safety",
+      "method": "hasSeatBeltNotBuckledWarning",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_SAFETY",
+      "console": "listed",
+      "verification": "none",
+      "note": "API 문서는 true를 안전벨트 미착용으로 설명한다. 실행 대조 전이다."
+    },
+    {
+      "id": "SEAT_OCCUPANCY",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getCurrentSeatOccupancy",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "SEAT_HEADREST_FORE_AFT_POSITION",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getCurrentSeatHeadrestForeAftPosition",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "SEAT_HEADREST_HEIGHT_AFT_POSITION",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getCurrentSeatHeadrestHeightAftPosition",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "SEAT_HEIGHT_POSITION",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getCurrentSeatHeightPosition",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "SEAT_LUMBAR_FORE_AFT_POSITION",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getCurrentSeatLumbarForeAftPosition",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "SEAT_LUMBAR_SIDE_SUPPORT_POSITION",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getCurrentSeatLumbarSideSupportPosition",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "SEAT_TILT_POSITION",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getCurrentSeatTiltPosition",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "SEAT_DEPTH_POSITION",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getCurrentSeatDepthPosition",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "SEAT_FORE_AFT_POSITION",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getCurrentSeatForeAftPosition",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "SEAT_HEADREST_ANGLE_POSITION",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getCurrentSeatHeadrestAnglePosition",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "SEAT_BACKREST_ANGLE_POSITION",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getCurrentSeatBackrestAnglePosition",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "SEAT_BELT_BUCKLED_STATE",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getCurrentSeatBeltBuckledState",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "SEAT_BELT_HEIGHT_POSITION",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getCurrentSeatBeltHeightPosition",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_SEAT_TEMPERATURE",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getHvacSeatTemperature",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_SEAT_VENTILATION_STATE",
+      "query": "seat_status",
+      "api": "Seat",
+      "method": "getHvacSeatVentilationState",
+      "arity": 3,
+      "areaType": "SeatArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_SEATS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_SIDE_MIRROR_HEAT_STATE",
+      "query": "side_mirror_status",
+      "api": "SideMirror",
+      "method": "getHvacSideMirrorHeatState",
+      "arity": 3,
+      "areaType": "MirrorArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_MIRRORS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "HVAC_STEERING_WHEEL_HEAT_STATE",
+      "query": "steering_wheel_status",
+      "api": "SteeringWheel",
+      "method": "getHvacSteeringWheelHeatState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_CLIMATE",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "STEERING_WHEEL_ANGLE",
+      "query": "steering_wheel_status",
+      "api": "SteeringWheel",
+      "method": "getCurrentSteeringWheelAngle",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "float",
+      "unit": "deg",
+      "permission": "CAR_DRIVE",
+      "console": "listed",
+      "verification": "none",
+      "note": "API 문서는 앞바퀴 조향각으로 설명하며 왼쪽이 음수다. 핸들 회전각이 아니다."
+    },
+    {
+      "id": "LOW_TIRE_PRESSURE",
+      "query": "tire_status",
+      "api": "Tire",
+      "method": "getLowTirePressure",
+      "arity": 3,
+      "areaType": "WheelArea",
+      "valueType": "float",
+      "unit": "kPa",
+      "permission": "CAR_SAFETY",
+      "console": "listed",
+      "verification": "none",
+      "note": "SDK 소스와 API 문서는 저압 임계값(kPa), 콘솔(2026-11-01)은 낮은 공기압 상태로 설명한다. 현재 공기압으로 표현하지 않는다."
+    },
+    {
+      "id": "ETCS_VOICE_GUIDANCE_VOLUME",
+      "query": "toll_status",
+      "api": "Toll",
+      "method": "getCurrentEtcsVoiceGuidanceVolume",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_TOLL",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "TURN_SIGNAL_STATE",
+      "query": "turn_signal_status",
+      "api": "TurnSignal",
+      "method": "getCurrentTurnSignalState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "enum:TurnSignalValue",
+      "unit": null,
+      "permission": "CAR_LIGHTS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "WINDOW_LOCK_STATE",
+      "query": "window_detail_status",
+      "api": "Window",
+      "method": "getCurrentWindowLockState",
+      "arity": 3,
+      "areaType": "WindowArea",
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_WINDOWS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "WINDOW_POSITION",
+      "query": "window_status",
+      "api": "Window",
+      "method": "getCurrentWindowPosition",
+      "arity": 3,
+      "areaType": "WindowArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_WINDOWS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "WINDOW_BLIND_POSITION",
+      "query": "window_detail_status",
+      "api": "Window",
+      "method": "getCurrentWindowBlindPosition",
+      "arity": 3,
+      "areaType": "WindowArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_WINDOWS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "SMART_GLASS_STATE",
+      "query": "window_detail_status",
+      "api": "Window",
+      "method": "getCurrentSmartGlassState",
+      "arity": 2,
+      "areaType": null,
+      "valueType": "boolean",
+      "unit": null,
+      "permission": "CAR_WINDOWS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "SMART_GLASS_CONFIG",
+      "query": "window_detail_status",
+      "api": "Window",
+      "method": "getSmartGlassConfig",
+      "arity": 3,
+      "areaType": "WindowArea",
+      "valueType": "smart_glass_config",
+      "unit": null,
+      "permission": "CAR_WINDOWS",
+      "console": "not_listed",
+      "verification": "none"
+    },
+    {
+      "id": "SMART_GLASS_LEVEL",
+      "query": "window_detail_status",
+      "api": "Window",
+      "method": "getCurrentSmartGlassLevel",
+      "arity": 3,
+      "areaType": "WindowArea",
+      "valueType": "int",
+      "unit": null,
+      "permission": "CAR_WINDOWS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "WIPER_STATE",
+      "query": "wiper_status",
+      "api": "Wiper",
+      "method": "getCurrentWiperState",
+      "arity": 3,
+      "areaType": "WindowArea",
+      "valueType": "enum:WiperState",
+      "unit": null,
+      "permission": "CAR_WINDOWS",
+      "console": "listed",
+      "verification": "none"
+    },
+    {
+      "id": "WIPER_SWITCH",
+      "query": "wiper_status",
+      "api": "Wiper",
+      "method": "getCurrentWiperSwitch",
+      "arity": 3,
+      "areaType": "WindowArea",
+      "valueType": "enum:WiperSwitch",
+      "unit": null,
+      "permission": "CAR_WINDOWS",
+      "console": "listed",
+      "verification": "none"
+    }
+  ],
+  "excluded": [
+    {
+      "api": "CarInfo",
+      "method": "getVINInfo",
+      "arity": 2,
+      "reason": "identifier"
+    },
+    {
+      "api": "CarInfo",
+      "method": "getCRNInfo",
+      "arity": 2,
+      "reason": "deprecated"
+    },
+    {
+      "api": "CarInfo",
+      "method": "getCapabilityInfo",
+      "arity": 2,
+      "reason": "private_permission"
+    },
+    {
+      "api": "EvBattery",
+      "method": "getEvBatteryLevel",
+      "arity": 2,
+      "reason": "hidden"
+    },
+    {
+      "api": "EvBattery",
+      "method": "isEvChargePortOpen",
+      "arity": 2,
+      "reason": "hidden"
+    },
+    {
+      "api": "EvBattery",
+      "method": "getEvBatteryCapacity",
+      "arity": 2,
+      "reason": "hidden"
+    },
+    {
+      "api": "Gear",
+      "method": "getCurrentGearSelectionState",
+      "arity": 2,
+      "reason": "hidden"
+    },
+    {
+      "api": "HVAC",
+      "method": "getHvacTemperatureCurrent",
+      "arity": 4,
+      "reason": "unit_overload"
+    },
+    {
+      "api": "Odometer",
+      "method": "getTripInstantaneousDrivingDistance",
+      "arity": 2,
+      "reason": "deprecated"
+    },
+    {
+      "api": "Odometer",
+      "method": "getRangeRemainingDistance",
+      "arity": 2,
+      "reason": "hidden"
+    },
+    {
+      "api": "Safety",
+      "method": "getTelltalesInfo",
+      "arity": 2,
+      "reason": "private_permission"
+    },
+    {
+      "api": "Tire",
+      "method": "getTirePressure",
+      "arity": 3,
+      "reason": "private_permission"
+    }
+  ]
+}

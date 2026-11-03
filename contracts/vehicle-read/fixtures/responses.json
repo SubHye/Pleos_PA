@@ -1,0 +1,3405 @@
+[
+  {
+    "name": "door status with a grouped lock",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "door_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_2_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "DOOR_LOCK",
+          "area": "ROW_1_LEFT+ROW_1_RIGHT+ROW_2_LEFT+ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "HOOD, ROW_1_LEFT+ROW_1_RIGHT+ROW_2_LEFT+ROW_2_RIGHT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": "locked",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "COMPLETE"
+    }
+  },
+  {
+    "name": "door lock failure keeps door positions",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "door_status",
+      "outcome": "PARTIAL",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_2_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "DOOR_LOCK",
+          "area": "ROW_1_LEFT",
+          "status": "AREA_UNSUPPORTED",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 0,
+            "reportedAreas": "HOOD, ROW_1_LEFT+ROW_1_RIGHT+ROW_2_LEFT+ROW_2_RIGHT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "PARTIAL"
+    }
+  },
+  {
+    "name": "single door",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "front_left_door_position",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "front_left_door_position",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 1,
+          "meaning": "open",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "COMPLETE"
+    }
+  },
+  {
+    "name": "window raw value stays raw",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "window_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "window_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "COMPLETE"
+    }
+  },
+  {
+    "name": "partial energy on an EV",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "energy_level",
+      "outcome": "PARTIAL",
+      "source": "pleos_emulator",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "FUEL_PERCENT",
+          "area": null,
+          "status": "PROPERTY_UNSUPPORTED",
+          "capability": null,
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": "Exception",
+          "errorCode": "ERROR_NOT_SUPPORTED_PROPERTY"
+        },
+        {
+          "property": "EV_BATTERY_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 100,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "PARTIAL"
+    }
+  },
+  {
+    "name": "all items failed",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "energy_level",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "FUEL_PERCENT",
+          "area": null,
+          "status": "PERMISSION_DENIED",
+          "capability": null,
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": "SecurityException",
+          "errorCode": null
+        },
+        {
+          "property": "EV_BATTERY_PERCENT",
+          "area": null,
+          "status": "CAPABILITY_FAILED",
+          "capability": null,
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": "a",
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "FAILED"
+    }
+  },
+  {
+    "name": "null value is not a reading",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "NO_VALUE",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "FAILED"
+    }
+  },
+  {
+    "name": "empty result code",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "NO_VALUE",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": "Exception",
+          "errorCode": "ERROR_EMPTY_RESULT"
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "FAILED"
+    }
+  },
+  {
+    "name": "write only property",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "READ_UNAVAILABLE",
+          "capability": {
+            "access": "WRITE",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "FAILED"
+    }
+  },
+  {
+    "name": "driving restriction",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "toll_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "toll_status",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "ETCS_VOICE_GUIDANCE_VOLUME",
+          "area": null,
+          "status": "DRIVING_RESTRICTED",
+          "capability": null,
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": "Exception",
+          "errorCode": "ERROR_DRIVING_RESTRICTED"
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "FAILED"
+    }
+  },
+  {
+    "name": "service unavailable",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "toll_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "toll_status",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "ETCS_VOICE_GUIDANCE_VOLUME",
+          "area": null,
+          "status": "SERVICE_UNAVAILABLE",
+          "capability": null,
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": "VehicleException",
+          "errorCode": "ERROR_SERVICE_CONNECTION_FAILURE"
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "FAILED"
+    }
+  },
+  {
+    "name": "float with a documented unit",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "tire_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "tire_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "LOW_TIRE_PRESSURE",
+          "area": "LEFT_FRONT",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 1,
+            "reportedAreas": "LEFT_FRONT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 165.5,
+          "meaning": null,
+          "unit": "kPa",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "COMPLETE"
+    }
+  },
+  {
+    "name": "enum by name",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "turn_signal_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "turn_signal_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "TURN_SIGNAL_STATE",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": "LEFT",
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "COMPLETE"
+    }
+  },
+  {
+    "name": "structured value",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "window_detail_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "window_detail_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "SMART_GLASS_CONFIG",
+          "area": "ROOF_TOP_1",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 1,
+            "reportedAreas": "ROOF_TOP_1",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": {
+            "zoneCount": 2,
+            "levelCount": 4
+          },
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "COMPLETE"
+    }
+  },
+  {
+    "name": "unrecognised enum is not OK",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "turn_signal_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "turn_signal_status",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "TURN_SIGNAL_STATE",
+          "area": null,
+          "status": "UNKNOWN_VALUE",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": "HAZARD",
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "FAILED"
+    }
+  },
+  {
+    "name": "door raw outside the documented range",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "front_left_door_position",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "front_left_door_position",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "UNKNOWN_VALUE",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "FAILED"
+    }
+  },
+  {
+    "name": "selection narrows the items",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "seat_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "seat_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "SEAT_OCCUPANCY",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "COMPLETE"
+    },
+    "selection": {
+      "properties": [
+        "SEAT_OCCUPANCY"
+      ],
+      "areas": [
+        "ROW_1_LEFT"
+      ]
+    }
+  },
+  {
+    "name": "android timeout keeps finished items",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "energy_level",
+      "outcome": "TIMEOUT",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "EV_BATTERY_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 100,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "FUEL_PERCENT",
+          "area": null,
+          "status": "NOT_READ",
+          "capability": null,
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "TIMEOUT"
+    }
+  },
+  {
+    "name": "android cancel before any capability",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "seat_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "seat_status",
+      "outcome": "CANCELLED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": []
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "CANCELLED"
+    }
+  },
+  {
+    "name": "busy",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "http": 409,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "ok": false,
+      "code": "BUSY"
+    },
+    "expect": {
+      "ok": false,
+      "code": "BUSY",
+      "origin": "android"
+    }
+  },
+  {
+    "name": "app not ready",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "http": 503,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "ok": false,
+      "code": "APP_NOT_READY"
+    },
+    "expect": {
+      "ok": false,
+      "code": "APP_NOT_READY",
+      "origin": "android"
+    }
+  },
+  {
+    "name": "connection stopped",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "http": 503,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "ok": false,
+      "code": "CONNECTION_STOPPED"
+    },
+    "expect": {
+      "ok": false,
+      "code": "CONNECTION_STOPPED",
+      "origin": "android"
+    }
+  },
+  {
+    "name": "malformed request",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "http": 400,
+    "body": {
+      "ok": false,
+      "code": "INVALID_REQUEST"
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_REQUEST",
+      "origin": "android"
+    }
+  },
+  {
+    "name": "oversized request",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "http": 413,
+    "body": {
+      "ok": false,
+      "code": "INVALID_REQUEST"
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_REQUEST",
+      "origin": "android"
+    }
+  },
+  {
+    "name": "wrong media type",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "http": 415,
+    "body": {
+      "ok": false,
+      "code": "INVALID_REQUEST"
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_REQUEST",
+      "origin": "android"
+    }
+  },
+  {
+    "name": "forbidden",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "http": 403,
+    "body": {
+      "ok": false,
+      "code": "REQUEST_FORBIDDEN"
+    },
+    "expect": {
+      "ok": false,
+      "code": "REQUEST_FORBIDDEN",
+      "origin": "android"
+    }
+  },
+  {
+    "name": "late reply for another request",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "http": 200,
+    "body": {
+      "requestId": "33333333-3333-4333-8333-333333333333",
+      "query": "energy_level",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "FUEL_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 62,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "EV_BATTERY_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 100,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "busy for another request",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "http": 409,
+    "body": {
+      "requestId": "33333333-3333-4333-8333-333333333333",
+      "ok": false,
+      "code": "BUSY"
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "wrong code for the status",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "http": 409,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "ok": false,
+      "code": "APP_NOT_READY"
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "unexpected http status",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "http": 500,
+    "body": {
+      "ok": false,
+      "code": "INVALID_REQUEST"
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "other query",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "window_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "FUEL_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 62,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "EV_BATTERY_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 100,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "other sdk version",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "energy_level",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.1",
+      "items": [
+        {
+          "property": "FUEL_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 62,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "EV_BATTERY_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 100,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "unknown source",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "energy_level",
+      "outcome": "COMPLETE",
+      "source": "android",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "FUEL_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 62,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "EV_BATTERY_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 100,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "outcome does not match items",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "energy_level",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "FUEL_PERCENT",
+          "area": null,
+          "status": "PROPERTY_UNSUPPORTED",
+          "capability": null,
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": "Exception",
+          "errorCode": "ERROR_NOT_SUPPORTED_PROPERTY"
+        },
+        {
+          "property": "EV_BATTERY_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 100,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "finished outcome without items",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "seat_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "seat_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": []
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "NOT_READ in a finished outcome",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "energy_level",
+      "outcome": "PARTIAL",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "EV_BATTERY_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 100,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "FUEL_PERCENT",
+          "area": null,
+          "status": "NOT_READ",
+          "capability": null,
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "missing fixed item",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "energy_level",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "EV_BATTERY_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 100,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "timeout missing fixed item",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "energy_level",
+      "outcome": "TIMEOUT",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "EV_BATTERY_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 100,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "extra item on a fixed query",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "front_left_door_position",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "front_left_door_position",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "duplicate item",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "door_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "door_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_2_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "DOOR_LOCK",
+          "area": "ROW_1_LEFT+ROW_1_RIGHT+ROW_2_LEFT+ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "HOOD, ROW_1_LEFT+ROW_1_RIGHT+ROW_2_LEFT+ROW_2_RIGHT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": "locked",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "DOOR_LOCK",
+          "area": "ROW_1_LEFT+ROW_1_RIGHT+ROW_2_LEFT+ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "HOOD, ROW_1_LEFT+ROW_1_RIGHT+ROW_2_LEFT+ROW_2_RIGHT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": "locked",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "property of another query",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "FUEL_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 62,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "property outside the selection",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "seat_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "seat_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "SEAT_OCCUPANCY",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    },
+    "selection": {
+      "properties": [
+        "SEAT_TILT_POSITION"
+      ]
+    }
+  },
+  {
+    "name": "area outside the selection",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "seat_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "seat_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "SEAT_OCCUPANCY",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    },
+    "selection": {
+      "areas": [
+        "ROW_1_RIGHT"
+      ]
+    }
+  },
+  {
+    "name": "area on an area-less property",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "area outside the vocabulary",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "seat_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "seat_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "SEAT_OCCUPANCY",
+          "area": "HOOD",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 1,
+            "reportedAreas": "HOOD",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "repeated part in a grouped area",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "seat_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "seat_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "SEAT_OCCUPANCY",
+          "area": "ROW_1_LEFT+ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "failure rewritten as false",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "READ_FAILED",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": false,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": "Exception",
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "OK without a receipt time",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "receipt time without a zone",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "OK on a write-only capability",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "WRITE",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "OK with the wrong value type",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 1,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "OK with an unlisted enum",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "turn_signal_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "turn_signal_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "TURN_SIGNAL_STATE",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": "HAZARD",
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "OK with the wrong unit",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "tire_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "tire_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "LOW_TIRE_PRESSURE",
+          "area": "LEFT_FRONT",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 1,
+            "reportedAreas": "LEFT_FRONT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 165.5,
+          "meaning": null,
+          "unit": "psi",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "OK grouped capability match",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "seat_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "seat_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "SEAT_OCCUPANCY",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 2,
+            "reportedAreas": "ROW_1_LEFT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "meaning on a property without one",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": "pressed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "door meaning contradicts the raw value",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "front_left_door_position",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "front_left_door_position",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "rawValue": 1,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "door OK needs the 0..1 range",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "front_left_door_position",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "front_left_door_position",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "DOOR_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 0,
+          "meaning": "closed",
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "percent out of range",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "energy_level",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "energy_level",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "FUEL_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 101,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "EV_BATTERY_PERCENT",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 100,
+          "meaning": null,
+          "unit": "%",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "unknown value that is valid",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "UNKNOWN_VALUE",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "capability failure with a capability",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "CAPABILITY_FAILED",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": "Exception",
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "read failure without a type",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "READ_FAILED",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "error message in errorType",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "READ_FAILED",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": "area ID: 0x1 not supported",
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "code that does not fit the status",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "DRIVING_RESTRICTED",
+          "capability": null,
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": "Exception",
+          "errorCode": "ERROR_EMPTY_RESULT"
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "unknown code",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "FAILED",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "READ_FAILED",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": null,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": null,
+          "errorType": "Exception",
+          "errorCode": "ERROR_NEW"
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "reversed bounds",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "window_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "window_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT",
+            "minimum": 10.0,
+            "maximum": 0.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_RIGHT",
+            "minimum": 10.0,
+            "maximum": 0.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_2_LEFT",
+            "minimum": 10.0,
+            "maximum": 0.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_2_RIGHT",
+            "minimum": 10.0,
+            "maximum": 0.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "window above the reported range is not OK",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "window_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "window_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 11,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "window below the reported range is not OK",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "window_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "window_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": -1,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "window outside the reported range is an unknown value",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "window_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "window_status",
+      "outcome": "PARTIAL",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "UNKNOWN_VALUE",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 11,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 5,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "PARTIAL"
+    }
+  },
+  {
+    "name": "window at the range edge is OK",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "window_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "window_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 10,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_1_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 0,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_LEFT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 0,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        },
+        {
+          "property": "WINDOW_POSITION",
+          "area": "ROW_2_RIGHT",
+          "status": "OK",
+          "capability": {
+            "access": "READ_WRITE",
+            "matchingAreas": 1,
+            "reportedAreas": "ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "rawValue": 0,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "COMPLETE"
+    }
+  },
+  {
+    "name": "other properties respect a reported range",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "tire_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "tire_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "LOW_TIRE_PRESSURE",
+          "area": "LEFT_FRONT",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 1,
+            "reportedAreas": "LEFT_FRONT",
+            "minimum": 100.0,
+            "maximum": 200.0
+          },
+          "rawValue": 250.5,
+          "meaning": null,
+          "unit": "kPa",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "int property beyond 32 bits is not OK",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "toll_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "toll_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "ETCS_VOICE_GUIDANCE_VOLUME",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 2147483648,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "float property keeps a value beyond 32 bits",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "tire_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "tire_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "LOW_TIRE_PRESSURE",
+          "area": "LEFT_FRONT",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 1,
+            "reportedAreas": "LEFT_FRONT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 2147483648,
+          "meaning": null,
+          "unit": "kPa",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": true,
+      "outcome": "COMPLETE"
+    }
+  },
+  {
+    "name": "matching areas beyond 32 bits",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "tire_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "tire_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "LOW_TIRE_PRESSURE",
+          "area": "LEFT_FRONT",
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": 2147483648,
+            "reportedAreas": "LEFT_FRONT",
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": 165.5,
+          "meaning": null,
+          "unit": "kPa",
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "extra item field",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null,
+          "source": "pc"
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "missing item field",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null
+        }
+      ]
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  },
+  {
+    "name": "extra top-level field",
+    "evidence": "mock",
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "query": "brake_status",
+    "http": 200,
+    "body": {
+      "requestId": "22222222-2222-4222-8222-222222222222",
+      "query": "brake_status",
+      "outcome": "COMPLETE",
+      "source": "simulation",
+      "sdkVersion": "2.3.2",
+      "items": [
+        {
+          "property": "BRAKE_PEDAL_STATUS",
+          "area": null,
+          "status": "OK",
+          "capability": {
+            "access": "READ",
+            "matchingAreas": null,
+            "reportedAreas": null,
+            "minimum": null,
+            "maximum": null
+          },
+          "rawValue": true,
+          "meaning": null,
+          "unit": null,
+          "receivedAt": "2026-11-02T09:30:00.123Z",
+          "errorType": null,
+          "errorCode": null
+        }
+      ],
+      "origin": "android"
+    },
+    "expect": {
+      "ok": false,
+      "code": "INVALID_RESPONSE",
+      "origin": "pc"
+    }
+  }
+]
