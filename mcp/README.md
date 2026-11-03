@@ -80,3 +80,23 @@ Claude Desktop 설정 예시:
 ```
 
 Codex CLI와 Claude Code의 연결은 데스크톱 클라이언트의 증거로 쓰지 않는다. 클라이언트별 실제 연결 결과는 PR 본문에 기록한다.
+
+## COM-10 모의 도구 연결
+
+일정·MCP·메시지 도구 결합 검증에는 아래의 별도 테스트 진입점을 등록한다.
+
+| 항목 | 값 |
+| --- | --- |
+| 등록 이름 | `pleos-com10-mock` |
+| 명령 | `C:\Program Files\nodejs\node.exe` |
+| 인자 | `<저장소>\mcp\test-support\serve-com10-mock.ts` |
+| 도구 / 인자 | `get_energy_level` / `{}` |
+| 예상 결과 | `source: simulation`, 연료·EV 배터리 각각 `50 %` |
+
+이 진입점은 COM-19의 서버와 가짜 Bridge를 함께 실행한다. Bridge는 프로세스가 소유한 loopback 임시 포트를 쓰므로 ADB forward나 차량 앱이 필요 없다. 클라이언트 연결이 끝나면 Bridge도 닫힌다. 다른 모의 도구나 실패 모드를 제공하지 않는다.
+
+도구 제목·설명과 반환 텍스트에 모의 결과임을 표시한다. `sdkVersion`과 `receivedAt`도 기존 fixture의 고정값이며 실행한 SDK 버전·실제 측정 시각의 증거가 아니다. 최종 답변과 Slack 본문에도 `[MCP 모의 결과]`를 붙인다. 기본 `src/server.ts`의 도구 목록과 운영 차량 계약은 이 진입점 때문에 바뀌지 않는다.
+
+COM-10의 일정 제공자는 Notion 일정 DB이며, Notion과 Slack은 동일 AI 대화의 기존 커넥터로 연결한다. Google Calendar와 Notion Calendar 앱 연동은 별도 검증 대상이다. 일정·메시지 원문을 이 도구의 인자로 전달하지 않는다. Slack 전송은 워크스페이스·채널·본문을 확인받고 명시 승인 뒤에만 수행한다. 이 서버가 외부 커넥터의 승인을 강제하지는 못한다.
+
+실행 시나리오와 지원 범위는 [COM-10](https://linear.app/wonsub/issue/COM-10)에, 실제 클라이언트 검증 증거는 해당 PR 본문에 기록한다. 이 진입점의 자동 테스트 성공은 AI 제품 연결·Google Calendar·Slack·실제 SDK 성공을 뜻하지 않는다.
