@@ -10,13 +10,18 @@
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\"",
     "start": "node src/server.ts",
-    "typecheck": "tsc -p ."
+    "typecheck": "tsc -p .",
+    "lint": "oxlint --deny-warnings src test test-support",
+    "format": "oxfmt --write \"src/**/*.ts\" \"test/**/*.ts\" \"test-support/**/*.ts\"",
+    "format:check": "oxfmt --check \"src/**/*.ts\" \"test/**/*.ts\" \"test-support/**/*.ts\""
   },
   "dependencies": {
     "zod": "4.2.0"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
+    "oxfmt": "0.75.0",
+    "oxlint": "1.90.0",
     "typescript": "7.0.2"
   }
 }
