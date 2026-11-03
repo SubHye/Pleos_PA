@@ -50,6 +50,9 @@ interface BridgeEvents {
 
     fun peerClosedDuringRead()
 
+    /** The listener died while the bridge was meant to be up. */
+    fun listenerFailed()
+
     fun ownReplyRejected()
 
     fun finished(requestId: String, query: String, result: String, elapsedMillis: Long)
@@ -199,6 +202,7 @@ class BridgeServer(
                 try {
                     server.accept()
                 } catch (_: IOException) {
+                    if (!stopped) events.listenerFailed()
                     return
                 }
             if (!socket.inetAddress.isLoopbackAddress) {

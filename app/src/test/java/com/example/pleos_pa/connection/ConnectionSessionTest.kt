@@ -145,6 +145,76 @@ class ConnectionSessionTest {
     }
 
     @Test
+    fun aLostPeerMarksTheConnectionUntilTheNextRequest() {
+        controller.start()
+        finishBind()
+
+        controller.peerClosedDuringRead()
+        assertEquals(ConnectionStatus.Connected(interrupted = true), reported.last())
+
+        controller.requestReceived()
+        assertEquals(ConnectionStatus.Connected(), reported.last())
+    }
+
+    @Test
+    fun aRequestOnAHealthyConnectionReportsNothing() {
+        controller.start()
+        finishBind()
+        val before = reported.size
+
+        controller.requestReceived()
+        assertEquals(before, reported.size)
+    }
+
+    @Test
+    fun aLostPeerChangesNothingBeforeConnectingOrDuringTeardown() {
+        controller.start()
+        controller.peerClosedDuringRead()
+        assertEquals(listOf<ConnectionStatus>(ConnectionStatus.Starting), reported)
+
+        finishBind()
+        controller.stop()
+        val before = reported.size
+        controller.peerClosedDuringRead()
+        controller.requestReceived()
+        assertEquals(before, reported.size)
+    }
+
+    @Test
+    fun aFailureAfterConnectingEndsTheConnectionWithItsCode() {
+        controller.start()
+        finishBind()
+
+        controller.fail("BRIDGE_LISTENER_FAILED")
+        assertEquals(1, steps.count { it == "reader1" })
+        release()
+
+        assertEquals(
+            listOf<ConnectionStatus>(ConnectionStatus.Failed("BRIDGE_LISTENER_FAILED")),
+            ended,
+        )
+        assertEquals(1, created)
+    }
+
+    @Test
+    fun aRemovedScreenCannotClearTheNewerOne() {
+        val older: (ConnectionStatus) -> Unit = {}
+        val seen = mutableListOf<ConnectionStatus>()
+        val newer: (ConnectionStatus) -> Unit = { seen += it }
+        ConnectionStatusBoard.observe(older)
+        ConnectionStatusBoard.observe(newer)
+        seen.clear()
+
+        ConnectionStatusBoard.remove(older)
+        ConnectionStatusBoard.publish(ConnectionStatus.Starting)
+        assertEquals(listOf<ConnectionStatus>(ConnectionStatus.Starting), seen)
+
+        ConnectionStatusBoard.remove(newer)
+        ConnectionStatusBoard.publish(ConnectionStatus.Stopped)
+        assertEquals(1, seen.size)
+    }
+
+    @Test
     fun aFailedConnectionIsNoLongerActive() {
         bindFails = true
         controller.start()

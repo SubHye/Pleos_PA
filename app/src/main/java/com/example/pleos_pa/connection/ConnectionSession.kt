@@ -90,6 +90,7 @@ class ConnectionController(
     private var current: ConnectionSession? = null
     private var tearingDown = false
     private var resumeAfterTeardown = false
+    private var lastReported: ConnectionStatus = ConnectionStatus.Stopped
 
     /** True until the connection has fully ended. */
     val active: Boolean
@@ -122,8 +123,32 @@ class ConnectionController(
         if (status is ConnectionStatus.Failed) {
             tearDown(session, status)
         } else {
-            report(status)
+            publish(status)
         }
+    }
+
+    /** A new request clears the mark a lost peer left. */
+    fun requestReceived() {
+        if (!tearingDown && lastReported == ConnectionStatus.Connected(interrupted = true)) {
+            publish(ConnectionStatus.Connected())
+        }
+    }
+
+    fun peerClosedDuringRead() {
+        if (!tearingDown && lastReported is ConnectionStatus.Connected) {
+            publish(ConnectionStatus.Connected(interrupted = true))
+        }
+    }
+
+    /** The bridge stopped working on its own. Nothing retries, as with a failed start. */
+    fun fail(code: String) {
+        val session = current ?: return
+        if (!tearingDown) tearDown(session, ConnectionStatus.Failed(code))
+    }
+
+    private fun publish(status: ConnectionStatus) {
+        lastReported = status
+        report(status)
     }
 
     /** [ConnectionSession.stop]'s callback must come back on the main thread. */

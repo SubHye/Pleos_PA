@@ -41,6 +41,7 @@ internal class FakeVehicleSdk : VehicleSdk {
     val calls = CopyOnWriteArrayList<String>()
     val reads = CopyOnWriteArrayList<String>()
     val unsupported = mutableSetOf<String>()
+    var throwNext: Exception? = null
     @Volatile private var capabilityDone: ((PropertyCapability) -> Unit)? = null
     @Volatile private var capabilityFailed: ((Exception) -> Unit)? = null
     @Volatile private var readDone: ((Any?, Long) -> Unit)? = null
@@ -55,6 +56,10 @@ internal class FakeVehicleSdk : VehicleSdk {
         failed: (Exception) -> Unit,
     ) {
         calls += "capability:$property"
+        throwNext?.let {
+            throwNext = null
+            throw it
+        }
         capabilityDone = complete
         capabilityFailed = failed
     }

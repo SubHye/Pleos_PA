@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var start: Button
     private lateinit var stop: Button
     private var everStarted = false
+    private val observer: (ConnectionStatus) -> Unit = { render(it) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,11 +79,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        ConnectionStatusBoard.observe(::render)
+        ConnectionStatusBoard.observe(observer)
     }
 
     override fun onStop() {
-        ConnectionStatusBoard.observe(null)
+        ConnectionStatusBoard.remove(observer)
         super.onStop()
     }
 

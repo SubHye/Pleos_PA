@@ -135,19 +135,15 @@ class BridgeService : Service() {
     /** Called on bridge threads; only fixed fields reach the log, never a vehicle value. */
     private inner class Events : BridgeEvents {
         override fun requestReceived() {
-            main.post {
-                if (ConnectionStatusBoard.status == ConnectionStatus.Connected(true)) {
-                    show(ConnectionStatus.Connected())
-                }
-            }
+            main.post { controller.requestReceived() }
         }
 
         override fun peerClosedDuringRead() {
-            main.post {
-                if (ConnectionStatusBoard.status is ConnectionStatus.Connected) {
-                    show(ConnectionStatus.Connected(interrupted = true))
-                }
-            }
+            main.post { controller.peerClosedDuringRead() }
+        }
+
+        override fun listenerFailed() {
+            main.post { controller.fail(BRIDGE_LISTENER_FAILED) }
         }
 
         override fun ownReplyRejected() {
@@ -187,7 +183,8 @@ class BridgeService : Service() {
             PendingIntent.getActivity(
                 this,
                 0,
-                Intent(this, MainActivity::class.java),
+                Intent(this, MainActivity::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP),
                 PendingIntent.FLAG_IMMUTABLE,
             )
         val action =
@@ -235,6 +232,7 @@ class BridgeService : Service() {
         private const val CHANNEL_ID = "bridge"
         private const val NOTIFICATION_ID = 1
         private const val FOREGROUND_NOT_ALLOWED = "FOREGROUND_NOT_ALLOWED"
+        private const val BRIDGE_LISTENER_FAILED = "BRIDGE_LISTENER_FAILED"
 
         // Shared across sessions so a new bind waits for the previous session's bind.
         private val bindExecutor = Executors.newSingleThreadExecutor {

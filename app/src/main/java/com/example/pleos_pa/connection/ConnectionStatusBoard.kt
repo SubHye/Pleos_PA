@@ -15,8 +15,13 @@ object ConnectionStatusBoard {
         listener?.invoke(next)
     }
 
-    fun observe(observer: ((ConnectionStatus) -> Unit)?) {
+    fun observe(observer: (ConnectionStatus) -> Unit) {
         listener = observer
-        observer?.invoke(status)
+        observer(status)
+    }
+
+    /** Only [observer]'s own registration: a newer screen may already have replaced it. */
+    fun remove(observer: (ConnectionStatus) -> Unit) {
+        if (listener === observer) listener = null
     }
 }

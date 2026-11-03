@@ -7,6 +7,7 @@ import com.example.pleos_pa.vehicle.ReadScheduler
 import com.example.pleos_pa.vehicle.ReportedArea
 import com.example.pleos_pa.vehicle.VehicleReader
 import java.net.InetAddress
+import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
@@ -51,6 +52,10 @@ class BridgeServerTest {
             }
 
             override fun peerClosedDuringRead() = interruptions.countDown()
+
+            override fun listenerFailed() {
+                received += "listener-failed"
+            }
 
             override fun ownReplyRejected() {
                 received += "rejected"
@@ -257,15 +262,30 @@ class BridgeServerTest {
         next.stop()
     }
 
+    private fun boundListener(target: BridgeServer = server): ServerSocket {
+        val field = BridgeServer::class.java.getDeclaredField("listener")
+        field.isAccessible = true
+        return field.get(target) as ServerSocket
+    }
+
     @Test
     fun itListensOnLoopbackOnly() {
-        val address = InetAddress.getLoopbackAddress()
+        val address = boundListener().inetAddress
+        assertTrue(address.isLoopbackAddress)
         assertFalse(address.isAnyLocalAddress)
-        // A wildcard bind would accept this; a loopback bind must refuse the host's own name.
-        val refused = runCatching {
-            Socket(InetAddress.getLocalHost(), server.localPort).use { it.isConnected }
-        }
-            .isFailure
-        assertTrue(refused || InetAddress.getLocalHost().isLoopbackAddress)
+    }
+
+    @Test
+    fun aListenerThatDiesIsReportedOnce() {
+        boundListener().close()
+        waitFor { "listener-failed" in received }
+        assertEquals(1, received.count { it == "listener-failed" })
+    }
+
+    @Test
+    fun stoppingIsNotReportedAsAListenerFailure() {
+        server.stop()
+        Thread.sleep(100)
+        assertFalse("listener-failed" in received)
     }
 }

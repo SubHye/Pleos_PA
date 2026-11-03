@@ -282,6 +282,34 @@ class VehicleReaderTest {
     }
 
     @Test
+    fun aMissingValueIsNotAReading() {
+        read(request("front_left_door_position"))
+        answerDoorCapability()
+        sdk.answerRead(null)
+        scheduler.runAll()
+
+        val item = finished.single().items.single()
+        assertEquals(ItemStatus.NO_VALUE, item.status)
+        assertNull(item.rawValue)
+        assertTrue(item.receivedAt != null)
+        assertValid(finished.single(), ReadSelection())
+    }
+
+    @Test
+    fun anSdkCallThatThrowsFailsThatItemAndFreesTheSlot() {
+        sdk.throwNext = Exception("99999")
+        read(request("front_left_door_position"))
+        assertEquals(ItemStatus.CAPABILITY_FAILED, finished.single().items.single().status)
+        assertValid(finished.single(), ReadSelection())
+
+        read(request("front_left_door_position"))
+        answerDoorCapability()
+        sdk.answerRead(1)
+        scheduler.runAll()
+        assertEquals(Outcome.COMPLETE, finished[1].outcome)
+    }
+
+    @Test
     fun aSelectionWithNothingToReadIsReported() {
         val property = catalog.propertiesOf("turn_signal_status").first()
         val admission = read(request("turn_signal_status", setOf(property), setOf("ROW_1_LEFT")))
