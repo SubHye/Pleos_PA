@@ -71,10 +71,7 @@ for (const { era, options } of ERAS) {
     const { client } = await connect([SERVER], options);
     try {
       for (const name of REJECTED) {
-        const called = await client
-          .callTool({ name, arguments: {} })
-          .catch((error: Error) => ({ isError: true, error }));
-        assert.equal(called.isError, true, name);
+        await assert.rejects(client.callTool({ name, arguments: {} }), /not found/, name);
       }
       if (fake) assert.equal(fake.seen.length, 0);
     } finally {

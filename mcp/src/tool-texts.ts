@@ -17,7 +17,11 @@ export const TOOL_TEXTS: Readonly<Record<string, { title: string; description: s
     '에너지 잔량',
     '연료 잔량과 EV 배터리 잔량을 퍼센트로 조회합니다. 차량 동력원에 맞지 않는 항목은 미지원으로 나옵니다. 주행 가능 거리로 환산하지 마세요.',
   ),
-  get_front_left_door_position: text('앞좌측 문 위치', '앞좌측 문 하나의 열림 상태를 조회합니다.'),
+  get_front_left_door_position: {
+    title: '앞좌측 문 위치',
+    description:
+      '앞좌측 문 하나의 열림 상태를 조회합니다. 호출할 때 한 번 읽습니다. ok가 true일 때만 state를 말하고, ok가 false이면 값을 추정하거나 닫힘으로 말하지 마세요.',
+  },
   get_brake_status: text('브레이크 페달', '브레이크 페달을 밟고 있는지 조회합니다.'),
   get_display_units: text('표시 단위', '온도 표시 단위를 조회합니다.'),
   get_glove_box_status: text('글로브박스', '글로브박스 잠금 상태를 조회합니다.'),
@@ -29,11 +33,23 @@ export const TOOL_TEXTS: Readonly<Record<string, { title: string; description: s
     '공조 전원, 에어컨, 오토, 내외기, 제상, 바람 세기와 방향, 설정 온도와 실내 온도(°C)를 조회합니다.',
   ),
   get_light_status: text('조명 상태', '실내등, 독서등, 앰비언트, 전조등, 후미등, 안개등의 스위치와 상태를 조회합니다.'),
-  get_trip_status: text('주행 기록', '주행 거리(km), 트립 주행 시간(분)과 거리(m)를 조회합니다.'),
-  get_safety_status: text('안전 상태', '오일과 워셔액 수준, 에어백, 안전벨트 미착용 경고, 저전력 경고를 조회합니다.'),
-  get_seat_status: text('좌석 상태', '좌석 점유, 안전벨트 체결, 좌석 위치 원시값, 열선과 통풍 단계를 조회합니다.'),
+  get_trip_status: text(
+    '주행 기록',
+    '누적 주행거리계(DISTANCE_DRIVEN, km)와 이번 주행, 누적, 주유 이후의 주행 시간(분)과 거리(m)를 조회합니다. 이번 주행 거리는 TRIP_CURRENT_DRIVING_DISTANCE입니다.',
+  ),
+  get_safety_status: text(
+    '안전 상태',
+    '오일과 워셔액 수준, 에어백, 안전벨트 미착용 경고, 전원 차단 경고를 조회합니다. SEAT_AIRBAG_ENABLED의 true는 API 문서상 해당 좌석 에어백의 문제이며 이름과 반대로 읽힐 수 있고, POWER_DOWN_WARNING_INDICATOR의 true는 API 문서상 엔진 문제입니다. 실행으로 대조하지 않았으므로 단정하지 마세요.',
+  ),
+  get_seat_status: text(
+    '좌석 상태',
+    '좌석 점유, 안전벨트 체결, 좌석 위치 원시값, 열선과 통풍 단계를 조회합니다. 에뮬레이터 대조에서 SEAT_OCCUPANCY는 Console과 반대로 나왔고, SEAT_FORE_AFT_POSITION, SEAT_HEIGHT_POSITION, SEAT_TILT_POSITION, SEAT_BACKREST_ANGLE_POSITION, SEAT_LUMBAR_FORE_AFT_POSITION은 Console 값을 따르지 않았습니다. 원인을 확인하지 못했으므로 이 값을 확정된 사실로 말하지 마세요.',
+  ),
   get_side_mirror_status: text('사이드미러', '사이드미러 열선 단계를 조회합니다.'),
-  get_steering_wheel_status: text('스티어링 휠', '스티어링 휠 열선 단계와 조향각(도)을 조회합니다.'),
+  get_steering_wheel_status: text(
+    '스티어링 휠',
+    '스티어링 휠 열선 단계와 조향각(도)을 조회합니다. 에뮬레이터 대조에서 STEERING_WHEEL_ANGLE은 Console과 부호가 반대로 나왔고 원인을 확인하지 못했으므로 회전 방향을 단정하지 마세요.',
+  ),
   get_tire_status: text(
     '저압 임계값',
     '바퀴별 저압 경고 임계값(kPa)을 조회합니다. 현재 타이어 공기압이 아니므로 현재 공기압으로 말하지 마세요.',

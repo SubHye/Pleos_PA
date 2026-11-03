@@ -305,7 +305,7 @@
       "legacy": false,
       "resultForm": "items",
       "adoption": "adopted",
-      "adoptionNote": "Console과 다른 속성이 있다. 위치 5개는 Console 값이 SDK에 반영되지 않았고, SEAT_OCCUPANCY는 Console 운전석 점유와 SDK ROW_1_LEFT 값이 반대로 나왔다. 원인 미확정.",
+      "adoptionNote": "Console과 다른 속성이 있다. SEAT_FORE_AFT_POSITION, SEAT_HEIGHT_POSITION, SEAT_TILT_POSITION, SEAT_BACKREST_ANGLE_POSITION, SEAT_LUMBAR_FORE_AFT_POSITION은 Console 값이 SDK에 반영되지 않았고, SEAT_OCCUPANCY는 Console 운전석 점유와 SDK ROW_1_LEFT 값이 반대로 나왔다. 원인 미확정.",
       "fixedItems": []
     },
     {
@@ -339,7 +339,7 @@
       "legacy": false,
       "resultForm": "items",
       "adoption": "rejected",
-      "adoptionNote": "에뮬레이터에서 ETCS_VOICE_GUIDANCE_VOLUME이 PROPERTY_UNSUPPORTED로 OK 항목이 없다.",
+      "adoptionNote": "CAR_TOLL이 있던 빌드에서 ETCS_VOICE_GUIDANCE_VOLUME이 PROPERTY_UNSUPPORTED여서 OK 항목이 없었다. 이 도구만 쓰던 CAR_TOLL을 Manifest에서 뺀 뒤로는 PERMISSION_DENIED를 받는다.",
       "fixedItems": []
     },
     {
@@ -355,7 +355,8 @@
       "query": "window_detail_status",
       "legacy": false,
       "resultForm": "items",
-      "adoption": "adopted",
+      "adoption": "undecided",
+      "adoptionNote": "SMART_GLASS_CONFIG에 공개 capability API가 없어 Adapter가 읽지 않으므로 verification이 none이다. 계약상 adopted가 될 수 없다. 나머지 속성의 값은 받았다. 예외 규칙 여부를 상대 개발자와 합의한 뒤 판정한다.",
       "fixedItems": []
     },
     {
@@ -1526,7 +1527,7 @@
       "unit": null,
       "permission": "CAR_TOLL",
       "console": "listed",
-      "verification": "executed"
+      "verification": "none"
     },
     {
       "id": "TURN_SIGNAL_STATE",

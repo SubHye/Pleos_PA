@@ -138,3 +138,11 @@ test('a Console verdict is recorded only for a property the Console map compares
     .map((property) => property.id);
   assert.deepEqual(recorded.sort(), [...compared].sort());
 });
+
+test('adoption changes only with a visible edit here, after a sweep report', () => {
+  const named = (adoption: string) =>
+    catalog.tools.filter((tool) => tool.adoption === adoption).map((tool) => tool.name);
+  assert.deepEqual(named('rejected').sort(), ['get_fuel_economy', 'get_toll_status']);
+  assert.deepEqual(named('undecided'), ['get_window_detail_status']);
+  assert.equal(named('adopted').length, 19);
+});

@@ -36,6 +36,16 @@ test('every catalog tool has wording that warns against guessing', () => {
     assert.match(description, /추정/);
   }
   assert.match(TOOL_TEXTS.get_tire_status.description, /현재 타이어 공기압이 아니/);
+  assert.match(TOOL_TEXTS.get_front_left_door_position.description, /ok가 true/);
+});
+
+test('the wording of an adopted tool names the properties that differed from the Console', () => {
+  for (const tool of catalog.tools.filter((entry) => entry.adoption === 'adopted')) {
+    for (const property of catalog.properties.filter((entry) => entry.query === tool.query)) {
+      if (property.verification !== 'console_mismatch') continue;
+      assert.ok(TOOL_TEXTS[tool.name].description.includes(property.id), `${tool.name} ${property.id}`);
+    }
+  }
 });
 
 test('every tool has an input schema and only read annotations', () => {
