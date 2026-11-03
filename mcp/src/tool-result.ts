@@ -31,7 +31,10 @@ export function toolInputSchema(catalog: Catalog, tool: ToolEntry) {
       .array(z.string().refine((area) => isArea(area, vocabulary)))
       .min(1)
       .refine(unique)
-      .optional();
+      .optional()
+      .describe(
+        `읽을 영역. 값은 ${[...vocabulary].join(', ')} 중 하나이고, 묶음 영역은 ROW_1_LEFT+ROW_1_RIGHT처럼 +로 잇습니다.`,
+      );
   }
   return z.strictObject(shape);
 }

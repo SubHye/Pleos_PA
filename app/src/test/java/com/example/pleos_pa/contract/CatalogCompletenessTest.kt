@@ -1,5 +1,6 @@
 package com.example.pleos_pa.contract
 
+import java.io.File
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -52,6 +53,25 @@ class CatalogCompletenessTest {
     @Test
     fun privatePermissionsAreNotOffered() {
         assertTrue(properties.none { it.getString("permission").startsWith("PRIVATE_") })
+    }
+
+    @Test
+    fun theManifestDeclaresWhatAdoptedToolsReadAndNothingElse() {
+        val adopted =
+            objects(root.getJSONArray("tools"))
+                .filter { it.getString("adoption") == "adopted" }
+                .map { it.getString("query") }
+        val needed =
+            properties
+                .filter { it.getString("query") in adopted }
+                .map { it.getString("permission") }
+                .toSet()
+        val declared =
+            Regex("""pleos\.car\.permission\.(\w+)""")
+                .findAll(File("src/main/AndroidManifest.xml").readText())
+                .map { it.groupValues[1] }
+                .toSet()
+        assertEquals(needed.sorted(), declared.sorted())
     }
 
     @Test

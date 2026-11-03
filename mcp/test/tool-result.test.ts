@@ -1,3 +1,4 @@
+import { TOOL_TEXTS } from '../src/tool-texts.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
@@ -26,6 +27,15 @@ test('accepted tool inputs make requests the bridge contract accepts', () => {
     };
     assert.notEqual(parseRequest(catalog, JSON.stringify(request)), null, name);
   }
+});
+
+test('every catalog tool has wording that warns against guessing', () => {
+  assert.deepEqual(Object.keys(TOOL_TEXTS).sort(), catalog.tools.map((tool) => tool.name).sort());
+  for (const { title, description } of Object.values(TOOL_TEXTS)) {
+    assert.ok(title);
+    assert.match(description, /추정/);
+  }
+  assert.match(TOOL_TEXTS.get_tire_status.description, /현재 타이어 공기압이 아니/);
 });
 
 test('every tool has an input schema and only read annotations', () => {

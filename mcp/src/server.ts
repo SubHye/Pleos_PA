@@ -9,6 +9,7 @@ import type { ReadOptions } from './bridge-client.ts';
 import { loadCatalog } from './contract.ts';
 import type { Catalog, Selection, ToolEntry } from './contract.ts';
 import { TOOL_ANNOTATIONS, toToolResult, toolInputSchema } from './tool-result.ts';
+import { TOOL_TEXTS } from './tool-texts.ts';
 
 export interface AdoptedTool {
   name: string;
@@ -16,11 +17,12 @@ export interface AdoptedTool {
   description: string;
 }
 
-/**
- * Tools shown to clients. The contract lists a tool only after it passes execution verification, and nothing has yet.
- * COM-23 adds entries here, with their descriptions, as COM-20 verifies them.
- */
-export const ADOPTED_TOOLS: readonly AdoptedTool[] = Object.freeze([]);
+/** Tools shown to clients: the ones the catalog records as adopted after execution verification. */
+export function adoptedTools(catalog: Catalog): AdoptedTool[] {
+  return catalog.tools
+    .filter((tool) => tool.adoption === 'adopted')
+    .map((tool) => ({ name: tool.name, ...TOOL_TEXTS[tool.name] }));
+}
 
 type ToolResult = ReturnType<typeof toToolResult>;
 
@@ -52,10 +54,10 @@ interface ServerOptions {
 }
 
 /** Factory for serveStdio, which may call it again for a 2025-era client, so it only registers. */
-export function createServer({ tools = ADOPTED_TOOLS, shutdownSignal, port }: ServerOptions = {}) {
+export function createServer({ tools, shutdownSignal, port }: ServerOptions = {}) {
   const catalog = loadCatalog();
   const server = new McpServer({ name: 'pleos-pa-vehicle', version: '0.1.0' }, { capabilities: { tools: {} } });
-  for (const { name, title, description } of tools) {
+  for (const { name, title, description } of tools ?? adoptedTools(catalog)) {
     const tool = catalog.tools.find((entry) => entry.name === name);
     if (!tool) throw new Error(`Tool is not in the catalog: ${name}`);
     server.registerTool(

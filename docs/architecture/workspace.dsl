@@ -1,8 +1,8 @@
 workspace "Pleos_PA" "Current app, first-phase target and separately identified reference implementation; only what the current system describes has been migrated." {
     model {
-        current = softwareSystem "Pleos_PA - current scaffold" "Android connection app with a loopback Bridge that reads one door property, and a stdio MCP server with no tools." {
-            scaffold = container "Android scaffold APK" "Connection control screen, Foreground Service, /v3/vehicle-read Bridge and a Vehicle SDK boundary covering DOOR_POSITION." "Android / Gradle"
-            currentMcp = container "MCP server" "Lists no tools until execution verification passes." "Node.js / TypeScript / stdio"
+        current = softwareSystem "Pleos_PA - current scaffold" "Android connection app with a loopback Bridge over the Vehicle SDK, and a stdio MCP server listing the adopted read tools." {
+            scaffold = container "Android scaffold APK" "Connection control screen, Foreground Service, /v3/vehicle-read Bridge and a Vehicle SDK boundary covering the catalog." "Android / Gradle"
+            currentMcp = container "MCP server" "Lists the tools the catalog records as adopted after execution verification." "Node.js / TypeScript / stdio"
         }
         client = softwareSystem "Local MCP-capable client" "Reference execution environment; exact AI product integration must be revalidated."
         vehicle = softwareSystem "Pleos Emulator Vehicle Service" "Reference SDK backend; not a live vehicle."
