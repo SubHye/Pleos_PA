@@ -63,7 +63,7 @@ Host/Origin 검사는 프로세스 인증이 아니다. forward가 켜져 있는
 | 표면 | 등록 경로 | 1차 대상 |
 | --- | --- | --- |
 | ChatGPT Desktop 로컬 Codex 호스트 | Settings → MCP servers → Add server → STDIO. 설정은 `~/.codex/config.toml`에 저장되고 Codex CLI와 공유한다. 연결 확인은 composer의 `/mcp` | 대상 |
-| Claude Desktop | `%APPDATA%\Claude\claude_desktop_config.json`의 `mcpServers`에 추가한 뒤 앱을 완전히 재시작 | 대상 |
+| Claude Desktop | 앱이 쓰는 `claude_desktop_config.json`의 `mcpServers`에 추가한 뒤 앱을 완전히 재시작. Windows MSIX 설치본(4.4212.0.0)에서는 `%LOCALAPPDATA%\Claude-Data\claude_<패키지 ID>\`에 있고, `%APPDATA%\Claude`의 같은 이름 파일이 아니다 | 대상 |
 | ChatGPT 웹 커스텀 MCP 앱 | 공개 HTTPS 또는 Secure MCP Tunnel만 가능. 로컬 stdio를 직접 연결하지 못한다 | 대상 아님. 네트워크 공개·터널은 [ADR-0002](../docs/decisions/0002-boundaries-and-transport.md) 범위 밖이라 별도 결정이 필요하다 |
 
 Claude Desktop 설정 예시:
