@@ -6,7 +6,7 @@ Pleos Connect MCP: 평소 쓰는 AI와 연결된 외부 서비스를 Pleos 차�
 
 ## 현재 상태
 
-Android 앱에 연결 제어 화면, Foreground Service, `/v3/vehicle-read` Bridge가 있다. SDK로 읽는 속성은 앞으로 COM-20에서 넓힐 예정이며, 지금은 `DOOR_POSITION`뿐이라 다른 속성을 읽어야 하는 요청은 `503 APP_NOT_READY`를 받는다. [MCP 서버](mcp/README.md)의 `tools/list`는 비어 있으므로 AI에서는 아직 차량 값을 읽을 수 없다. 기존 [PoC](https://github.com/HyeeSeong/pleostest/tree/0d288c8aeab3b2fd08d09a257d894cbfeca793ca)에서 기능 단위로 선택 이전 중이다.
+Android 앱에 연결 제어 화면, Foreground Service, `/v3/vehicle-read` Bridge가 있다. Vehicle Adapter는 카탈로그의 97개 속성을 읽으며, 속성별 실행 결과는 카탈로그의 `verification`에 있다. [MCP 서버](mcp/README.md)의 `tools/list`는 비어 있으므로 AI에서는 아직 차량 값을 읽을 수 없다. 기존 [PoC](https://github.com/HyeeSeong/pleostest/tree/0d288c8aeab3b2fd08d09a257d894cbfeca793ca)에서 기능 단위로 선택 이전 중이다.
 
 ## 시작하기
 
@@ -64,7 +64,7 @@ Bridge는 개발용 연결이고 인증이 없다. 쓰지 않을 때는 앱에�
 | `bridge/BridgeServer.kt`, `bridge/BridgeHttp.kt`, `bridge/StrictRequestSyntax.kt` | `bridge/DoorBridgeServer.kt`, `bridge/DoorBridgeProtocol.kt` |
 | `connection/ConnectionSession.kt` | `bridge/BridgeSession.kt` |
 | `connection/BridgeService.kt`, `MainActivity.kt` | `BridgeService.kt`, `MainActivity.kt` |
-| `vehicle/VehicleReader.kt`, `vehicle/PleosVehicleSdk.kt`, `vehicle/VehicleSdk.kt` | `vehicle/VehicleStatusReader.kt`, `vehicle/PleosVehicleSdk.kt` |
+| `vehicle/VehicleReader.kt`, `vehicle/PleosVehicleSdk.kt`, `vehicle/VehicleProperties.kt`, `vehicle/VehicleSdk.kt` | `vehicle/VehicleStatusReader.kt`, `vehicle/PleosVehicleSdk.kt` |
 
 ## 문서
 

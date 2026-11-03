@@ -5,7 +5,7 @@
 ## 현재 상태
 
 - **`tools/list`는 비어 있다.** 계약은 실행 검증을 통과한 도구만 올리도록 정하고, 아직 통과한 도구가 없다. `src/server.ts`의 `ADOPTED_TOOLS`에 COM-23이 항목을 추가한다. 기본 실행 경로는 인자나 환경 변수로 도구를 받지 않는다.
-- **AI에서 차량 값을 읽을 수 없다.** Android `/v3/vehicle-read` Bridge는 있지만 Vehicle Adapter(COM-20)가 문 위치만 읽고, 채택된 도구가 없다.
+- **AI에서 차량 값을 읽을 수 없다.** Android `/v3/vehicle-read` Bridge와 Vehicle Adapter는 있지만 채택된 도구가 없다.
 - 테스트의 Bridge는 모두 가짜이며 실제 SDK 결과가 아니다.
 - PoC의 ChatGPT·Claude 성공 기록은 이 서버의 기록이 아니다.
 
@@ -49,6 +49,19 @@ adb -s <기기 serial> forward --no-rebind tcp:18765 tcp:18765
 - 제거: `adb -s <기기 serial> forward --remove tcp:18765`
 
 Host/Origin 검사는 프로세스 인증이 아니다. forward가 켜져 있는 동안 이 PC의 다른 로컬 프로세스도 같은 포트로 요청할 수 있다. 쓰지 않을 때는 forward를 제거한다. 외부 네트워크에 공개하지 않는다.
+
+## 전수 실행
+
+`test-support/vehicle-sweep.ts`는 실제 앱의 Bridge로 22개 도구를 직렬로 호출하고, 채택 판정과 `verification` 갱신에 쓰는 보고서를 만든다. 앱에서 연결을 시작하고 `adb forward`를 만든 뒤 실행한다.
+
+```powershell
+node test-support/vehicle-sweep.ts ../build/pleos-emulator-test/<RunId>/sweep.json test-support/vehicle-console-map.json
+```
+
+- `source`가 `pleos_emulator`가 아니면 멈춘다. 재시도하지 않는다.
+- 대조표를 주면 Virtual Console 값을 바꿔 SDK 응답과 비교하고 원래 값으로 되돌린다. Console 페이지가 열려 있어야 하며, `http://127.0.0.1:8088`의 비공식 경로를 쓰므로 에뮬레이터 버전이 바뀌면 다시 확인한다.
+- 대조표에는 Console 쓰기 후 값이 바뀌고 되돌릴 수 있는 항목만 둔다. 주행 거리처럼 줄일 수 없는 값은 넣지 않는다.
+- 보고서는 커밋하지 않는다. 결과는 카탈로그와 PR 본문, SDK 지원 기능표에 옮긴다.
 
 ## 클라이언트 연결
 

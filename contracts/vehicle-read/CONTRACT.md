@@ -12,7 +12,22 @@
 | `source_only` | SDK 2.3.2 소스에서 읽은 경로. 실행하지 않았다 |
 | `sdk_emulator` | Pleos 에뮬레이터에서 관찰한 실제 값. 그 환경에 한정한다 |
 
-카탈로그의 `verification: "none"`은 실행 검증 전이라는 뜻이다. 카탈로그에 있어도 동작을 보장하지 않으며, 실행 검증을 통과한 도구만 `tools/list`에 올린다.
+카탈로그에 있어도 동작을 보장하지 않는다. 실행 결과는 카탈로그에 다음과 같이 기록하고, `adoption`이 `adopted`인 도구만 `tools/list`에 올린다.
+
+| 속성 `verification` | 뜻 |
+| --- | --- |
+| `none` | 실행 근거가 없다. `NOT_READ`나 콜백 없음으로 끝난 속성도 여기 머문다 |
+| `executed` | `verifiedOn` 환경의 실제 SDK로 실행해 status로 분류했다. 값 일치를 뜻하지 않는다 |
+| `console_matched` | Virtual Console 값을 바꿔 SDK 응답과 일치함을 확인했다 |
+| `console_mismatch` | Console 값은 바뀌었지만 SDK 응답이 달랐다 |
+
+| 도구 `adoption` | 뜻 |
+| --- | --- |
+| `undecided` | 판정 전이다 |
+| `adopted` | 모든 속성이 `none`이 아니고, 인자 없는 전체 호출에서 `OK` 항목이 1개 이상이며, 호출이 TIMEOUT 없이 끝났다. `console_mismatch` 속성이 있으면 `adoptionNote`에 원인을 적는다 |
+| `rejected` | 위 조건을 만족하지 못했다. `adoptionNote`에 이유를 적는다. 기존 4개는 이 값을 쓰지 않고, 미달이면 `undecided`로 두고 실패로 보고한다 |
+
+값은 전수 실행 보고서로만 올린다. SDK나 에뮬레이터 버전이 바뀌면 `verifiedOn`을 비우고 전부 `none`과 `undecided`로 되돌리며, 해당 Adapter 호출을 바꾸면 그 속성을 `none`으로 되돌린다.
 
 ## 범위
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { loadCatalog, parseRequest, validateResponse } from '../src/contract.ts';
+import { loadCatalog, parseRequest, propertiesOf, propertyOf, validateResponse } from '../src/contract.ts';
 
 const fixture = (name: string) =>
   JSON.parse(readFileSync(new URL(`../../contracts/vehicle-read/fixtures/${name}.json`, import.meta.url), 'utf8'));
@@ -104,5 +104,26 @@ test('the catalog keeps the existing tools and offers no excluded read', () => {
   for (const entry of catalog.excluded)
     assert.ok(!offered.has(`${entry.api}.${entry.method}/${entry.arity}`), entry.method);
   assert.ok(catalog.excluded.some((entry) => entry.method === 'getVINInfo' && entry.reason === 'identifier'));
-  assert.ok(catalog.properties.every((p) => p.verification === 'none'));
+});
+
+test('verification and adoption records are consistent', () => {
+  const verification = new Set(['none', 'executed', 'console_matched', 'console_mismatch']);
+  for (const property of catalog.properties) assert.ok(verification.has(property.verification), property.id);
+  if (catalog.properties.some((property) => property.verification !== 'none')) assert.ok(catalog.verifiedOn);
+  for (const tool of catalog.tools) {
+    assert.ok(['undecided', 'adopted', 'rejected'].includes(tool.adoption), tool.name);
+    if (tool.adoption === 'rejected') {
+      assert.ok(tool.adoptionNote, tool.name);
+      assert.ok(!tool.legacy, tool.name);
+    }
+    if (tool.adoption !== 'adopted') continue;
+    const properties = [...propertiesOf(catalog, tool)].map((id) => propertyOf(catalog, id)!);
+    assert.ok(
+      properties.every((property) => property.verification !== 'none'),
+      tool.name,
+    );
+    if (properties.some((property) => property.verification === 'console_mismatch')) {
+      assert.ok(tool.adoptionNote, tool.name);
+    }
+  }
 });

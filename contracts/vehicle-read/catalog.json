@@ -1,4 +1,5 @@
 {
+  "verifiedOn": "Pleos_Connect_v2.1.0, API 34, Vehicle Service 2.3.22, Vehicle SDK 2.3.2",
   "sdk": {
     "artifact": "ai.pleos.playground:Vehicle",
     "version": "2.3.2"
@@ -142,6 +143,7 @@
       "query": "door_status",
       "legacy": true,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": [
         {
           "property": "DOOR_POSITION",
@@ -166,6 +168,7 @@
       "query": "window_status",
       "legacy": true,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": [
         {
           "property": "WINDOW_POSITION",
@@ -190,6 +193,7 @@
       "query": "energy_level",
       "legacy": true,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": [
         {
           "property": "FUEL_PERCENT",
@@ -206,6 +210,7 @@
       "query": "front_left_door_position",
       "legacy": true,
       "resultForm": "scalar",
+      "adoption": "undecided",
       "fixedItems": [
         {
           "property": "DOOR_POSITION",
@@ -218,6 +223,7 @@
       "query": "brake_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -225,6 +231,7 @@
       "query": "display_units",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -232,6 +239,7 @@
       "query": "glove_box_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -239,6 +247,7 @@
       "query": "driving_mode_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -246,6 +255,7 @@
       "query": "ev_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -253,6 +263,7 @@
       "query": "fuel_economy",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -260,6 +271,7 @@
       "query": "hvac_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -267,6 +279,7 @@
       "query": "light_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -274,6 +287,7 @@
       "query": "trip_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -281,6 +295,7 @@
       "query": "safety_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -288,6 +303,7 @@
       "query": "seat_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -295,6 +311,7 @@
       "query": "side_mirror_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -302,6 +319,7 @@
       "query": "steering_wheel_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -309,6 +327,7 @@
       "query": "tire_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -316,6 +335,7 @@
       "query": "toll_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -323,6 +343,7 @@
       "query": "turn_signal_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -330,6 +351,7 @@
       "query": "window_detail_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     },
     {
@@ -337,6 +359,7 @@
       "query": "wiper_status",
       "legacy": false,
       "resultForm": "items",
+      "adoption": "undecided",
       "fixedItems": []
     }
   ],
@@ -352,7 +375,7 @@
       "unit": null,
       "permission": "CAR_DRIVE",
       "console": "listed",
-      "verification": "none",
+      "verification": "console_matched",
       "note": "API 문서와 콘솔은 true를 페달이 눌린 상태로 설명한다. 실행 대조 전이다."
     },
     {
@@ -366,7 +389,7 @@
       "unit": null,
       "permission": "CAR_INFO",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "DOOR_LOCK",
@@ -379,7 +402,7 @@
       "unit": null,
       "permission": "CAR_DOORS",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "GLOVE_BOX_LOCK_STATE",
@@ -392,7 +415,7 @@
       "unit": null,
       "permission": "CAR_DOORS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "DOOR_POSITION",
@@ -405,7 +428,7 @@
       "unit": null,
       "permission": "CAR_DOORS",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "CRUISE_CONTROL_TARGET_SPEED",
@@ -418,7 +441,7 @@
       "unit": "m/s",
       "permission": "CAR_DRIVE",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "CRUISE_CONTROL_STATE",
@@ -431,7 +454,7 @@
       "unit": null,
       "permission": "CAR_DRIVE",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "DRIVING_MODE_STATE",
@@ -444,7 +467,7 @@
       "unit": null,
       "permission": "CAR_DRIVE",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "INSTANTANEOUS_EV_EFFICIENCY",
@@ -457,7 +480,7 @@
       "unit": "km/kWh",
       "permission": "CAR_ENERGY",
       "console": "listed",
-      "verification": "none",
+      "verification": "executed",
       "note": "API 문서는 추후 Deprecated 예정이라고 적는다. 채택 전에 다시 확인한다."
     },
     {
@@ -471,7 +494,7 @@
       "unit": "km/kWh",
       "permission": "CAR_ENERGY",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "CUMULATIVE_EV_EFFICIENCY",
@@ -484,7 +507,7 @@
       "unit": "km/kWh",
       "permission": "CAR_ENERGY",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "EV_EFFICIENCY",
@@ -497,7 +520,7 @@
       "unit": "km/kWh",
       "permission": "CAR_ENERGY",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "EV_BATTERY_PERCENT",
@@ -510,7 +533,7 @@
       "unit": "%",
       "permission": "CAR_ENERGY",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "EV_CHARGE_CURRENT_DRAW_LIMIT",
@@ -523,7 +546,7 @@
       "unit": "A",
       "permission": "CAR_ENERGY",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "EV_CHARGE_SWITCH_STATE",
@@ -536,7 +559,7 @@
       "unit": null,
       "permission": "CAR_ENERGY",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "INSTANTANEOUS_FUEL_ECONOMY",
@@ -549,7 +572,7 @@
       "unit": "L/100 km",
       "permission": "CAR_ENERGY",
       "console": "listed",
-      "verification": "none",
+      "verification": "executed",
       "note": "API 문서는 추후 Deprecated 예정이라고 적는다. 채택 전에 다시 확인한다."
     },
     {
@@ -563,7 +586,7 @@
       "unit": "L/100 km",
       "permission": "CAR_ENERGY",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "CUMULATIVE_FUEL_ECONOMY",
@@ -576,7 +599,7 @@
       "unit": "L/100 km",
       "permission": "CAR_ENERGY",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "FUEL_ECONOMY",
@@ -589,7 +612,7 @@
       "unit": "L/100 km",
       "permission": "CAR_ENERGY",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "FUEL_PERCENT",
@@ -602,7 +625,7 @@
       "unit": "%",
       "permission": "CAR_ENERGY",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "HVAC_AC_STATE",
@@ -615,7 +638,7 @@
       "unit": null,
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "HVAC_AUTO_STATE",
@@ -628,7 +651,7 @@
       "unit": null,
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "HVAC_AUTO_RECIRCULATION_STATE",
@@ -641,7 +664,7 @@
       "unit": null,
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "HVAC_DEFROSTER_STATE",
@@ -654,7 +677,7 @@
       "unit": null,
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "HVAC_DUAL_STATE",
@@ -667,7 +690,7 @@
       "unit": null,
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "HVAC_FAN_DIRECTION",
@@ -680,7 +703,7 @@
       "unit": null,
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "HVAC_FAN_SPEED",
@@ -693,7 +716,7 @@
       "unit": null,
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "HVAC_MAX_AC_STATE",
@@ -706,7 +729,7 @@
       "unit": null,
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "HVAC_MAX_DEFROST_STATE",
@@ -719,7 +742,7 @@
       "unit": null,
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "HVAC_POWER_STATE",
@@ -732,7 +755,7 @@
       "unit": null,
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "HVAC_RECIRCULATION_STATE",
@@ -745,7 +768,7 @@
       "unit": null,
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "HVAC_AIR_CLEANER_STATE",
@@ -758,7 +781,7 @@
       "unit": null,
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "HVAC_TEMPERATURE",
@@ -771,7 +794,7 @@
       "unit": "°C",
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none",
+      "verification": "console_matched",
       "fixedArgs": {
         "unit": "CELSIUS"
       },
@@ -788,7 +811,7 @@
       "unit": "°C",
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "READING_LIGHT_SWITCH",
@@ -801,7 +824,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "READING_LIGHT_STATE",
@@ -814,7 +837,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "CABIN_LIGHT_SWITCH",
@@ -827,7 +850,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "CABIN_LIGHT_STATE",
@@ -840,7 +863,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "HIGH_BEAM_LIGHT_STATE",
@@ -853,7 +876,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "HIGH_BEAM_LIGHT_SWITCH",
@@ -866,7 +889,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "LOW_BEAM_LIGHT_SWITCH",
@@ -879,7 +902,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "LOW_BEAM_LIGHT_STATE",
@@ -892,7 +915,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "TAIL_LAMP_LIGHT_STATE",
@@ -905,7 +928,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "TAIL_LAMP_LIGHT_SWITCH",
@@ -918,7 +941,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "FRONT_FOG_LIGHT_STATE",
@@ -931,7 +954,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "FRONT_FOG_LIGHT_SWITCH",
@@ -944,7 +967,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "REAR_FOG_LIGHT_STATE",
@@ -957,7 +980,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "REAR_FOG_LIGHT_SWITCH",
@@ -970,7 +993,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "AMBIENT_LIGHT_BRIGHTNESS",
@@ -983,7 +1006,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "AMBIENT_LIGHT_BRIGHTNESS_COLOR",
@@ -996,7 +1019,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none",
+      "verification": "executed",
       "note": "API 문서와 콘솔은 32비트 ARGB로 설명하며, API 문서는 알파를 0xFF 고정으로 적는다. 밝기 값이 아니다."
     },
     {
@@ -1010,7 +1033,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "AMBIENT_LIGHT_STATE",
@@ -1023,7 +1046,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "AMBIENT_COLOR_AUTO_BY_DRIVE_MODE_ENABLED",
@@ -1036,7 +1059,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "DISTANCE_DRIVEN",
@@ -1049,7 +1072,7 @@
       "unit": "km",
       "permission": "CAR_DRIVE",
       "console": "listed",
-      "verification": "none",
+      "verification": "executed",
       "note": "API 문서는 현재 주행거리계 값으로 설명한다. 이번 주행 거리는 TRIP_CURRENT_DRIVING_DISTANCE다."
     },
     {
@@ -1063,7 +1086,7 @@
       "unit": "min",
       "permission": "CAR_DRIVE",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "TRIP_CUMULATIVE_DRIVING_TIME",
@@ -1076,7 +1099,7 @@
       "unit": "min",
       "permission": "CAR_DRIVE",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "TRIP_SINCE_REFILL_DRIVING_TIME",
@@ -1089,7 +1112,7 @@
       "unit": "min",
       "permission": "CAR_DRIVE",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "TRIP_CURRENT_DRIVING_DISTANCE",
@@ -1102,7 +1125,7 @@
       "unit": "m",
       "permission": "CAR_DRIVE",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "TRIP_CUMULATIVE_DRIVING_DISTANCE",
@@ -1115,7 +1138,7 @@
       "unit": "m",
       "permission": "CAR_DRIVE",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "TRIP_SINCE_REFILL_DRIVING_DISTANCE",
@@ -1128,7 +1151,7 @@
       "unit": "m",
       "permission": "CAR_DRIVE",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "ENGINE_OIL_LEVEL_STATE",
@@ -1141,7 +1164,7 @@
       "unit": null,
       "permission": "CAR_SAFETY",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "BRAKE_FLUID_LEVEL_STATE",
@@ -1154,7 +1177,7 @@
       "unit": null,
       "permission": "CAR_SAFETY",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "TRANSMISSION_OIL_LEVEL_STATE",
@@ -1167,7 +1190,7 @@
       "unit": null,
       "permission": "CAR_SAFETY",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "LOW_WASHER_FLUID_WARNING",
@@ -1180,7 +1203,7 @@
       "unit": null,
       "permission": "CAR_SAFETY",
       "console": "listed",
-      "verification": "none",
+      "verification": "executed",
       "note": "API 문서는 true를 워셔액 문제로 설명한다. 실행 대조 전이다."
     },
     {
@@ -1194,7 +1217,7 @@
       "unit": null,
       "permission": "CAR_SAFETY",
       "console": "listed",
-      "verification": "none",
+      "verification": "executed",
       "note": "API 문서는 true를 에어백 전개로 설명한다. 실행 대조 전이다."
     },
     {
@@ -1208,7 +1231,7 @@
       "unit": null,
       "permission": "CAR_SAFETY",
       "console": "listed",
-      "verification": "none",
+      "verification": "executed",
       "note": "API 문서는 true를 엔진 문제로 설명한다. 실행 대조 전이다."
     },
     {
@@ -1222,7 +1245,7 @@
       "unit": null,
       "permission": "CAR_SAFETY",
       "console": "listed",
-      "verification": "none",
+      "verification": "executed",
       "note": "API 문서와 콘솔은 true를 해당 좌석 에어백의 문제로 설명한다. 이름과 반대로 읽힐 수 있으며 실행 대조 전이다(OQ-13)."
     },
     {
@@ -1236,7 +1259,7 @@
       "unit": null,
       "permission": "CAR_SAFETY",
       "console": "listed",
-      "verification": "none",
+      "verification": "executed",
       "note": "API 문서는 true를 안전벨트 미착용으로 설명한다. 실행 대조 전이다."
     },
     {
@@ -1250,7 +1273,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_mismatch"
     },
     {
       "id": "SEAT_HEADREST_FORE_AFT_POSITION",
@@ -1263,7 +1286,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "SEAT_HEADREST_HEIGHT_AFT_POSITION",
@@ -1276,7 +1299,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "SEAT_HEIGHT_POSITION",
@@ -1289,7 +1312,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_mismatch"
     },
     {
       "id": "SEAT_LUMBAR_FORE_AFT_POSITION",
@@ -1302,7 +1325,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_mismatch"
     },
     {
       "id": "SEAT_LUMBAR_SIDE_SUPPORT_POSITION",
@@ -1315,7 +1338,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "SEAT_TILT_POSITION",
@@ -1328,7 +1351,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_mismatch"
     },
     {
       "id": "SEAT_DEPTH_POSITION",
@@ -1341,7 +1364,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "SEAT_FORE_AFT_POSITION",
@@ -1354,7 +1377,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_mismatch"
     },
     {
       "id": "SEAT_HEADREST_ANGLE_POSITION",
@@ -1367,7 +1390,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "SEAT_BACKREST_ANGLE_POSITION",
@@ -1380,7 +1403,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_mismatch"
     },
     {
       "id": "SEAT_BELT_BUCKLED_STATE",
@@ -1393,7 +1416,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "SEAT_BELT_HEIGHT_POSITION",
@@ -1406,7 +1429,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "HVAC_SEAT_TEMPERATURE",
@@ -1419,7 +1442,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "HVAC_SEAT_VENTILATION_STATE",
@@ -1432,7 +1455,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "HVAC_SIDE_MIRROR_HEAT_STATE",
@@ -1445,7 +1468,7 @@
       "unit": null,
       "permission": "CAR_MIRRORS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "HVAC_STEERING_WHEEL_HEAT_STATE",
@@ -1458,7 +1481,7 @@
       "unit": null,
       "permission": "CAR_CLIMATE",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "STEERING_WHEEL_ANGLE",
@@ -1471,7 +1494,7 @@
       "unit": "deg",
       "permission": "CAR_DRIVE",
       "console": "listed",
-      "verification": "none",
+      "verification": "console_mismatch",
       "note": "API 문서는 앞바퀴 조향각으로 설명하며 왼쪽이 음수다. 핸들 회전각이 아니다."
     },
     {
@@ -1485,7 +1508,7 @@
       "unit": "kPa",
       "permission": "CAR_SAFETY",
       "console": "listed",
-      "verification": "none",
+      "verification": "executed",
       "note": "SDK 소스와 API 문서는 저압 임계값(kPa), 콘솔(2026-11-01)은 낮은 공기압 상태로 설명한다. 현재 공기압으로 표현하지 않는다."
     },
     {
@@ -1499,7 +1522,7 @@
       "unit": null,
       "permission": "CAR_TOLL",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "TURN_SIGNAL_STATE",
@@ -1512,7 +1535,7 @@
       "unit": null,
       "permission": "CAR_LIGHTS",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "WINDOW_LOCK_STATE",
@@ -1525,7 +1548,7 @@
       "unit": null,
       "permission": "CAR_WINDOWS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "WINDOW_POSITION",
@@ -1538,7 +1561,7 @@
       "unit": null,
       "permission": "CAR_WINDOWS",
       "console": "listed",
-      "verification": "none"
+      "verification": "console_matched"
     },
     {
       "id": "WINDOW_BLIND_POSITION",
@@ -1551,7 +1574,7 @@
       "unit": null,
       "permission": "CAR_WINDOWS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "SMART_GLASS_STATE",
@@ -1564,7 +1587,7 @@
       "unit": null,
       "permission": "CAR_WINDOWS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "SMART_GLASS_CONFIG",
@@ -1577,7 +1600,7 @@
       "unit": null,
       "permission": "CAR_WINDOWS",
       "console": "not_listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "SMART_GLASS_LEVEL",
@@ -1590,7 +1613,7 @@
       "unit": null,
       "permission": "CAR_WINDOWS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "WIPER_STATE",
@@ -1603,7 +1626,7 @@
       "unit": null,
       "permission": "CAR_WINDOWS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     },
     {
       "id": "WIPER_SWITCH",
@@ -1616,7 +1639,7 @@
       "unit": null,
       "permission": "CAR_WINDOWS",
       "console": "listed",
-      "verification": "none"
+      "verification": "executed"
     }
   ],
   "excluded": [
