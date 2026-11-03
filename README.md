@@ -6,7 +6,7 @@ Pleos Connect MCP: 평소 쓰는 AI와 연결된 외부 서비스를 Pleos 차�
 
 ## 현재 상태
 
-Android Car Empty 프로젝트에 차량 조회 [계약](contracts/vehicle-read/CONTRACT.md), 양쪽 계약 테스트, 도구가 없는 [stdio MCP 서버](mcp/README.md)가 있다. Activity, Foreground Service/Bridge, Vehicle Adapter는 아직 없으므로 차량 값을 읽을 수 없다. 빌드되는 APK가 사용자 기능을 제공한다는 뜻은 아니다. 기존 [PoC](https://github.com/HyeeSeong/pleostest/tree/0d288c8aeab3b2fd08d09a257d894cbfeca793ca)에서 기능 단위로 선택 이전할 예정이다.
+Android Car Empty 프로젝트에 차량 조회 [계약](contracts/vehicle-read/CONTRACT.md), 양쪽 계약 테스트, 도구가 없는 [stdio MCP 서버](mcp/README.md)가 있다. COM-9 실행 경계 프로토타입과 debug 전용 UX 관찰·앱/알림 중지 진단 Activity가 있다. Foreground Service/Bridge, Vehicle Adapter, 신뢰된 승인 UI는 아직 없어 MCP에서 차량 값을 읽거나 내비를 변경할 수 없다. 진단의 원시 UX 관찰은 정차·운전자 영역의 증명이 아니며 내비 변경은 기본 차단된다. 빌드되는 APK가 사용자 기능을 제공한다는 뜻은 아니다. 기존 [PoC](https://github.com/HyeeSeong/pleostest/tree/0d288c8aeab3b2fd08d09a257d894cbfeca793ca)에서 기능 단위로 선택 이전할 예정이다.
 
 ## 시작하기
 

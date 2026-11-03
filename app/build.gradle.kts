@@ -3,6 +3,7 @@ plugins {
 }
 
 android {
+    useLibrary("android.car", false)
     namespace = "com.example.pleos_pa"
     compileSdk {
         version = release(37)
