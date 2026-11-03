@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { readVehicle } from '../src/bridge-client.ts';
 import { loadCatalog } from '../src/contract.ts';
-import { ADOPTED_TOOLS, createServer, runTool } from '../src/server.ts';
+import { createServer, runTool } from '../src/server.ts';
 import { energyReply, json, startBridge, waitFor } from '../test-support/fake-bridge.ts';
 
 const catalog = loadCatalog();
@@ -34,15 +34,18 @@ test('a read sends one POST to the catalog path and returns the validated reply'
 });
 
 test('selectors reach the bridge and also bound the reply', async () => {
-  const fake = await startBridge((body, res) =>
-    json(res, 200, { ...energyReply(body.requestId), query: 'seat_status', outcome: 'COMPLETE' }),
+  const outside = fixture('responses').find(
+    (entry: { name: string }) => entry.name === 'property outside the selection',
   );
+  const fake = await startBridge((request, res) => json(res, 200, { ...outside.body, requestId: request.requestId }));
   try {
-    const selection = { properties: ['SEAT_OCCUPANCY'], areas: ['ROW_1_LEFT'] };
-    const { result } = await readVehicle(catalog, 'seat_status', { port: fake.port, selection });
+    const { query, selection } = outside;
+    const bounded = await readVehicle(catalog, query, { port: fake.port, selection });
     assert.deepEqual(fake.seen[0].body.properties, selection.properties);
-    assert.deepEqual(fake.seen[0].body.areas, selection.areas);
-    assert.deepEqual(result, pcFailure('INVALID_RESPONSE'));
+    assert.deepEqual(bounded.result, pcFailure('INVALID_RESPONSE'));
+
+    const unbounded = await readVehicle(catalog, query, { port: fake.port });
+    assert.equal(unbounded.result.ok, true, 'the same reply is valid without the selection');
   } finally {
     await fake.close();
   }
@@ -92,16 +95,26 @@ test('a reply over the size limit or with another content type is not used', asy
   }
 });
 
-test('an unreachable bridge is ANDROID_UNREACHABLE and is not retried', async () => {
+test('an unreachable bridge is ANDROID_UNREACHABLE', async () => {
   const fake = await startBridge(() => {});
   const { port } = fake;
   await fake.close();
-  const { requestId, result } = await readVehicle(catalog, 'energy_level', { port });
+  const { result } = await readVehicle(catalog, 'energy_level', { port });
   assert.deepEqual(result, pcFailure('ANDROID_UNREACHABLE'));
-  assert.ok(requestId);
 });
 
-/** Every order of the seat areas that isArea accepts, as a pool to build a body of an exact size from. */
+test('a dropped connection is not retried', async () => {
+  const fake = await startBridge((_body, res) => res.destroy());
+  try {
+    const { result } = await readVehicle(catalog, 'energy_level', { port: fake.port });
+    assert.deepEqual(result, pcFailure('ANDROID_UNREACHABLE'));
+    assert.equal(fake.seen.length, 1);
+  } finally {
+    await fake.close();
+  }
+});
+
+/** Every combination of seat areas that isArea accepts, as a pool to build a body of an exact size from. */
 function seatAreaPool() {
   const areas = catalog.areas.SeatArea;
   const pool: string[] = [];
@@ -266,7 +279,6 @@ test('presentation counts against the same deadline as the fetch', async () => {
 });
 
 test('the adopted tool table only names catalog tools', () => {
-  const names = new Set(catalog.tools.map((tool) => tool.name));
-  for (const tool of ADOPTED_TOOLS) assert.ok(names.has(tool.name), tool.name);
+  assert.doesNotThrow(() => createServer());
   assert.throws(() => createServer({ tools: [{ name: 'get_unknown', title: 't', description: 'd' }] }), /get_unknown/);
 });

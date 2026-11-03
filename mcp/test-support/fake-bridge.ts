@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import type { ServerResponse } from 'node:http';
 
-export interface SeenRequest {
+interface SeenRequest {
   raw: string;
   body: Record<string, any>;
   closed: boolean;
@@ -12,7 +12,7 @@ export interface SeenRequest {
   url: string | undefined;
 }
 
-export type Reply = (body: Record<string, any>, res: ServerResponse) => void;
+type Reply = (body: Record<string, any>, res: ServerResponse) => void;
 
 export async function startBridge(reply: Reply, listenPort = 0) {
   const seen: SeenRequest[] = [];
@@ -61,7 +61,6 @@ export function json(res: ServerResponse, status: number, value: unknown, conten
   res.end(body);
 }
 
-/** Polls instead of sleeping for a fixed time, so a slow machine only makes the test slower. */
 export async function waitFor(condition: () => boolean, timeoutMs = 3_000) {
   const started = performance.now();
   while (!condition()) {
@@ -72,7 +71,6 @@ export async function waitFor(condition: () => boolean, timeoutMs = 3_000) {
 
 const capability = { access: 'READ', matchingAreas: null, reportedAreas: null, minimum: null, maximum: null };
 
-/** A complete energy_level reply for the request it answers. */
 export const energyReply = (requestId: string) => ({
   requestId,
   query: 'energy_level',

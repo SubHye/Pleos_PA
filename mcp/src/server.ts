@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { McpServer } from '@modelcontextprotocol/server';
 import { serveStdio } from '@modelcontextprotocol/server/stdio';
 import { pcFailure, readVehicle } from './bridge-client.ts';
+import type { ReadOptions } from './bridge-client.ts';
 import { loadCatalog } from './contract.ts';
 import type { Catalog, Selection, ToolEntry } from './contract.ts';
 import { TOOL_ANNOTATIONS, toToolResult, toolInputSchema } from './tool-result.ts';
@@ -23,15 +24,10 @@ export const ADOPTED_TOOLS: readonly AdoptedTool[] = Object.freeze([]);
 
 type ToolResult = ReturnType<typeof toToolResult>;
 
-interface RunOptions {
-  signal?: AbortSignal;
-  port?: number;
-  deadlineMs?: number;
-  now?: () => number;
+interface RunOptions extends Omit<ReadOptions, 'selection' | 'startedAt'> {
   render?: (result: ToolResult) => ToolResult;
 }
 
-/** Runs one call under a single deadline that starts here and also covers building the result. */
 export async function runTool(catalog: Catalog, tool: ToolEntry, selection: Selection, options: RunOptions = {}) {
   const { signal, port, deadlineMs = catalog.bridge.deadlineMs, now = () => performance.now() } = options;
   const { render = (value) => value } = options;
@@ -74,7 +70,6 @@ export function createServer({ tools = ADOPTED_TOOLS, shutdownSignal, port }: Se
   return server;
 }
 
-/** Serves over stdio until stdin ends or the process is told to stop. */
 export function serve(options: Omit<ServerOptions, 'shutdownSignal'> = {}) {
   const shutdown = new AbortController();
   const handle = serveStdio(() => createServer({ ...options, shutdownSignal: shutdown.signal }), {

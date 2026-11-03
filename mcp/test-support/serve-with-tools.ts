@@ -1,5 +1,4 @@
 // Test-only stdio server: `node serve-with-tools.ts <bridge port> <tool name>...`.
-// The production entry point takes no tool list, so this file is the only way to run src/server.ts with tools today.
 import { serve } from '../src/server.ts';
 
 const [port, ...names] = process.argv.slice(2);

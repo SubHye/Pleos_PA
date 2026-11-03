@@ -21,10 +21,6 @@ type Reply = { status: number | undefined; text: string } | { failure: 'aborted'
 
 export const pcFailure = (code: string): BridgeFailure => ({ ok: false, code, origin: 'pc' });
 
-/**
- * Reads one query. The deadline starts at `startedAt` (the handler entry). `port`, `deadlineMs`, `now` and `startedAt`
- * come from the server configuration and tests, never from model arguments.
- */
 export async function readVehicle(
   catalog: Catalog,
   query: string,
@@ -38,7 +34,6 @@ export async function readVehicle(
   const remainingMs = Math.floor(deadlineMs - (now() - startedAt));
   if (remainingMs < 1) return finish(pcFailure('TIMEOUT'));
 
-  // Checked on the exact bytes that would be sent, so the limit never depends on an estimate of the envelope.
   const payload = JSON.stringify({ requestId, remainingMs, query, ...selection });
   if (parseRequest(catalog, payload) === null) return finish(pcFailure('INVALID_REQUEST'));
 
