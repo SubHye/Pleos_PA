@@ -1,18 +1,13 @@
 package com.example.pleos_pa.vehicle
 
 import ai.pleos.playground.vehicle.Vehicle
-import ai.pleos.playground.vehicle.api.model.area.DoorArea
-import ai.pleos.playground.vehicle.api.model.capability.AreaBounds
-import ai.pleos.playground.vehicle.api.model.capability.CapabilityConfig
-import ai.pleos.playground.vehicle.constant.area.DoorValue
 import android.content.Context
 import android.util.Log
 import java.util.concurrent.Executors
 
 /**
  * One Vehicle instance on one worker thread, so SDK calls stay off the UI thread and release comes
- * after every call that was issued. This build reads the single door property the connection
- * lifecycle needs; COM-20 adds the rest of the catalog.
+ * after every call that was issued.
  */
 class PleosVehicleSdk(context: Context) : VehicleSdk {
     private val context = context.applicationContext
@@ -22,7 +17,7 @@ class PleosVehicleSdk(context: Context) : VehicleSdk {
     private var initialized = false
     @Volatile private var closing = false
 
-    override fun supports(property: String) = property == DOOR_POSITION
+    override fun supports(property: String) = property in SDK_PROPERTIES
 
     override fun checkCapability(
         property: String,
@@ -31,25 +26,7 @@ class PleosVehicleSdk(context: Context) : VehicleSdk {
         failed: (Exception) -> Unit,
     ) =
         submit(active, failed) { connected ->
-            connected
-                .getDoor()
-                .checkDoorPositionCapabilities(
-                    { config: CapabilityConfig, areas: Map<DoorArea, AreaBounds<Int>> ->
-                        complete(
-                            PropertyCapability(
-                                config.accessType.name,
-                                areas.map { (area, bounds) ->
-                                    ReportedArea(
-                                        area.values.joinToString("+") { it.name },
-                                        bounds.minValue.toDouble(),
-                                        bounds.maxValue.toDouble(),
-                                    )
-                                },
-                            )
-                        )
-                    },
-                    failed,
-                )
+            SDK_PROPERTIES.getValue(property).checkCapability(connected, complete, failed)
         }
 
     override fun read(
@@ -61,11 +38,11 @@ class PleosVehicleSdk(context: Context) : VehicleSdk {
     ) {
         val failedNow: (Exception) -> Unit = { failed(it, System.currentTimeMillis()) }
         submit(active, failedNow) { connected ->
-            connected
-                .getDoor()
-                .getCurrentDoorPosition(
-                    doorArea(area!!),
-                    { value: Int? -> complete(value, System.currentTimeMillis()) },
+            SDK_PROPERTIES.getValue(property)
+                .read(
+                    connected,
+                    area,
+                    { value -> complete(contractValue(value), System.currentTimeMillis()) },
                     failedNow,
                 )
         }
@@ -86,9 +63,6 @@ class PleosVehicleSdk(context: Context) : VehicleSdk {
         }
         worker.shutdown()
     }
-
-    private fun doorArea(area: String) =
-        DoorArea(*area.split('+').map(DoorValue::valueOf).toTypedArray())
 
     private fun submit(
         active: () -> Boolean,
@@ -122,6 +96,5 @@ class PleosVehicleSdk(context: Context) : VehicleSdk {
 
     private companion object {
         const val TAG = "PleosVehicleSdk"
-        const val DOOR_POSITION = "DOOR_POSITION"
     }
 }
