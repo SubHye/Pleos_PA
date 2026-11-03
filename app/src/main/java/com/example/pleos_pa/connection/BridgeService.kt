@@ -105,8 +105,8 @@ class BridgeService : Service() {
 
     override fun onDestroy() {
         destroyed = true
-        controller.stop()
-        main.post { ConnectionStatusBoard.publish(ConnectionStatus.Stopped) }
+        // An ended connection keeps its final status, which may be a failure the screen must show.
+        if (controller.active) controller.stop()
         super.onDestroy()
     }
 

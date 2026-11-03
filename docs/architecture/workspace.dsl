@@ -1,8 +1,8 @@
 workspace "Pleos_PA" "Current scaffold, first-phase target and separately identified reference implementation; no migration claimed." {
     model {
-        current = softwareSystem "Pleos_PA - current scaffold" "Android contract code and a stdio MCP server with no tools; no Activity, SDK runtime or Bridge." {
-            scaffold = container "Android scaffold APK" "App module with contract code only; no user workflow implemented." "Android / Gradle"
-            currentMcp = container "MCP server" "Lists no tools until execution verification passes; no Android Bridge to reach yet." "Node.js / TypeScript / stdio"
+        current = softwareSystem "Pleos_PA - current scaffold" "Android connection app with a loopback Bridge that reads one door property, and a stdio MCP server with no tools." {
+            scaffold = container "Android scaffold APK" "Connection control screen, Foreground Service, /v3/vehicle-read Bridge and a Vehicle SDK boundary covering DOOR_POSITION." "Android / Gradle"
+            currentMcp = container "MCP server" "Lists no tools until execution verification passes." "Node.js / TypeScript / stdio"
         }
         client = softwareSystem "Local MCP-capable client" "Reference execution environment; exact AI product integration must be revalidated."
         vehicle = softwareSystem "Pleos Emulator Vehicle Service" "Reference SDK backend; not a live vehicle."

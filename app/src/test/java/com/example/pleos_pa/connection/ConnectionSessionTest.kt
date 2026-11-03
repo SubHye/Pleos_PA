@@ -4,6 +4,7 @@ import com.example.pleos_pa.bridge.BridgeEndpoint
 import java.io.IOException
 import java.util.concurrent.Executor
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -141,6 +142,19 @@ class ConnectionSessionTest {
         assertEquals(1, steps.count { it == "reader1" })
         release()
         assertEquals(1, ended.size)
+    }
+
+    @Test
+    fun aFailedConnectionIsNoLongerActive() {
+        bindFails = true
+        controller.start()
+        assertTrue(controller.active)
+
+        finishBind()
+        assertTrue(controller.active)
+
+        release()
+        assertFalse(controller.active)
     }
 
     @Test

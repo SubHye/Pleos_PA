@@ -91,6 +91,10 @@ class ConnectionController(
     private var tearingDown = false
     private var resumeAfterTeardown = false
 
+    /** True until the connection has fully ended. */
+    val active: Boolean
+        get() = current != null
+
     fun start() {
         if (tearingDown) {
             resumeAfterTeardown = true
