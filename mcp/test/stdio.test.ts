@@ -221,3 +221,62 @@ test('stdout carries only MCP JSON-RPC, stderr stays empty and stdin EOF ends th
   assert.deepEqual(JSON.parse(lines.find((line) => line.includes('"id":2'))!).result.tools, []);
   assert.equal(stderr.trim(), '');
 });
+
+test('a tool table naming an unknown tool stops the process before any client connects', async () => {
+  const child = spawn(process.execPath, [WITH_TOOLS, '18765', 'get_unknown'], {
+    env: BASE_ENV,
+    stdio: ['pipe', 'pipe', 'pipe'],
+  });
+  let stdout = '';
+  let stderr = '';
+  child.stdout.on('data', (chunk) => {
+    stdout += chunk;
+  });
+  child.stderr.on('data', (chunk) => {
+    stderr += chunk;
+  });
+  const exited = new Promise((resolve) => child.once('exit', (code) => resolve(code)));
+  const code = await Promise.race([exited, new Promise((resolve) => setTimeout(() => resolve('hung'), 3_000))]);
+  if (code === 'hung') child.kill();
+  assert.equal(code, 1);
+  assert.equal(stdout, '');
+  assert.equal(stderr.trim(), 'pleos-pa-mcp: INVALID_TOOL_TABLE');
+});
+
+test('stdin EOF during a tool call ends the request and the process without leaking to stdout or stderr', async () => {
+  const fake = await startBridge(() => {});
+  const child = spawn(process.execPath, [WITH_TOOLS, String(fake.port), 'get_energy_level'], {
+    env: BASE_ENV,
+    stdio: ['pipe', 'pipe', 'pipe'],
+  });
+  let stdout = '';
+  let stderr = '';
+  child.stdout.on('data', (chunk) => {
+    stdout += chunk;
+  });
+  child.stderr.on('data', (chunk) => {
+    stderr += chunk;
+  });
+  const send = (message: unknown) => child.stdin.write(`${JSON.stringify(message)}\n`);
+  try {
+    send({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'raw', version: '0' } },
+    });
+    send({ jsonrpc: '2.0', method: 'notifications/initialized' });
+    send({ jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'get_energy_level', arguments: {} } });
+    await waitFor(() => fake.seen.length === 1);
+    const exited = new Promise((resolve) => child.once('exit', (code) => resolve(code)));
+    child.stdin.end();
+    const code = await Promise.race([exited, new Promise((resolve) => setTimeout(() => resolve('hung'), 1_500))]);
+    if (code === 'hung') child.kill();
+    assert.equal(code, 0);
+    await waitFor(() => fake.seen[0].closed);
+    for (const line of stdout.trim().split('\n')) assert.equal(JSON.parse(line).jsonrpc, '2.0');
+    assert.equal(stderr.trim(), '');
+  } finally {
+    await fake.close();
+  }
+});

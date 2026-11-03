@@ -8,6 +8,9 @@ interface SeenRequest {
   body: Record<string, any>;
   closed: boolean;
   authorization: string | undefined;
+  contentType: string | undefined;
+  host: string | undefined;
+  origin: string | undefined;
   method: string | undefined;
   url: string | undefined;
 }
@@ -27,6 +30,9 @@ export async function startBridge(reply: Reply, listenPort = 0) {
         body: JSON.parse(raw),
         closed: false,
         authorization: req.headers.authorization,
+        contentType: req.headers['content-type'],
+        host: req.headers.host,
+        origin: req.headers.origin,
         method: req.method,
         url: req.url,
       };

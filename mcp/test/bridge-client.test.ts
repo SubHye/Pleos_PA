@@ -1,6 +1,8 @@
 // Logic tests without an MCP transport. The fake bridge makes every result here mock evidence.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { createServer as createTcpServer } from 'node:net';
+import type { AddressInfo } from 'node:net';
 import { test } from 'node:test';
 import { readVehicle } from '../src/bridge-client.ts';
 import { loadCatalog } from '../src/contract.ts';
@@ -25,6 +27,9 @@ test('a read sends one POST to the catalog path and returns the validated reply'
     assert.equal(seen.method, 'POST');
     assert.equal(seen.url, catalog.bridge.path);
     assert.equal(seen.authorization, undefined);
+    assert.equal(seen.contentType, 'application/json');
+    assert.equal(seen.host, `127.0.0.1:${fake.port}`);
+    assert.equal(seen.origin, undefined);
     assert.deepEqual(Object.keys(seen.body).sort(), ['query', 'remainingMs', 'requestId']);
     assert.equal(seen.body.requestId, requestId);
     assert.ok(seen.body.remainingMs >= 1 && seen.body.remainingMs <= catalog.bridge.deadlineMs);
@@ -281,4 +286,34 @@ test('presentation counts against the same deadline as the fetch', async () => {
 test('the adopted tool table only names catalog tools', () => {
   assert.doesNotThrow(() => createServer());
   assert.throws(() => createServer({ tools: [{ name: 'get_unknown', title: 't', description: 'd' }] }), /get_unknown/);
+});
+
+test('a reply that breaks off after its headers is not used', async () => {
+  const fake = await startBridge((_body, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Length': 1000 });
+    res.write('{');
+    setImmediate(() => res.destroy());
+  });
+  try {
+    const { result } = await readVehicle(catalog, 'energy_level', { port: fake.port });
+    assert.deepEqual(result, pcFailure('INVALID_RESPONSE'));
+    assert.equal(fake.seen.length, 1);
+  } finally {
+    await fake.close();
+  }
+});
+
+test('something other than HTTP on the bridge port is INVALID_RESPONSE, not unreachable', async () => {
+  const server = createTcpServer((socket) => {
+    socket.resume();
+    socket.end('SSH-2.0-not-http\r\n');
+  });
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  try {
+    const { port } = server.address() as AddressInfo;
+    const { result } = await readVehicle(catalog, 'energy_level', { port });
+    assert.deepEqual(result, pcFailure('INVALID_RESPONSE'));
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
 });

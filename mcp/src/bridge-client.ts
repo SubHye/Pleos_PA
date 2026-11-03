@@ -97,7 +97,10 @@ function exchange(catalog: Catalog, port: number, payload: string, signal: Abort
         res.on('error', () => resolve({ failure: signal.aborted ? 'aborted' : 'invalid' }));
       },
     );
-    req.on('error', () => resolve({ failure: signal.aborted ? 'aborted' : 'unreachable' }));
+    req.on('error', (error: NodeJS.ErrnoException) => {
+      if (signal.aborted) resolve({ failure: 'aborted' });
+      else resolve({ failure: error.code?.startsWith('HPE_') ? 'invalid' : 'unreachable' });
+    });
     req.end(payload);
   });
 }

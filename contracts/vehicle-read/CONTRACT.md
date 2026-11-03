@@ -47,6 +47,8 @@
 
 주소·경로·크기 한도는 카탈로그 `bridge`를 따른다. loopback 전용이며 Host/Origin 검사는 프로세스 인증이 아니다.
 
+요청과 모든 응답(200과 호출 단위 실패)의 `Content-Type`은 `application/json`이고 `charset=utf-8`만 덧붙일 수 있다. Node는 다른 형식의 응답을 상태 코드와 관계없이 쓰지 않는다.
+
 ### 요청
 
 ```json
@@ -110,7 +112,7 @@
 | 403 | `{ok:false, code:"REQUEST_FORBIDDEN"}` | `origin:"android"` |
 | 보내기 전 요청 본문이 계약을 어김(실제 본문 기준 `maxRequestBytes` 초과 등) | 없음, HTTP를 보내지 않음 | `INVALID_REQUEST`, `origin:"pc"` |
 | 연결 실패 | 없음 | `ANDROID_UNREACHABLE`, `origin:"pc"` |
-| 형식 위반, 다른 `requestId`, 크기 초과 | 없음 | `INVALID_RESPONSE`, `origin:"pc"` |
+| 형식 위반(`Content-Type` 위반, HTTP가 아닌 응답 포함), 다른 `requestId`, 크기 초과 | 없음 | `INVALID_RESPONSE`, `origin:"pc"` |
 | 데드라인 초과, MCP 취소 | 없음 | `TIMEOUT`, `CANCELLED`, `origin:"pc"` |
 
 ## MCP 도구와 응답

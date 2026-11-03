@@ -71,6 +71,14 @@ export function createServer({ tools = ADOPTED_TOOLS, shutdownSignal, port }: Se
 }
 
 export function serve(options: Omit<ServerOptions, 'shutdownSignal'> = {}) {
+  // serveStdio calls the factory only on the first message, which would hide a bad table until a client connects.
+  try {
+    createServer(options);
+  } catch {
+    process.stderr.write('pleos-pa-mcp: INVALID_TOOL_TABLE\n');
+    process.exitCode = 1;
+    return;
+  }
   const shutdown = new AbortController();
   const handle = serveStdio(() => createServer({ ...options, shutdownSignal: shutdown.signal }), {
     legacy: 'serve',
