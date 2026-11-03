@@ -21,6 +21,7 @@ Linear Issue → Coding Agent(Codex, Claude Code) → 구현·테스트·검증�
 
 - 구현 중, 커밋 전: `.\gradlew.bat :spotlessApply`
 - PR 제출 전: `.\gradlew.bat :spotlessCheck :app:assembleDebug :app:testDebugUnitTest :app:lintDebug`
+- `mcp/` 변경 시: `npm --prefix mcp run format`, PR 제출 전 `npm --prefix mcp run typecheck`, `lint`, `format:check`, `test`
 
 CI가 같은 검사를 실행한다. 실행하지 못한 검사, NO-SOURCE/skip, 모의 응답과 실제 SDK 결과를 구분해 보고한다. 빌드 성공을 차량 기능 완료로 보고하지 않는다.
 
@@ -42,7 +43,7 @@ CI가 같은 검사를 실행한다. 실행하지 못한 검사, NO-SOURCE/skip,
 
 - [app/src](app/src/AGENTS.md): Android 소스
 - [contracts/vehicle-read](contracts/vehicle-read/CONTRACT.md): 차량 조회 계약, 카탈로그, 공용 fixture
-- `mcp/`: Node 측 계약 코드와 테스트. MCP 서버는 아직 없다(`npm --prefix mcp test`)
+- [mcp](mcp/README.md): Node MCP 서버, 실행 환경, ADB·클라이언트 연결
 - [docs](docs/AGENTS.md): 문서
 - [docs/architecture](docs/architecture/AGENTS.md): C4 모델과 런타임 시나리오
 - [docs/decisions](docs/decisions/AGENTS.md): ADR

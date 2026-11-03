@@ -2,15 +2,29 @@
   "name": "pleos-pa-mcp",
   "version": "0.1.0",
   "private": true,
-  "description": "Vehicle read contract for the Node side of the Android bridge. The MCP server itself arrives with COM-19.",
+  "description": "MCP server for the Pleos vehicle read contract, run from TypeScript source without a build.",
   "type": "module",
   "engines": {
     "node": ">=24.15.0"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test --test-timeout=30000 \"test/**/*.test.ts\"",
+    "start": "node src/server.ts",
+    "typecheck": "tsc -p .",
+    "lint": "oxlint --deny-warnings src test test-support",
+    "format": "oxfmt --write \"src/**/*.ts\" \"test/**/*.ts\" \"test-support/**/*.ts\"",
+    "format:check": "oxfmt --check \"src/**/*.ts\" \"test/**/*.ts\" \"test-support/**/*.ts\"",
+    "pretest": "node -e \"process.exit(require('node:fs').globSync('test/**/*.test.ts').length > 0 ? 0 : 1)\""
   },
   "dependencies": {
+    "@modelcontextprotocol/server": "2.4.0",
     "zod": "4.2.0"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.4.0",
+    "@types/node": "24.19.2",
+    "oxfmt": "0.75.0",
+    "oxlint": "1.90.0",
+    "typescript": "7.0.2"
   }
 }

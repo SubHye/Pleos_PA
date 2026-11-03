@@ -4,6 +4,7 @@
 - [ADR-0002](0002-boundaries-and-transport.md): SDK 책임과 개발용 통신 경계
 - [ADR-0003](0003-single-repository.md): Android 앱과 Node MCP의 단일 저장소
 - [ADR-0004](0004-vehicle-read-contract.md): 차량 조회 계약과 요청 생명주기
+- [ADR-0005](0005-mcp-typescript-and-tooling.md): MCP 서버의 TypeScript 실행과 검사 도구 (제안)
 
 되돌리기 어렵거나 양쪽 개발자에게 영향을 주는 결정만 기록한다.
 
