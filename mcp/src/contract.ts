@@ -61,13 +61,29 @@ const SOURCES = ['pleos_emulator', 'real_vehicle', 'simulation'];
 const READABLE = ['READ', 'READ_WRITE'];
 const OUTCOMES = ['COMPLETE', 'PARTIAL', 'FAILED', 'TIMEOUT', 'CANCELLED'];
 const STATUSES = [
-  'OK', 'NO_VALUE', 'UNKNOWN_VALUE', 'CAPABILITY_FAILED', 'READ_UNAVAILABLE', 'AREA_UNSUPPORTED',
-  'SUPPORT_UNCONFIRMED', 'READ_FAILED', 'PERMISSION_DENIED', 'PROPERTY_UNSUPPORTED',
-  'DRIVING_RESTRICTED', 'SERVICE_UNAVAILABLE', 'NOT_READ',
+  'OK',
+  'NO_VALUE',
+  'UNKNOWN_VALUE',
+  'CAPABILITY_FAILED',
+  'READ_UNAVAILABLE',
+  'AREA_UNSUPPORTED',
+  'SUPPORT_UNCONFIRMED',
+  'READ_FAILED',
+  'PERMISSION_DENIED',
+  'PROPERTY_UNSUPPORTED',
+  'DRIVING_RESTRICTED',
+  'SERVICE_UNAVAILABLE',
+  'NOT_READ',
 ];
 const CODES_BY_STATUS: Record<string, (string | null)[]> = {
   NO_VALUE: ['ERROR_EMPTY_RESULT'],
-  CAPABILITY_FAILED: [null, 'ERROR_INTERNAL_SERVICE', 'ERROR_UNDEFINED', 'ERROR_NOT_SUPPORTED_AREA', 'ERROR_EMPTY_RESULT'],
+  CAPABILITY_FAILED: [
+    null,
+    'ERROR_INTERNAL_SERVICE',
+    'ERROR_UNDEFINED',
+    'ERROR_NOT_SUPPORTED_AREA',
+    'ERROR_EMPTY_RESULT',
+  ],
   READ_FAILED: [null, 'ERROR_INTERNAL_SERVICE', 'ERROR_UNDEFINED'],
   AREA_UNSUPPORTED: [null, 'ERROR_NOT_SUPPORTED_AREA'],
   PERMISSION_DENIED: [null, 'ERROR_SECURITY_PERMISSION'],
@@ -79,13 +95,18 @@ const INVALID: BridgeFailure = Object.freeze({ ok: false, code: 'INVALID_RESPONS
 
 const nullableText = z.string().nullable();
 const number = z.number().nullable();
-const capabilitySchema = z.strictObject({
-  access: z.string(),
-  matchingAreas: z.int32().nullable(),
-  reportedAreas: nullableText,
-  minimum: number,
-  maximum: number,
-}).refine(({ minimum, maximum }) => (minimum === null) === (maximum === null) && (minimum === null || maximum === null || minimum <= maximum));
+const capabilitySchema = z
+  .strictObject({
+    access: z.string(),
+    matchingAreas: z.int32().nullable(),
+    reportedAreas: nullableText,
+    minimum: number,
+    maximum: number,
+  })
+  .refine(
+    ({ minimum, maximum }) =>
+      (minimum === null) === (maximum === null) && (minimum === null || maximum === null || minimum <= maximum),
+  );
 const smartGlassSchema = z.strictObject({ zoneCount: z.int32(), levelCount: z.int32() });
 const itemSchema = z.strictObject({
   property: z.string(),
@@ -136,15 +157,25 @@ export function isArea(area: string, vocabulary: Set<string>) {
 export function parseRequest(catalog: Catalog, text: string) {
   if (Buffer.byteLength(text) > catalog.bridge.maxRequestBytes) return null;
   let body;
-  try { body = JSON.parse(text); } catch { return null; }
-  const selector = z.array(z.string()).min(1).refine((values) => new Set(values).size === values.length).optional();
-  const parsed = z.strictObject({
-    requestId: z.string().regex(UUID_RE),
-    remainingMs: z.number().int().min(1).max(catalog.bridge.deadlineMs),
-    query: z.string(),
-    properties: selector,
-    areas: selector,
-  }).safeParse(body);
+  try {
+    body = JSON.parse(text);
+  } catch {
+    return null;
+  }
+  const selector = z
+    .array(z.string())
+    .min(1)
+    .refine((values) => new Set(values).size === values.length)
+    .optional();
+  const parsed = z
+    .strictObject({
+      requestId: z.string().regex(UUID_RE),
+      remainingMs: z.number().int().min(1).max(catalog.bridge.deadlineMs),
+      query: z.string(),
+      properties: selector,
+      areas: selector,
+    })
+    .safeParse(body);
   if (!parsed.success) return null;
   const request = parsed.data;
   const tool = toolOf(catalog, request.query);
@@ -152,12 +183,15 @@ export function parseRequest(catalog: Catalog, text: string) {
   if (tool.legacy && (request.properties || request.areas)) return null;
   const allowed = propertiesOf(catalog, tool);
   if (request.properties?.some((id) => !allowed.has(id))) return null;
-  const vocabulary = new Set([...allowed].flatMap((id) => catalog.areas[propertyOf(catalog, id)?.areaType ?? ''] ?? []));
+  const vocabulary = new Set(
+    [...allowed].flatMap((id) => catalog.areas[propertyOf(catalog, id)?.areaType ?? ''] ?? []),
+  );
   if (request.areas?.some((area) => !isArea(area, vocabulary))) return null;
   return request;
 }
 
-const isInt32 = (value: unknown) => typeof value === 'number' && Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
+const isInt32 = (value: unknown) =>
+  typeof value === 'number' && Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
 
 function isValueType(catalog: Catalog, raw: unknown, valueType: string) {
   if (valueType === 'int') return isInt32(raw);
@@ -170,7 +204,8 @@ function isValueType(catalog: Catalog, raw: unknown, valueType: string) {
 
 /** A value outside the range capability reports is not a confirmed reading. */
 function withinBounds(raw: unknown, capability: Capability | null) {
-  if (typeof raw !== 'number' || capability === null || capability.minimum === null || capability.maximum === null) return true;
+  if (typeof raw !== 'number' || capability === null || capability.minimum === null || capability.maximum === null)
+    return true;
   return raw >= capability.minimum && raw <= capability.maximum;
 }
 
@@ -179,11 +214,15 @@ function confirmed(catalog: Catalog, item: BridgeItem, entry: PropertyEntry) {
   const { rawValue: raw, capability } = item;
   const typed = isValueType(catalog, raw, entry.valueType) && withinBounds(raw, capability);
   switch (entry.id) {
-    case 'DOOR_POSITION': return capability?.minimum === 0 && capability.maximum === 1 && (raw === 0 || raw === 1);
-    case 'WINDOW_POSITION': return typed && capability?.minimum !== null && capability?.minimum !== undefined;
+    case 'DOOR_POSITION':
+      return capability?.minimum === 0 && capability.maximum === 1 && (raw === 0 || raw === 1);
+    case 'WINDOW_POSITION':
+      return typed && capability?.minimum !== null && capability?.minimum !== undefined;
     case 'FUEL_PERCENT':
-    case 'EV_BATTERY_PERCENT': return typed && typeof raw === 'number' && raw >= 0 && raw <= 100;
-    default: return typed;
+    case 'EV_BATTERY_PERCENT':
+      return typed && typeof raw === 'number' && raw >= 0 && raw <= 100;
+    default:
+      return typed;
   }
 }
 
@@ -202,20 +241,48 @@ function statusFits(catalog: Catalog, item: BridgeItem, entry: PropertyEntry) {
   const received = receivedAt !== null;
   switch (status) {
     case 'OK':
-      return readable && received && noError && (entry.areaType === null || capability.matchingAreas === 1) &&
-        confirmed(catalog, item, entry) && meaning === expectedMeaning(entry.id, rawValue) && unit === entry.unit;
+      return (
+        readable &&
+        received &&
+        noError &&
+        (entry.areaType === null || capability.matchingAreas === 1) &&
+        confirmed(catalog, item, entry) &&
+        meaning === expectedMeaning(entry.id, rawValue) &&
+        unit === entry.unit
+      );
     case 'NO_VALUE':
-      return capability !== null && received && rawValue === null && meaning === null && unit === null && (noError || typedCode);
+      return (
+        capability !== null &&
+        received &&
+        rawValue === null &&
+        meaning === null &&
+        unit === null &&
+        (noError || typedCode)
+      );
     case 'UNKNOWN_VALUE':
-      return capability !== null && received && rawValue !== null && !confirmed(catalog, item, entry) &&
-        meaning === null && unit === null && noError;
-    case 'CAPABILITY_FAILED': return capability === null && noValue && typedCode;
-    case 'READ_UNAVAILABLE': return capability !== null && !readable && noValue && noError;
-    case 'AREA_UNSUPPORTED': return readable && noValue && ((noError && capability.matchingAreas === 0) || typedCode);
-    case 'SUPPORT_UNCONFIRMED': return readable && noValue && noError;
-    case 'READ_FAILED': return readable && noValue && typedCode;
-    case 'NOT_READ': return noValue && noError;
-    default: return noValue && typedCode;
+      return (
+        capability !== null &&
+        received &&
+        rawValue !== null &&
+        !confirmed(catalog, item, entry) &&
+        meaning === null &&
+        unit === null &&
+        noError
+      );
+    case 'CAPABILITY_FAILED':
+      return capability === null && noValue && typedCode;
+    case 'READ_UNAVAILABLE':
+      return capability !== null && !readable && noValue && noError;
+    case 'AREA_UNSUPPORTED':
+      return readable && noValue && ((noError && capability.matchingAreas === 0) || typedCode);
+    case 'SUPPORT_UNCONFIRMED':
+      return readable && noValue && noError;
+    case 'READ_FAILED':
+      return readable && noValue && typedCode;
+    case 'NOT_READ':
+      return noValue && noError;
+    default:
+      return noValue && typedCode;
   }
 }
 
@@ -239,12 +306,19 @@ function itemFits(catalog: Catalog, tool: ToolEntry, item: BridgeItem, selection
   return statusFits(catalog, item, entry);
 }
 
-function success(catalog: Catalog, body: unknown, requestId: string, query: string, selection: Selection): BridgeResult {
+function success(
+  catalog: Catalog,
+  body: unknown,
+  requestId: string,
+  query: string,
+  selection: Selection,
+): BridgeResult {
   const parsed = responseSchema.safeParse(body);
   const tool = toolOf(catalog, query);
   if (!parsed.success || !tool) return INVALID;
   const response = parsed.data;
-  if (response.requestId !== requestId || response.query !== query || response.sdkVersion !== catalog.sdk.version) return INVALID;
+  if (response.requestId !== requestId || response.query !== query || response.sdkVersion !== catalog.sdk.version)
+    return INVALID;
   const { items, outcome } = response;
   if (!items.every((item) => itemFits(catalog, tool, item, selection))) return INVALID;
 
@@ -279,19 +353,35 @@ function rejection(body: unknown, code: string): BridgeFailure {
 /** Validates one bridge reply. Anything that does not fit is INVALID_RESPONSE and is never used as a result. */
 export function validateResponse(
   catalog: Catalog,
-  { http, text, requestId, query, selection = {} }: { http: number | undefined; text: string; requestId: string; query: string; selection?: Selection },
+  {
+    http,
+    text,
+    requestId,
+    query,
+    selection = {},
+  }: { http: number | undefined; text: string; requestId: string; query: string; selection?: Selection },
 ): BridgeResult {
   if (Buffer.byteLength(text) > catalog.bridge.maxResponseBytes) return INVALID;
   let body;
-  try { body = JSON.parse(text); } catch { return INVALID; }
+  try {
+    body = JSON.parse(text);
+  } catch {
+    return INVALID;
+  }
   switch (http) {
-    case 200: return success(catalog, body, requestId, query, selection);
-    case 409: return admission(body, requestId, ['BUSY']);
-    case 503: return admission(body, requestId, ['APP_NOT_READY', 'CONNECTION_STOPPED']);
+    case 200:
+      return success(catalog, body, requestId, query, selection);
+    case 409:
+      return admission(body, requestId, ['BUSY']);
+    case 503:
+      return admission(body, requestId, ['APP_NOT_READY', 'CONNECTION_STOPPED']);
     case 400:
     case 413:
-    case 415: return rejection(body, 'INVALID_REQUEST');
-    case 403: return rejection(body, 'REQUEST_FORBIDDEN');
-    default: return INVALID;
+    case 415:
+      return rejection(body, 'INVALID_REQUEST');
+    case 403:
+      return rejection(body, 'REQUEST_FORBIDDEN');
+    default:
+      return INVALID;
   }
 }
