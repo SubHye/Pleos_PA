@@ -13,7 +13,8 @@
     "typecheck": "tsc -p .",
     "lint": "oxlint --deny-warnings src test test-support",
     "format": "oxfmt --write \"src/**/*.ts\" \"test/**/*.ts\" \"test-support/**/*.ts\"",
-    "format:check": "oxfmt --check \"src/**/*.ts\" \"test/**/*.ts\" \"test-support/**/*.ts\""
+    "format:check": "oxfmt --check \"src/**/*.ts\" \"test/**/*.ts\" \"test-support/**/*.ts\"",
+    "pretest": "node -e \"process.exit(require('node:fs').globSync('test/**/*.test.ts').length > 0 ? 0 : 1)\""
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.4.0",

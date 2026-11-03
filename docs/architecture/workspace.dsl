@@ -1,7 +1,8 @@
 workspace "Pleos_PA" "Current scaffold, first-phase target and separately identified reference implementation; no migration claimed." {
     model {
-        current = softwareSystem "Pleos_PA - current scaffold" "Android resources and manifest only; no Activity, SDK, Bridge or MCP." {
-            scaffold = container "Android scaffold APK" "Empty app module; no user workflow implemented." "Android / Gradle"
+        current = softwareSystem "Pleos_PA - current scaffold" "Android contract code and a stdio MCP server with no tools; no Activity, SDK runtime or Bridge." {
+            scaffold = container "Android scaffold APK" "App module with contract code only; no user workflow implemented." "Android / Gradle"
+            currentMcp = container "MCP server" "Lists no tools until execution verification passes; no Android Bridge to reach yet." "Node.js / TypeScript / stdio"
         }
         client = softwareSystem "Local MCP-capable client" "Reference execution environment; exact AI product integration must be revalidated."
         vehicle = softwareSystem "Pleos Emulator Vehicle Service" "Reference SDK backend; not a live vehicle."
@@ -10,12 +11,13 @@ workspace "Pleos_PA" "Current scaffold, first-phase target and separately identi
             android = container "Reference Android app" "Foreground Service owns Bridge and Vehicle SDK adapter." "Kotlin / Vehicle SDK 2.3.2"
         }
         client -> mcp "Calls read tools" "MCP / stdio"
+        client -> currentMcp "Connects and lists tools; connection must be revalidated per client" "MCP / stdio"
         mcp -> android "Reads via PC loopback and ADB forward" "HTTP POST /v2/vehicle-read :18765"
         android -> vehicle "Queries supported vehicle properties" "Vehicle SDK"
 
         driver = person "Driver - target" "Asks for departure help and approves destination changes and messages."
         targetSystem = softwareSystem "Pleos_PA - first-phase target (not implemented)" "Goal structure; nothing here exists in the repository yet." {
-            targetMcp = container "External MCP server - target" "MCP protocol, input validation, request and error mapping. No vehicle SDK logic." "Node.js / stdio"
+            targetMcp = container "External MCP server - target" "MCP protocol, input validation, request and error mapping. No vehicle SDK logic." "Node.js / TypeScript / stdio"
             targetApp = container "Android app - target" "Owns SDK permissions, execution, session lifecycle, driving restrictions and result display through Service, Bridge and Adapter. Keeps call records in memory only." "Kotlin / Vehicle SDK, NaviHelper"
         }
         targetAi = softwareSystem "ChatGPT or Claude - target" "Interprets schedule, selects tools and runs approval dialogue. Exact product, version and connection path must be verified per client."
@@ -33,6 +35,9 @@ workspace "Pleos_PA" "Current scaffold, first-phase target and separately identi
         deploymentEnvironment "Scaffold installation target - unverified" {
             deploymentNode "Development Android device or emulator" "Intended APK installation target, not a confirmed deployment." "Android" {
                 containerInstance scaffold
+            }
+            deploymentNode "Development PC" "Local MCP runtime." "Desktop OS" {
+                containerInstance currentMcp
             }
         }
         deploymentEnvironment "Reference development setup" {

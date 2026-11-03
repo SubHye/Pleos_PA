@@ -6,7 +6,7 @@ Pleos Connect MCP: 평소 쓰는 AI와 연결된 외부 서비스를 Pleos 차�
 
 ## 현재 상태
 
-Android Car Empty 프로젝트에 차량 조회 [계약](contracts/vehicle-read/CONTRACT.md)과 양쪽 계약 테스트만 있다. Activity, Foreground Service/Bridge, Vehicle Adapter, MCP 서버는 아직 없다. 빌드되는 APK가 사용자 기능을 제공한다는 뜻은 아니다. 기존 [PoC](https://github.com/HyeeSeong/pleostest/tree/0d288c8aeab3b2fd08d09a257d894cbfeca793ca)에서 기능 단위로 선택 이전할 예정이다.
+Android Car Empty 프로젝트에 차량 조회 [계약](contracts/vehicle-read/CONTRACT.md), 양쪽 계약 테스트, 도구가 없는 [stdio MCP 서버](mcp/README.md)가 있다. Activity, Foreground Service/Bridge, Vehicle Adapter는 아직 없으므로 차량 값을 읽을 수 없다. 빌드되는 APK가 사용자 기능을 제공한다는 뜻은 아니다. 기존 [PoC](https://github.com/HyeeSeong/pleostest/tree/0d288c8aeab3b2fd08d09a257d894cbfeca793ca)에서 기능 단위로 선택 이전할 예정이다.
 
 ## 시작하기
 
@@ -16,12 +16,18 @@ Android Car Empty 프로젝트에 차량 조회 [계약](contracts/vehicle-read/
 | JDK | 25 (Java 컴파일 타깃 11) |
 | Android SDK | compile·target 37, min 28, Build Tools 36.0.0 |
 | Vehicle SDK | 2.3.2 (계약 테스트 전용) |
-| Node | 24.15.0 (`mcp/.node-version`) |
-| ChatGPT, Claude, Emulator | 해당 기능 이전 시 기록 |
+| Node | 24.15.0 (`mcp/.node-version`), TypeScript 소스를 빌드 없이 실행 |
+| TypeScript / oxlint / oxfmt | 7.0.2 / 1.90.0 / 0.75.0 ([ADR-0005](docs/decisions/0005-mcp-typescript-and-tooling.md)) |
+| MCP SDK / zod | 2.4.0 / 4.2.0 |
+| ChatGPT, Claude | 연결 경로는 [mcp/README.md](mcp/README.md), 실제 연결 결과는 COM-19 PR |
+| Emulator | 해당 기능 이전 시 기록 |
 
 ```powershell
 .\gradlew.bat :spotlessCheck :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
 npm --prefix mcp ci
+npm --prefix mcp run typecheck
+npm --prefix mcp run lint
+npm --prefix mcp run format:check
 npm --prefix mcp test
 ```
 
@@ -33,5 +39,6 @@ PR과 main push에서 CI가 같은 검사와 Structurizr 모델 검증을 실행
 - [아키텍처](docs/architecture/AGENTS.md): Structurizr C4 모델과 Mermaid 시나리오
 - [결정 기록](docs/decisions/AGENTS.md): ADR
 - [차량 조회 계약](contracts/vehicle-read/CONTRACT.md): 도구, wire 형식, 요청 생명주기
+- [MCP 서버](mcp/README.md): 실행 환경, ADB·클라이언트 연결
 - [Linear 팀](https://linear.app/wonsub/team/COM/overview): 요구사항과 진행 관리
   - [공모전 1차 Project](https://linear.app/wonsub/project/pleos-connect-mcp-공모전-1차-29bf62b430ba) · [프로젝트 기획서](https://linear.app/wonsub/document/프로젝트-기획서-e1e6374c0bbb) · [요구사항 정의서](https://linear.app/wonsub/document/요구사항-정의서-1b7e6fcd5721) (둘이 충돌하면 최신 결정을 반영한 요구사항 정의서 우선)
