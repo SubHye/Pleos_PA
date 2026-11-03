@@ -1600,7 +1600,7 @@
       "unit": null,
       "permission": "CAR_WINDOWS",
       "console": "not_listed",
-      "verification": "executed"
+      "verification": "none"
     },
     {
       "id": "SMART_GLASS_LEVEL",

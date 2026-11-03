@@ -109,7 +109,9 @@ test('the catalog keeps the existing tools and offers no excluded read', () => {
 test('verification and adoption records are consistent', () => {
   const verification = new Set(['none', 'executed', 'console_matched', 'console_mismatch']);
   for (const property of catalog.properties) assert.ok(verification.has(property.verification), property.id);
-  if (catalog.properties.some((property) => property.verification !== 'none')) assert.ok(catalog.verifiedOn);
+  if (catalog.properties.some((property) => property.verification !== 'none')) {
+    assert.ok(catalog.verifiedOn?.includes(`Vehicle SDK ${catalog.sdk.version}`));
+  }
   for (const tool of catalog.tools) {
     assert.ok(['undecided', 'adopted', 'rejected'].includes(tool.adoption), tool.name);
     if (tool.adoption === 'rejected') {
@@ -122,8 +124,17 @@ test('verification and adoption records are consistent', () => {
       properties.every((property) => property.verification !== 'none'),
       tool.name,
     );
-    if (properties.some((property) => property.verification === 'console_mismatch')) {
-      assert.ok(tool.adoptionNote, tool.name);
+    for (const property of properties.filter((entry) => entry.verification === 'console_mismatch')) {
+      assert.ok(tool.adoptionNote?.includes(property.id), `${tool.name} ${property.id}`);
     }
   }
+});
+
+test('a Console verdict is recorded only for a property the Console map compares', () => {
+  const rows = JSON.parse(readFileSync(new URL('../test-support/vehicle-console-map.json', import.meta.url), 'utf8'));
+  const compared = new Set(rows.map((row: { property: string }) => row.property));
+  const recorded = catalog.properties
+    .filter((property) => property.verification === 'console_matched' || property.verification === 'console_mismatch')
+    .map((property) => property.id);
+  assert.deepEqual(recorded.sort(), [...compared].sort());
 });

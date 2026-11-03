@@ -188,6 +188,40 @@ test('a tool with no OK item fails, and a property never classified stays none',
   }
 });
 
+test('a read the SDK did not answer stays none and fails the tool', async () => {
+  const unanswered = ['PERMISSION_DENIED', 'SERVICE_UNAVAILABLE', 'CAPABILITY_FAILED', 'NOT_READ'];
+  const fake = await startBridge((body, res) => {
+    if (body.query !== 'toll_status') return json(res, 200, reply(body, okItems(body.query)));
+    const status = unanswered[(fake.seen.length - 1) % unanswered.length];
+    json(res, 200, reply(body, [itemOf('ETCS_VOICE_GUIDANCE_VOLUME', null, status)], 'FAILED'));
+  });
+  try {
+    const report = await sweep(catalog, options(fake.port));
+    const toll = report.tools.find((tool) => tool.query === 'toll_status')!;
+    assert.equal(report.verification.ETCS_VOICE_GUIDANCE_VOLUME, 'none');
+    assert.equal(toll.r19.passed, false);
+  } finally {
+    await fake.close();
+  }
+});
+
+test('one area the SDK did not answer keeps the whole property at none', async () => {
+  const fake = await startBridge((body, res) => {
+    if (body.query !== 'window_status') return json(res, 200, reply(body, okItems(body.query)));
+    const items = [
+      itemOf('WINDOW_POSITION', 'ROW_1_LEFT', 'OK', 5),
+      itemOf('WINDOW_POSITION', 'ROW_1_RIGHT', 'NOT_READ'),
+    ];
+    json(res, 200, reply(body, items, 'PARTIAL'));
+  });
+  try {
+    const report = await sweep(catalog, options(fake.port));
+    assert.equal(report.verification.WINDOW_POSITION, 'none');
+  } finally {
+    await fake.close();
+  }
+});
+
 test('any source but the expected one stops the sweep before touching the console', async () => {
   const fake = await startBridge((body, res) =>
     json(res, 200, reply(body, okItems(body.query), 'COMPLETE', 'simulation')),
@@ -199,6 +233,28 @@ test('any source but the expected one stops the sweep before touching the consol
       SweepStopped,
     );
     assert.deepEqual(fakeConsole.puts, []);
+  } finally {
+    await fake.close();
+    await fakeConsole.close();
+  }
+});
+
+test('a read that fails during a comparison stops the sweep and restores the console', async () => {
+  const fakeConsole = await startConsole();
+  let compared = false;
+  const fake = await startBridge((body, res) => {
+    if (compared && body.query === 'door_status') return json(res, 503, { requestId: body.requestId, code: 'BUSY' });
+    json(res, 200, reply(body, okItems(body.query)));
+  });
+  try {
+    const log = (line: string) => {
+      if (line.startsWith('get_wiper_status')) compared = true;
+    };
+    await assert.rejects(
+      sweep(catalog, { ...options(fake.port), repeat: 1, consoleUrl: fakeConsole.url, consoleMap: [doorRow], log }),
+      SweepStopped,
+    );
+    assert.match(fakeConsole.puts.at(-1)!, /door_fl=false/);
   } finally {
     await fake.close();
     await fakeConsole.close();

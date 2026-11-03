@@ -149,7 +149,7 @@ Node만 담당하는 구간이다. 사례는 [fixtures/tool-inputs.json](fixture
 | Android `TIMEOUT`, `CANCELLED` | `true` | 전달 |
 | 호출 단위 실패 | `true` | 없음 |
 
-`isError: true`인 응답도 항목 값을 함께 보낸다. 받은 값을 AI가 실제로 사용하는지는 ChatGPT·Claude에서 확인하지 않았다. COM-23의 검증 대상이다.
+`isError: true`인 응답도 항목 값을 함께 보낸다. 받은 값을 AI가 실제로 사용하는지는 ChatGPT·Claude에서 확인하지 않았다. COM-26의 검증 대상이다.
 
 **`structuredContent`** (카탈로그 `resultForm`으로 구분)
 

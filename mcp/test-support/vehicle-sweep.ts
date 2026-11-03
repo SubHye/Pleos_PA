@@ -1,6 +1,6 @@
 // Runs every catalog tool against a real Android bridge and reports the facts a tool's adoption is judged on.
 // Test-only and not part of the MCP server. One request at a time, no retries. Reports stay out of the repository.
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readVehicle } from '../src/bridge-client.ts';
@@ -37,6 +37,17 @@ const describe = (result: BridgeResult) => (result.ok ? result.response.outcome 
 
 export class SweepStopped extends Error {}
 
+/** Statuses the SDK itself answered with. Anything else, such as a refused permission or a capability the Adapter has no API for, did not execute the read. */
+const ANSWERED = new Set([
+  'OK',
+  'NO_VALUE',
+  'UNKNOWN_VALUE',
+  'READ_UNAVAILABLE',
+  'AREA_UNSUPPORTED',
+  'PROPERTY_UNSUPPORTED',
+  'SUPPORT_UNCONFIRMED',
+]);
+
 async function call(catalog: Catalog, tool: ToolEntry, selection: Selection, options: SweepOptions) {
   const started = performance.now();
   const { result } = await readVehicle(catalog, tool.query, { port: options.port, selection });
@@ -66,7 +77,10 @@ async function sweepTool(catalog: Catalog, tool: ToolEntry, options: SweepOption
   const classified = new Map<string, boolean>(
     properties.map((id) => [
       id,
-      calls.every((entry) => entry.items.some((item) => item.property === id && item.status !== 'NOT_READ')),
+      calls.every((entry) => {
+        const items = entry.items.filter((item) => item.property === id);
+        return items.length > 0 && items.every((item) => ANSWERED.has(item.status));
+      }),
     ]),
   );
   const alone: Record<string, string> = {};
@@ -135,8 +149,10 @@ async function matchRow(catalog: Catalog, row: ConsoleRow, consoleUrl: string, o
         throw new SweepStopped(`console value did not change for ${row.property} (${row.field})`);
       }
       const { result } = await call(catalog, tool, {}, options);
-      const items = result.ok ? result.response.items : [];
-      const item = items.find(
+      if (!result.ok || result.response.outcome === 'TIMEOUT' || result.response.outcome === 'CANCELLED') {
+        throw new SweepStopped(`read did not finish while comparing ${row.property}`);
+      }
+      const item = result.response.items.find(
         (entry) =>
           entry.property === row.property &&
           (row.area === null || entry.area === row.area || entry.area?.split('+').includes(row.area)),
@@ -196,8 +212,9 @@ export async function sweep(catalog: Catalog, options: SweepOptions = {}) {
   return { tools: summary, verification };
 }
 
-// Node runs the main module from its real path.
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+// Node runs the main module from its real path, which a junction changes.
+const invokedPath = process.argv[1] ? realpathSync(process.argv[1]) : '';
+if (realpathSync(fileURLToPath(import.meta.url)) === invokedPath) {
   const [, , reportPath, consoleMapPath] = process.argv;
   if (!reportPath) {
     process.stderr.write('usage: node test-support/vehicle-sweep.ts <report.json> [console-map.json]\n');

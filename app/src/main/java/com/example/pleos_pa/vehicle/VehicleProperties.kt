@@ -127,7 +127,7 @@ private fun mirrorArea(area: String?) =
 private fun wheelArea(area: String?) =
     WheelArea(*parts(area).map(WheelValue::valueOf).toTypedArray())
 
-/** Every catalog property, spelled out so a wrong SDK call fails at compile time. */
+/** Every catalog property, spelled out so the compiler checks each SDK signature. */
 val SDK_PROPERTIES: Map<String, SdkProperty> =
     mapOf(
         "BRAKE_PEDAL_STATUS" to
