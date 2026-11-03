@@ -39,7 +39,7 @@ fun interface BridgeGateway {
     /** Called on a bridge worker. Returns a function that gives the request up. */
     fun submit(
         request: VehicleReadRequest,
-        receivedAtMillis: Long,
+        acceptedAtMillis: Long,
         respond: (BridgeReply?) -> Unit,
     ): () -> Unit
 }
@@ -73,7 +73,7 @@ class ReaderBridgeGateway(
 
     override fun submit(
         request: VehicleReadRequest,
-        receivedAtMillis: Long,
+        acceptedAtMillis: Long,
         respond: (BridgeReply?) -> Unit,
     ): () -> Unit {
         val ticket = AtomicReference<ReadTicket?>()
@@ -83,7 +83,7 @@ class ReaderBridgeGateway(
                 request.requestId,
                 request.query,
                 result,
-                scheduler.nowMillis() - receivedAtMillis,
+                scheduler.nowMillis() - acceptedAtMillis,
             )
             respond(reply)
         }
@@ -96,7 +96,7 @@ class ReaderBridgeGateway(
                 finish(null, "CANCELLED")
                 return@execute
             }
-            val elapsed = scheduler.nowMillis() - receivedAtMillis
+            val elapsed = scheduler.nowMillis() - acceptedAtMillis
             val budget = request.remainingMs - elapsed - REPLY_MARGIN_MILLIS
             val admission =
                 reader.read(request, budget) { response ->
@@ -292,10 +292,9 @@ class BridgeServer(
         if (input.available() > 0) return BridgeHttp.invalid(400)
         val request = parse(body) ?: return BridgeHttp.invalid(400)
         events.requestReceived()
-        val receivedAt = clock()
         if (stopped) return null
         val reply = CompletableFuture<BridgeReply?>()
-        val abandon = gateway.submit(request, receivedAt) { reply.complete(it) }
+        val abandon = gateway.submit(request, acceptedAt) { reply.complete(it) }
         return awaitReply(socket, input, reply, abandon, acceptedAt)
     }
 
