@@ -9,6 +9,7 @@ import com.example.pleos_pa.vehicle.VehicleReader
 import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -248,6 +249,34 @@ class BridgeServerTest {
         assertEquals("CONNECTION_STOPPED", json.getString("code"))
         assertEquals(ID, json.getString("requestId"))
         assertTrue(sdk.calls.isEmpty())
+    }
+
+    @Test
+    fun theReadBudgetCountsTheTimeSpentReceivingTheRequest() {
+        val measured = CompletableFuture<Long>()
+        val recording = BridgeGateway { _, acceptedAt, respond ->
+            measured.complete(scheduler.nowMillis() - acceptedAt)
+            respond(null)
+            val abandon: () -> Unit = {}
+            abandon
+        }
+        val slow = BridgeServer(catalog, recording, events, { scheduler.nowMillis() }, port = 0)
+        slow.start()
+        try {
+            val request = rawRequest(body(), host = "127.0.0.1:${slow.localPort}")
+            val headSize = request.length - body().length
+            Socket(InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1)), slow.localPort).use {
+                val output = it.getOutputStream()
+                output.write(request.take(headSize).toByteArray())
+                output.flush()
+                Thread.sleep(400)
+                output.write(request.drop(headSize).toByteArray())
+                output.flush()
+                assertTrue(measured.get(3, TimeUnit.SECONDS) >= 400)
+            }
+        } finally {
+            slow.stop()
+        }
     }
 
     @Test
