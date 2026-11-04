@@ -2,8 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Read-only vehicle permission; no control permission is requested. -->
+    <!-- Read-only vehicle permissions; no control permission is requested. -->
+    <uses-permission android:name="pleos.car.permission.CAR_CLIMATE" />
     <uses-permission android:name="pleos.car.permission.CAR_DOORS" />
+    <uses-permission android:name="pleos.car.permission.CAR_DRIVE" />
+    <uses-permission android:name="pleos.car.permission.CAR_ENERGY" />
+    <uses-permission android:name="pleos.car.permission.CAR_INFO" />
+    <uses-permission android:name="pleos.car.permission.CAR_LIGHTS" />
+    <uses-permission android:name="pleos.car.permission.CAR_MIRRORS" />
+    <uses-permission android:name="pleos.car.permission.CAR_SAFETY" />
+    <uses-permission android:name="pleos.car.permission.CAR_SEATS" />
+    <uses-permission android:name="pleos.car.permission.CAR_TOLL" />
+    <uses-permission android:name="pleos.car.permission.CAR_WINDOWS" />
     <!-- Loopback-only bridge socket for the local MCP connection. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Keeps the bridge alive while the screen is closed. -->

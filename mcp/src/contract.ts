@@ -21,6 +21,8 @@ export interface ToolEntry {
   query: string;
   legacy: boolean;
   resultForm: 'items' | 'scalar';
+  adoption: 'undecided' | 'adopted' | 'rejected';
+  adoptionNote?: string;
   fixedItems: ItemKey[];
 }
 export interface PropertyEntry {
@@ -32,9 +34,10 @@ export interface PropertyEntry {
   areaType: string | null;
   valueType: string;
   unit: string | null;
-  verification: string;
+  verification: 'none' | 'executed' | 'console_matched' | 'console_mismatch';
 }
 export interface Catalog {
+  verifiedOn: string | null;
   sdk: { artifact: string; version: string };
   bridge: BridgeConfig;
   areas: Record<string, string[]>;

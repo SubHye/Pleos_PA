@@ -55,8 +55,32 @@ class CatalogCompletenessTest {
     }
 
     @Test
-    fun nothingIsMarkedVerifiedWithoutEvidence() {
-        assertTrue(properties.all { it.getString("verification") == "none" })
+    fun verificationRecordsUseTheContractsWords() {
+        val words = setOf("none", "executed", "console_matched", "console_mismatch")
+        assertTrue(properties.all { it.getString("verification") in words })
+        if (properties.any { it.getString("verification") != "none" }) {
+            assertTrue(!root.isNull("verifiedOn"))
+        }
+    }
+
+    @Test
+    fun adoptionRecordsAreConsistent() {
+        for (tool in objects(root.getJSONArray("tools"))) {
+            val name = tool.getString("name")
+            val adoption = tool.getString("adoption")
+            assertTrue(name, adoption in setOf("undecided", "adopted", "rejected"))
+            if (adoption == "rejected") {
+                assertTrue(name, tool.has("adoptionNote"))
+                assertTrue(name, !tool.getBoolean("legacy"))
+            }
+            if (adoption != "adopted") continue
+            val ids = ContractFixtures.catalog.propertiesOf(tool.getString("query"))
+            val own = properties.filter { it.getString("id") in ids }
+            assertTrue(name, own.none { it.getString("verification") == "none" })
+            if (own.any { it.getString("verification") == "console_mismatch" }) {
+                assertTrue(name, tool.has("adoptionNote"))
+            }
+        }
     }
 
     @Test

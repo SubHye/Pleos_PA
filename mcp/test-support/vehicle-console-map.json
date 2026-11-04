@@ -1,0 +1,523 @@
+[
+  {
+    "property": "DOOR_POSITION",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/body",
+    "field": "door_fl",
+    "statePath": "body.doors.front_left",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      1,
+      0
+    ]
+  },
+  {
+    "property": "DOOR_POSITION",
+    "area": "ROW_1_RIGHT",
+    "endpoint": "/vehicle/body",
+    "field": "door_fr",
+    "statePath": "body.doors.front_right",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      1,
+      0
+    ]
+  },
+  {
+    "property": "DOOR_POSITION",
+    "area": "ROW_2_LEFT",
+    "endpoint": "/vehicle/body",
+    "field": "door_rl",
+    "statePath": "body.doors.rear_left",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      1,
+      0
+    ]
+  },
+  {
+    "property": "DOOR_POSITION",
+    "area": "ROW_2_RIGHT",
+    "endpoint": "/vehicle/body",
+    "field": "door_rr",
+    "statePath": "body.doors.rear_right",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      1,
+      0
+    ]
+  },
+  {
+    "property": "DOOR_LOCK",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/body",
+    "field": "doors_locked",
+    "statePath": "body.door_locks.all",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      true,
+      false
+    ]
+  },
+  {
+    "property": "WINDOW_POSITION",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/body",
+    "field": "window_fl",
+    "statePath": "body.windows.front_left",
+    "values": [
+      "50",
+      "0"
+    ],
+    "expected": [
+      5,
+      0
+    ]
+  },
+  {
+    "property": "WINDOW_POSITION",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/body",
+    "field": "window_fl",
+    "statePath": "body.windows.front_left",
+    "values": [
+      "100",
+      "0"
+    ],
+    "expected": [
+      10,
+      0
+    ]
+  },
+  {
+    "property": "BRAKE_PEDAL_STATUS",
+    "area": null,
+    "endpoint": "/vehicle/controls",
+    "field": "brake",
+    "statePath": "controls.brake_pct",
+    "values": [
+      "50",
+      "0"
+    ],
+    "expected": [
+      true,
+      false
+    ]
+  },
+  {
+    "property": "STEERING_WHEEL_ANGLE",
+    "area": null,
+    "endpoint": "/vehicle/controls",
+    "field": "steering",
+    "statePath": "controls.steering_deg",
+    "values": [
+      "30",
+      "0"
+    ],
+    "expected": [
+      30,
+      0
+    ]
+  },
+  {
+    "property": "TURN_SIGNAL_STATE",
+    "area": null,
+    "endpoint": "/vehicle/turn-signal",
+    "field": "mode",
+    "statePath": "lights.turn_signal_mode",
+    "values": [
+      "BlinkLeft",
+      "Off"
+    ],
+    "expected": [
+      "LEFT",
+      "OFF"
+    ]
+  },
+  {
+    "property": "HVAC_STEERING_WHEEL_HEAT_STATE",
+    "area": null,
+    "endpoint": "/vehicle/steering-wheel-heat",
+    "field": "level",
+    "statePath": "steering_wheel_heat.level",
+    "values": [
+      "2",
+      "0"
+    ],
+    "expected": [
+      2,
+      0
+    ]
+  },
+  {
+    "property": "CRUISE_CONTROL_TARGET_SPEED",
+    "area": null,
+    "endpoint": "/vehicle/driving-mode",
+    "field": "target_speed_mps",
+    "statePath": "driving_mode.target_speed_mps",
+    "values": [
+      "10",
+      "20"
+    ],
+    "expected": [
+      10,
+      20
+    ]
+  },
+  {
+    "property": "HVAC_POWER_STATE",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/hvac",
+    "field": "power",
+    "statePath": "hvac.power_on",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      true,
+      false
+    ]
+  },
+  {
+    "property": "HVAC_AC_STATE",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/hvac",
+    "field": "ac",
+    "statePath": "hvac.ac_on",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      true,
+      false
+    ]
+  },
+  {
+    "property": "HVAC_AUTO_STATE",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/hvac",
+    "field": "auto",
+    "statePath": "hvac.auto_on",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      true,
+      false
+    ]
+  },
+  {
+    "property": "HVAC_DUAL_STATE",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/hvac",
+    "field": "dual",
+    "statePath": "hvac.dual_on",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      true,
+      false
+    ]
+  },
+  {
+    "property": "HVAC_RECIRCULATION_STATE",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/hvac",
+    "field": "recirc",
+    "statePath": "hvac.recirc_on",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      true,
+      false
+    ]
+  },
+  {
+    "property": "HVAC_FAN_SPEED",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/hvac",
+    "field": "fan_speed",
+    "statePath": "hvac.fan_speed",
+    "values": [
+      "3",
+      "1"
+    ],
+    "expected": [
+      3,
+      1
+    ]
+  },
+  {
+    "property": "HVAC_TEMPERATURE",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/hvac",
+    "field": "driver_temp",
+    "statePath": "hvac.driver.temp_c",
+    "values": [
+      "20",
+      "24"
+    ],
+    "expected": [
+      20,
+      24
+    ]
+  },
+  {
+    "property": "HVAC_AIR_CLEANER_STATE",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/hvac-air-cleaner",
+    "field": "activated",
+    "statePath": "hvac_air_cleaner.activated",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      true,
+      false
+    ]
+  },
+  {
+    "property": "CABIN_LIGHT_SWITCH",
+    "area": null,
+    "endpoint": "/vehicle/body",
+    "field": "cabin_light",
+    "statePath": "body.cabin_light.on",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      "ON",
+      "OFF"
+    ]
+  },
+  {
+    "property": "AMBIENT_LIGHT_BRIGHTNESS",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/body",
+    "field": "ambient_brightness",
+    "statePath": "body.ambient_light.brightness_pct",
+    "values": [
+      "30",
+      "60"
+    ],
+    "expected": [
+      30,
+      60
+    ]
+  },
+  {
+    "property": "EV_BATTERY_PERCENT",
+    "area": null,
+    "endpoint": "/vehicle/ev-battery",
+    "field": "value",
+    "params": {
+      "field": "soc"
+    },
+    "statePath": "ev_battery.state_of_charge",
+    "values": [
+      "40",
+      "80"
+    ],
+    "expected": [
+      40,
+      80
+    ]
+  },
+  {
+    "property": "EV_CHARGE_CURRENT_DRAW_LIMIT",
+    "area": null,
+    "endpoint": "/vehicle/ev-battery",
+    "field": "value",
+    "params": {
+      "field": "current_limit"
+    },
+    "statePath": "ev_battery.maximum_current_a",
+    "values": [
+      "20",
+      "30"
+    ],
+    "expected": [
+      20,
+      30
+    ]
+  },
+  {
+    "property": "EV_CHARGE_SWITCH_STATE",
+    "area": null,
+    "endpoint": "/vehicle/ev-battery",
+    "field": "value",
+    "params": {
+      "field": "charge_switch"
+    },
+    "statePath": "ev_battery.charging_activated",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      true,
+      false
+    ]
+  },
+  {
+    "property": "HIGH_BEAM_LIGHT_STATE",
+    "area": null,
+    "endpoint": "/vehicle/lights",
+    "field": "value",
+    "params": {
+      "feature": "high_beam"
+    },
+    "statePath": "lights.high_beam_on",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      "ON",
+      "OFF"
+    ]
+  },
+  {
+    "property": "SEAT_OCCUPANCY",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/seat",
+    "field": "value",
+    "params": {
+      "kind": "occupied",
+      "area": "driver"
+    },
+    "statePath": "seat.occupied.driver",
+    "values": [
+      "true",
+      "false"
+    ],
+    "expected": [
+      true,
+      false
+    ]
+  },
+  {
+    "property": "SEAT_FORE_AFT_POSITION",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/seat",
+    "field": "value",
+    "params": {
+      "kind": "position",
+      "control": "slide",
+      "area": "driver"
+    },
+    "statePath": "seat.positions.slide.driver",
+    "values": [
+      "30",
+      "60"
+    ],
+    "expected": [
+      30,
+      60
+    ]
+  },
+  {
+    "property": "SEAT_HEIGHT_POSITION",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/seat",
+    "field": "value",
+    "params": {
+      "kind": "position",
+      "control": "height",
+      "area": "driver"
+    },
+    "statePath": "seat.positions.height.driver",
+    "values": [
+      "30",
+      "60"
+    ],
+    "expected": [
+      30,
+      60
+    ]
+  },
+  {
+    "property": "SEAT_TILT_POSITION",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/seat",
+    "field": "value",
+    "params": {
+      "kind": "position",
+      "control": "tilt",
+      "area": "driver"
+    },
+    "statePath": "seat.positions.tilt.driver",
+    "values": [
+      "30",
+      "60"
+    ],
+    "expected": [
+      30,
+      60
+    ]
+  },
+  {
+    "property": "SEAT_BACKREST_ANGLE_POSITION",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/seat",
+    "field": "value",
+    "params": {
+      "kind": "position",
+      "control": "recline",
+      "area": "driver"
+    },
+    "statePath": "seat.positions.recline.driver",
+    "values": [
+      "30",
+      "60"
+    ],
+    "expected": [
+      30,
+      60
+    ]
+  },
+  {
+    "property": "SEAT_LUMBAR_FORE_AFT_POSITION",
+    "area": "ROW_1_LEFT",
+    "endpoint": "/vehicle/seat",
+    "field": "value",
+    "params": {
+      "kind": "position",
+      "control": "lumbar",
+      "area": "driver"
+    },
+    "statePath": "seat.positions.lumbar.driver",
+    "values": [
+      "30",
+      "60"
+    ],
+    "expected": [
+      30,
+      60
+    ]
+  }
+]
