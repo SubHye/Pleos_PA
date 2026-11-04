@@ -1,12 +1,12 @@
-workspace "Pleos_PA" "Current scaffold, first-phase target and separately identified reference implementation; no migration claimed." {
+workspace "Pleos_PA" "Current app, first-phase target and separately identified reference implementation; only what the current system describes has been migrated." {
     model {
-        current = softwareSystem "Pleos_PA - current scaffold" "Android contract code and a stdio MCP server with no tools; no Activity, SDK runtime or Bridge." {
-            scaffold = container "Android scaffold APK" "App module with contract code only; no user workflow implemented." "Android / Gradle"
-            currentMcp = container "MCP server" "Lists no tools until execution verification passes; no Android Bridge to reach yet." "Node.js / TypeScript / stdio"
+        current = softwareSystem "Pleos_PA - current scaffold" "Android connection app with a loopback Bridge that reads one door property, and a stdio MCP server with no tools." {
+            scaffold = container "Android scaffold APK" "Connection control screen, Foreground Service, /v3/vehicle-read Bridge and a Vehicle SDK boundary covering DOOR_POSITION." "Android / Gradle"
+            currentMcp = container "MCP server" "Lists no tools until execution verification passes." "Node.js / TypeScript / stdio"
         }
         client = softwareSystem "Local MCP-capable client" "Reference execution environment; exact AI product integration must be revalidated."
         vehicle = softwareSystem "Pleos Emulator Vehicle Service" "Reference SDK backend; not a live vehicle."
-        poc = softwareSystem "pleostest - reference only" "Source reviewed at 0d288c8; not migrated into Pleos_PA." {
+        poc = softwareSystem "pleostest - reference only" "Source reviewed at 0d288c8. The connection service, Bridge, read slot and DOOR_POSITION SDK call were selectively migrated; the rest was not." {
             mcp = container "External MCP server" "Four read tools and HTTP bridge client." "Node.js / stdio"
             android = container "Reference Android app" "Foreground Service owns Bridge and Vehicle SDK adapter." "Kotlin / Vehicle SDK 2.3.2"
         }

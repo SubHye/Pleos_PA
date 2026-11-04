@@ -2,6 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Read-only vehicle permission; no control permission is requested. -->
+    <uses-permission android:name="pleos.car.permission.CAR_DOORS" />
+    <!-- Loopback-only bridge socket for the local MCP connection. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Keeps the bridge alive while the screen is closed. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- Shows the stop and resume actions; the screen works without it. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -10,6 +20,23 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Pleos_pa" />
+        android:theme="@style/Theme.Pleos_pa">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <service
+            android:name=".connection.BridgeService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Read-only loopback (127.0.0.1) bridge that answers local MCP vehicle status reads while the app screen is closed; user-stoppable from the notification and the screen." />
+        </service>
+    </application>
 
 </manifest>

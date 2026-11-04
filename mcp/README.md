@@ -5,7 +5,7 @@
 ## 현재 상태
 
 - **`tools/list`는 비어 있다.** 계약은 실행 검증을 통과한 도구만 올리도록 정하고, 아직 통과한 도구가 없다. `src/server.ts`의 `ADOPTED_TOOLS`에 COM-23이 항목을 추가한다. 기본 실행 경로는 인자나 환경 변수로 도구를 받지 않는다.
-- **차량 값을 읽을 수 없다.** 이 저장소에는 Android `/v3/vehicle-read` Bridge(COM-18)와 Vehicle Adapter(COM-20)가 아직 없다.
+- **AI에서 차량 값을 읽을 수 없다.** Android `/v3/vehicle-read` Bridge는 있지만 Vehicle Adapter(COM-20)가 문 위치만 읽고, 채택된 도구가 없다.
 - 테스트의 Bridge는 모두 가짜이며 실제 SDK 결과가 아니다.
 - PoC의 ChatGPT·Claude 성공 기록은 이 서버의 기록이 아니다.
 

@@ -1,12 +1,17 @@
 # Android 소스
 
-현재 초기 모듈이다. Activity, Service, Bridge, Vehicle Adapter는 아직 없다. Pleos SDK는 계약 테스트의 클래스 대조용으로만 쓰며 앱에 포함되지 않는다.
+연결 제어 앱이다. SDK로 읽는 속성은 아직 `DOOR_POSITION`뿐이다(COM-20에서 확장).
 
 | 위치 | 내용 |
 | --- | --- |
 | `main/` | Manifest, 리소스, `keepRules/rules.keep` |
+| `main/java/com/example/pleos_pa/MainActivity.kt` | 연결 시작·중지·재개와 상태를 보여 주는 최소 화면 |
+| `main/java/com/example/pleos_pa/connection/` | Foreground Service, 알림, 세션과 명령 순서, 메모리 상태 |
+| `main/java/com/example/pleos_pa/bridge/` | loopback HTTP 서버, 요청 문법·헤더 검사, 조회기로 넘기는 게이트웨이 |
+| `main/java/com/example/pleos_pa/vehicle/` | 앱 전체 조회 슬롯, SDK 경계, 실행 환경 판별 |
 | `main/java/com/example/pleos_pa/contract/` | [차량 조회 계약](../../contracts/vehicle-read/CONTRACT.md)의 wire 모델과 검증, SDK 실패 분류. SDK와 Android 컴포넌트에 의존하지 않는다 |
 | `test/java/com/example/pleos_pa/contract/` | 공용 fixture와 SDK 클래스 대조로 계약을 고정하는 JVM 테스트. SDK를 실행하지 않으므로 차량 기능 검증이 아니다 |
+| `test/java/com/example/pleos_pa/{bridge,connection,vehicle}/` | 실제 소켓과 SDK 대역으로 Bridge·세션·조회기를 검사하는 JVM 테스트. 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/` | 산술 예제 1개 |
 | `androidTest/java/com/example/pleos_pa/` | 기기 테스트. 현재 예제 1개이며 CI 범위 밖이다 |
 

@@ -317,8 +317,8 @@ class VehicleReadValidator(private val catalog: VehicleReadCatalog) {
                     received &&
                     noError &&
                     (entry.areaType == null || capability?.matchingAreas == 1) &&
-                    confirmed(item, entry, capability) &&
-                    item.meaning == expectedMeaning(entry.id, item.rawValue) &&
+                    isConfirmed(entry, item.rawValue, capability) &&
+                    item.meaning == meaningOf(entry.id, item.rawValue) &&
                     item.unit == entry.unit
             ItemStatus.NO_VALUE ->
                 capability != null &&
@@ -331,7 +331,7 @@ class VehicleReadValidator(private val catalog: VehicleReadCatalog) {
                 capability != null &&
                     received &&
                     item.rawValue != null &&
-                    !confirmed(item, entry, capability) &&
+                    !isConfirmed(entry, item.rawValue, capability) &&
                     item.meaning == null &&
                     item.unit == null &&
                     noError
@@ -350,12 +350,7 @@ class VehicleReadValidator(private val catalog: VehicleReadCatalog) {
     }
 
     /** Whether the value's type, range and unit are confirmed for this property. */
-    private fun confirmed(
-        item: VehicleReadItem,
-        entry: PropertyEntry,
-        capability: ItemCapability?,
-    ): Boolean {
-        val raw = item.rawValue
+    fun isConfirmed(entry: PropertyEntry, raw: Any?, capability: ItemCapability?): Boolean {
         val typed = isValueType(raw, entry.valueType) && withinBounds(raw, capability)
         return when (entry.id) {
             "DOOR_POSITION" ->
@@ -386,7 +381,8 @@ class VehicleReadValidator(private val catalog: VehicleReadCatalog) {
             else -> false
         }
 
-    private fun expectedMeaning(property: String, raw: Any?): String? =
+    /** The only two properties whose raw value has an agreed meaning. */
+    fun meaningOf(property: String, raw: Any?): String? =
         when (property) {
             "DOOR_POSITION" -> if (raw == 0) "closed" else "open"
             "DOOR_LOCK" -> if (raw == true) "locked" else "unlocked"
