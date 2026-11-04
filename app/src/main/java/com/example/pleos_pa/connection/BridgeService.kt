@@ -24,6 +24,8 @@ import com.example.pleos_pa.bridge.BridgeEvents
 import com.example.pleos_pa.bridge.BridgeServer
 import com.example.pleos_pa.bridge.ReaderBridgeGateway
 import com.example.pleos_pa.contract.VehicleReadCatalog
+import com.example.pleos_pa.ui.DriverHistory
+import com.example.pleos_pa.ui.HistoryPresentation
 import com.example.pleos_pa.vehicle.PleosVehicleSdk
 import com.example.pleos_pa.vehicle.ReadScheduler
 import com.example.pleos_pa.vehicle.VehicleReader
@@ -120,7 +122,17 @@ class BridgeService : Service() {
             )
         val reader = VehicleReader(catalog, PleosVehicleSdk(this), scheduler, source)
         val events = Events()
-        val gateway = ReaderBridgeGateway(catalog, reader, scheduler, events)
+        val gateway =
+            ReaderBridgeGateway(
+                catalog,
+                reader,
+                scheduler,
+                events,
+                HistoryPresentation(
+                    DriverHistory.history,
+                    { query -> catalog.tools.getValue(query).name },
+                ),
+            )
         val server = BridgeServer(catalog, gateway, events, SystemClock::elapsedRealtime)
         return ConnectionSession(
             gateway::close,

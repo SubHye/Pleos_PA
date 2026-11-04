@@ -28,6 +28,7 @@ androidComponents {
 }
 
 android {
+    useLibrary("android.car", false)
     namespace = "com.example.pleos_pa"
     compileSdk {
         version = release(37)
@@ -44,6 +45,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            if (providers.gradleProperty("com5Diagnostic").orNull == "true") {
+                applicationIdSuffix = ".com5"
+            }
+        }
         release {
             optimization {
                 enable = true

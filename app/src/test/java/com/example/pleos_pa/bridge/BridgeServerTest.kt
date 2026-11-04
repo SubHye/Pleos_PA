@@ -1,6 +1,8 @@
 package com.example.pleos_pa.bridge
 
 import com.example.pleos_pa.contract.ContractFixtures
+import com.example.pleos_pa.ui.HistoryPresentation
+import com.example.pleos_pa.ui.RequestHistory
 import com.example.pleos_pa.vehicle.FakeVehicleSdk
 import com.example.pleos_pa.vehicle.PropertyCapability
 import com.example.pleos_pa.vehicle.ReadScheduler
@@ -71,7 +73,15 @@ class BridgeServerTest {
                 received += result
             }
         }
-    private val gateway = ReaderBridgeGateway(catalog, reader, scheduler, events)
+    private val history = RequestHistory()
+    private val gateway =
+        ReaderBridgeGateway(
+            catalog,
+            reader,
+            scheduler,
+            events,
+            HistoryPresentation(history, { catalog.tools.getValue(it).name }),
+        )
     private val server = BridgeServer(catalog, gateway, events, { scheduler.nowMillis() }, port = 0)
 
     private fun body(query: String = "front_left_door_position", id: String = ID) =
@@ -142,6 +152,27 @@ class BridgeServerTest {
         assertEquals(ID, json.getString("requestId"))
         assertEquals("COMPLETE", json.getString("outcome"))
         assertEquals("simulation", json.getString("source"))
+        val row = history.snapshot().single()
+        assertEquals(json.getString("requestId"), row.requestId)
+        assertEquals(json.getString("outcome"), row.state)
+        assertEquals("simulation", row.source)
+        assertTrue(row.details.contains("OK · 1"))
+    }
+
+    @Test
+    fun clearingUiHistoryDuringAnActualReadDoesNotResurrectTheReply() {
+        val executor = Executors.newSingleThreadExecutor()
+        try {
+            val done = executor.submit<Pair<Int, String>> { exchange(rawRequest(body())) }
+            waitFor { sdk.calls.size == 1 }
+            assertEquals(1, history.snapshot().size)
+            history.clear()
+            answerDoor()
+            assertEquals(200, done.get(5, TimeUnit.SECONDS).first)
+            assertTrue(history.snapshot().isEmpty())
+        } finally {
+            executor.shutdownNow()
+        }
     }
 
     @Test
@@ -293,15 +324,19 @@ class BridgeServerTest {
 
     @Test
     fun aPortReleasedAMomentLaterStillBinds() {
-        val port = server.localPort
-        server.stop()
-        val holder = ServerSocket(port, 1, InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1)))
-        pool.schedule({ holder.close() }, 100, TimeUnit.MILLISECONDS)
-
+        // Use a fresh held port. Rebinding a just-used listener in the fixture can itself fail
+        // before the production retry logic is reached (for example while accepted sockets drain).
+        val holder = ServerSocket(0, 1, InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1)))
+        val port = holder.localPort
         val next = BridgeServer(catalog, gateway, events, { scheduler.nowMillis() }, port = port)
-        next.start()
-        assertEquals(port, next.localPort)
-        next.stop()
+        try {
+            pool.schedule({ holder.close() }, 100, TimeUnit.MILLISECONDS)
+            next.start()
+            assertEquals(port, next.localPort)
+        } finally {
+            holder.close()
+            next.stop()
+        }
     }
 
     private fun boundListener(target: BridgeServer = server): ServerSocket {

@@ -6,7 +6,7 @@ Pleos Connect MCP: 평소 쓰는 AI와 연결된 외부 서비스를 Pleos 차�
 
 ## 현재 상태
 
-Android 앱에 연결 제어 화면, Foreground Service, `/v3/vehicle-read` Bridge가 있다. Vehicle Adapter에는 카탈로그 97개 속성의 호출 표가 있고, 속성별 실행 결과는 카탈로그의 `verification`에 있다. `SMART_GLASS_CONFIG`는 공개 capability API가 없어 읽지 않고, `ETCS_VOICE_GUIDANCE_VOLUME`은 `CAR_TOLL`을 Manifest에서 빼서 `PERMISSION_DENIED`를 받는다. [MCP 서버](mcp/README.md)는 실행 검증을 통과한 도구 20개를 제공한다. ChatGPT·Claude 호출 검증은 COM-26이다. 기존 [PoC](https://github.com/HyeeSeong/pleostest/tree/0d288c8aeab3b2fd08d09a257d894cbfeca793ca)에서 기능 단위로 선택 이전 중이다.
+Android 앱에 연결 상태·요청 기록 화면, Car UX 제한 관찰, Foreground Service, `/v3/vehicle-read` Bridge가 있다. Vehicle Adapter에는 카탈로그 97개 속성의 호출 표가 있고, 속성별 실행 결과는 카탈로그의 `verification`에 있다. `SMART_GLASS_CONFIG`는 공개 capability API가 없어 읽지 않고, `ETCS_VOICE_GUIDANCE_VOLUME`은 `CAR_TOLL`을 Manifest에서 빼서 `PERMISSION_DENIED`를 받는다. [MCP 서버](mcp/README.md)는 실행 검증을 통과한 도구 20개를 제공한다. ChatGPT·Claude 호출 검증은 COM-26이다. 기존 [PoC](https://github.com/HyeeSeong/pleostest/tree/0d288c8aeab3b2fd08d09a257d894cbfeca793ca)에서 기능 단위로 선택 이전 중이다.
 
 ## 시작하기
 
@@ -41,6 +41,27 @@ Bridge는 사용자가 앱 화면에서 시작해야 열리고, 앱 실행이나
 
 시스템이나 사용자가 프로세스를 종료하면 자동으로 다시 열지 않는다. 다음 실행은 중지 상태로 시작한다.
 
+## 차량 화면과 요청 기록
+
+요청 기록은 차량 조회 계약을 검증한 뒤 추가한다. 요청마다 별도 식별자를 사용하므로 중복 requestId, 역순·늦은 응답이 다른 행을 갱신하지 않는다. 수신 시각과 출처를 표시하고, 미지원·알 수 없는 값을 0/false로 채우지 않는다. 클라이언트 인증 정보가 없으므로 AI 이름은 "알 수 없음"이다. 내비 변경·되돌리기는 아직 지원하지 않으며 버튼을 비활성화하고 이유를 표시한다.
+
+현재 화면의 공개 Car UX API를 관찰한다. COM-9에서 운전자 표시 영역·규제 중 화면 정책을 검증하지 못했으므로 실제 앱의 상세 기록 허용은 기본 차단한다. DO=false·제한 0만으로 이 차단을 해제하지 않으며 실행 인자·빌드 플래그로 우회할 수 없다. 검증 후 코드 리뷰를 거쳐 정책을 연결해야 한다. 모의 화면은 별도 검수 정책으로 동작한다. 규제 활성·연결 상실·화면 변경·3초간 관찰 갱신 없음은 상세 기록을 숨기고 짧은 처리 상태와 연결 중지만 유지한다. UX 제한 해제는 정차나 차량 변경 허가의 증거가 아니다. 텍스트 입력과 차량 변경 경로는 없다. 실제 Pleos의 규제 전환 검수는 별도로 필요하다.
+
+기록에는 요청 선택 인자와 검증된 차량 조회 결과만 남긴다. 메일·일정 원문, HTTP 원문, 신원·인증 헤더는 받지 않는다. 최근 100건·인자 4,096자·결과 16,384자 상한과 10건씩 탐색은 검수용 초기값이다. OQ-09의 최종 상한은 실제 기기의 UI·힙 검수 후 정한다. 기록 삭제 후 늦게 도착한 응답은 기록을 복구하지 않는다. Android 화면 상태 저장에도 값과 선택을 맡기지 않는다.
+
+`debug`에만 `com.example.pleos_pa.ui.DriverUiPreviewActivity`가 있다. 모의 기록·규제·연결 제어는 실제 SDK, Bridge, 공용 기록과 분리된다. 아래 빌드 옵션은 기존 앱 서명·데이터를 건드리지 않도록 별도 패키지에 설치할 때 사용한다. 실제 앱·알림 중지와 프로세스 재시작 검수는 기본 MainActivity에서 수행해야 한다.
+
+```powershell
+.\gradlew.bat -Pcom5Diagnostic=true :app:assembleDebug :app:assembleDebugAndroidTest
+# 설치는 동일 PC에서 빌드한 두 APK를 사용한다. 기존 앱을 삭제하지 않는다.
+# 기본 debug 빌드는 com.example.pleos_pa, 위 옵션은 com.example.pleos_pa.com5다.
+$com5Adb = Join-Path $env:LOCALAPPDATA 'Android\Sdk\platform-tools\adb.exe'
+& $com5Adb -s emulator-5554 shell am start -n com.example.pleos_pa.com5/com.example.pleos_pa.ui.DriverUiPreviewActivity
+& $com5Adb -s emulator-5554 shell am instrument -w -r -e class com.example.pleos_pa.ui.DriverUiTest com.example.pleos_pa.com5.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+위 테스트는 Android 위젯에서 모의 규제·정보 상실·갱신 만료·기록 삭제를 검사한다. 실제 Car UX 또는 실제 차량 값을 검증하지 않는다. 기본 화면에서는 실제 조회 후 제한 안내의 기록 건수를 확인한 뒤 프로세스를 종료하고 다시 열어 기록이 0건이고 연결이 중지 상태인지 검수한다. 실제 상세 값·이전 상태 비복원 검수는 화면 정책 및 내비 구현 연결 후 수행한다. Activity 재생성이나 메모리 모델의 새 인스턴스 검사는 프로세스 재시작 증거가 아니다.
+
 ## Bridge 신뢰 경계
 
 Bridge는 개발용 연결이고 인증이 없다. 쓰지 않을 때는 앱에서 중지하고 `adb forward`를 제거한다.
@@ -53,7 +74,7 @@ Bridge는 개발용 연결이고 인증이 없다. 쓰지 않을 때는 앱에�
 | 검사가 못 막는 것 | 호출 프로세스의 신원 확인, 같은 형식으로 보내는 로컬 프로세스, 평문 HTTP 관찰, 슬롯 점유로 인한 `BUSY`, Bridge 사칭 |
 | Bridge 사칭 | 앱이 포트를 잡고 있지 않을 때 다른 프로세스가 18765에서 수신하면 Node는 계약 형식의 응답과 `source`를 그대로 믿는다. 앱 화면이 연결됨이 아니면 AI가 답한 차량 값을 믿지 않는다 |
 | 노출 범위 | 카탈로그의 읽기 값뿐이다. 제어 API가 없고 VIN은 제외된다. Bridge가 열려 있으면 INTERNET 권한만 있는 기기 내 앱도 이 앱의 `CAR_*` 권한을 거쳐 값을 읽으며, Android 권한 모델은 이 경로를 막지 못한다 |
-| 값이 남는 곳 | 앱은 값을 저장하거나 로그에 쓰지 않는다. 앱 로그는 requestId, query, 결과, 처리 시간뿐이다. 다만 SDK가 조회 값을 logcat에 남긴다(문 위치에서 확인) |
+| 값이 남는 곳 | 앱은 검증된 조회 결과와 선택 인자만 프로세스 메모리 기록에 보관한다. 디스크·로그에 쓰지 않고 프로세스 재시작 때 사라진다. 앱 로그는 requestId, query, 결과, 처리 시간뿐이다. 다만 SDK가 조회 값을 logcat에 남긴다(문 위치에서 확인) |
 
 ## PoC에서 가져온 코드
 
