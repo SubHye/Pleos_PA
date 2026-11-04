@@ -1,5 +1,6 @@
 // Protocol tests over real stdio processes. InMemoryTransport only links 2025-era instances, so it cannot cover
 // 2026-07-28. Bridge replies still come from a fake, so these prove the MCP path, not an SDK read.
+import { loadCatalog } from '../src/contract.ts';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { mkdtempSync, rmSync, symlinkSync } from 'node:fs';
@@ -11,6 +12,13 @@ import { Client } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
 import { energyReply, json, startBridge, waitFor } from '../test-support/fake-bridge.ts';
 
+const ADOPTED = loadCatalog()
+  .tools.filter((tool) => tool.adoption === 'adopted')
+  .map((tool) => tool.name);
+const REJECTED = loadCatalog()
+  .tools.filter((tool) => tool.adoption === 'rejected')
+  .map((tool) => tool.name);
+const names = (listed: { tools: { name: string }[] }) => listed.tools.map((tool) => tool.name);
 const SERVER = fileURLToPath(new URL('../src/server.ts', import.meta.url));
 const WITH_TOOLS = fileURLToPath(new URL('../test-support/serve-with-tools.ts', import.meta.url));
 const ERAS = [
@@ -27,7 +35,7 @@ async function connect(args: string[], options = {}, env: Record<string, string>
 }
 
 for (const { era, options } of ERAS) {
-  test(`${era}: the default server lists no tools and never reaches the bridge`, async (t) => {
+  test(`${era}: the default server lists exactly the adopted tools and never reaches the bridge`, async (t) => {
     const fake = await startBridge(() => {}, 18765).catch((error) => {
       if (error.code === 'EADDRINUSE') return null;
       throw error;
@@ -36,7 +44,7 @@ for (const { era, options } of ERAS) {
     const { client } = await connect([SERVER], options);
     try {
       assert.equal(client.getNegotiatedProtocolVersion(), era);
-      assert.deepEqual((await client.listTools()).tools, []);
+      assert.deepEqual(names(await client.listTools()), ADOPTED);
       if (fake) assert.equal(fake.seen.length, 0);
     } finally {
       await client.close();
@@ -45,12 +53,30 @@ for (const { era, options } of ERAS) {
   });
 
   test(`${era}: arguments and environment cannot add tools to the default server`, async () => {
-    const env = { ...BASE_ENV, PLEOS_TOOLS: 'get_door_status', TOOLS: 'get_door_status', NODE_ENV: 'test' };
-    const { client } = await connect([SERVER, '18765', 'get_door_status'], options, env);
+    const env = { ...BASE_ENV, PLEOS_TOOLS: 'get_toll_status', TOOLS: 'get_toll_status', NODE_ENV: 'test' };
+    const { client } = await connect([SERVER, '18765', 'get_toll_status'], options, env);
     try {
-      assert.deepEqual((await client.listTools()).tools, []);
+      assert.deepEqual(names(await client.listTools()), ADOPTED);
     } finally {
       await client.close();
+    }
+  });
+
+  test(`${era}: a tool the catalog rejected cannot be called and never reaches the bridge`, async (t) => {
+    const fake = await startBridge(() => {}, 18765).catch((error) => {
+      if (error.code === 'EADDRINUSE') return null;
+      throw error;
+    });
+    if (!fake) t.diagnostic('127.0.0.1:18765 is in use (for example by an adb forward); bridge count not checked');
+    const { client } = await connect([SERVER], options);
+    try {
+      for (const name of REJECTED) {
+        await assert.rejects(client.callTool({ name, arguments: {} }), /not found/, name);
+      }
+      if (fake) assert.equal(fake.seen.length, 0);
+    } finally {
+      await client.close();
+      await fake?.close();
     }
   });
 
@@ -75,6 +101,8 @@ for (const { era, options } of ERAS) {
       }
       assert.deepEqual(Object.keys(tools[0].inputSchema.properties ?? {}), []);
       assert.deepEqual(Object.keys(tools[1].inputSchema.properties ?? {}).sort(), ['areas', 'properties']);
+      const areas = tools[1].inputSchema.properties?.areas as { description?: string };
+      assert.match(areas.description ?? '', /ROW_1_LEFT.*\+/);
       assert.equal(fake.seen.length, 0, 'discovery never reaches the bridge');
     } finally {
       await client.close();
@@ -161,8 +189,8 @@ for (const { era, options } of ERAS) {
     const second = await connect([SERVER], options);
     try {
       assert.notEqual(first.transport.pid, second.transport.pid);
-      assert.deepEqual((await first.client.listTools()).tools, []);
-      assert.deepEqual((await second.client.listTools()).tools, []);
+      assert.deepEqual(names(await first.client.listTools()), ADOPTED);
+      assert.deepEqual(names(await second.client.listTools()), ADOPTED);
     } finally {
       await first.client.close();
       await second.client.close();
@@ -182,7 +210,7 @@ for (const { era, options } of ERAS) {
     const client = new Client({ name: 'test', version: '0' }, options);
     try {
       await client.connect(transport);
-      assert.deepEqual((await client.listTools()).tools, []);
+      assert.deepEqual(names(await client.listTools()), ADOPTED);
     } finally {
       await client.close().catch(() => {});
       rmSync(link);
@@ -218,7 +246,10 @@ test('stdout carries only MCP JSON-RPC, stderr stays empty and stdin EOF ends th
   assert.equal(code, 0);
   const lines = stdout.trim().split('\n');
   for (const line of lines) assert.equal(JSON.parse(line).jsonrpc, '2.0');
-  assert.deepEqual(JSON.parse(lines.find((line) => line.includes('"id":2'))!).result.tools, []);
+  assert.deepEqual(
+    JSON.parse(lines.find((line) => line.includes('"id":2'))!).result.tools.map((tool: { name: string }) => tool.name),
+    ADOPTED,
+  );
   assert.equal(stderr.trim(), '');
 });
 

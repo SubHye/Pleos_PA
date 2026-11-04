@@ -24,8 +24,10 @@
 | 도구 `adoption` | 뜻 |
 | --- | --- |
 | `undecided` | 판정 전이다 |
-| `adopted` | 모든 속성이 `none`이 아니고, 인자 없는 전체 호출에서 `OK` 항목이 1개 이상이며, 호출이 TIMEOUT 없이 끝났다. `console_mismatch` 속성이 있으면 `adoptionNote`에 원인을 적는다 |
+| `adopted` | 모든 속성이 `none`이 아니고(`noCapabilityApi` 속성은 제외), 인자 없는 전체 호출에서 `OK` 항목이 1개 이상이며, 호출이 TIMEOUT 없이 끝났다. `console_mismatch` 속성이 있으면 `adoptionNote`에 원인을 적는다 |
 | `rejected` | 위 조건을 만족하지 못했다. `adoptionNote`에 이유를 적는다. 기존 4개는 이 값을 쓰지 않고, 미달이면 `undecided`로 두고 실패로 보고한다 |
+
+`noCapabilityApi: true`는 SDK에 공개 capability API가 없어 Adapter가 읽지 않는 속성이다. 응답은 항상 `CAPABILITY_FAILED`이고 `verification`은 `none`으로 둔다. 도구에 `OK` 항목이 있어도 이 속성의 값을 얻었다고 보지 않는다.
 
 값은 전수 실행 보고서로만 올린다. SDK나 에뮬레이터 버전이 바뀌면 `verifiedOn`을 비우고 전부 `none`과 `undecided`로 되돌리며, 해당 Adapter 호출을 바꾸면 그 속성을 `none`으로 되돌린다.
 

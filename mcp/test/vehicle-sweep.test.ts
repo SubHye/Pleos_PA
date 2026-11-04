@@ -205,6 +205,25 @@ test('a read the SDK did not answer stays none and fails the tool', async () => 
   }
 });
 
+test('a property with no capability API stays none without failing its tool', async () => {
+  const fake = await startBridge((body, res) => {
+    if (body.query !== 'window_detail_status') return json(res, 200, reply(body, okItems(body.query)));
+    const items = okItems(body.query).map((item) =>
+      item.property === 'SMART_GLASS_CONFIG'
+        ? { ...itemOf(item.property, item.area, 'CAPABILITY_FAILED'), errorType: 'UnsupportedOperationException' }
+        : item,
+    );
+    json(res, 200, reply(body, items, 'PARTIAL'));
+  });
+  try {
+    const report = await sweep(catalog, options(fake.port));
+    assert.equal(report.verification.SMART_GLASS_CONFIG, 'none');
+    assert.equal(report.tools.find((tool) => tool.query === 'window_detail_status')!.r19.passed, true);
+  } finally {
+    await fake.close();
+  }
+});
+
 test('one area the SDK did not answer keeps the whole property at none', async () => {
   const fake = await startBridge((body, res) => {
     if (body.query !== 'window_status') return json(res, 200, reply(body, okItems(body.query)));

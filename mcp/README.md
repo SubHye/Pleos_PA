@@ -4,8 +4,8 @@
 
 ## 현재 상태
 
-- **`tools/list`는 비어 있다.** 계약은 실행 검증을 통과한 도구만 올리도록 정하고, 아직 통과한 도구가 없다. `src/server.ts`의 `ADOPTED_TOOLS`에 COM-23이 항목을 추가한다. 기본 실행 경로는 인자나 환경 변수로 도구를 받지 않는다.
-- **AI에서 차량 값을 읽을 수 없다.** Android `/v3/vehicle-read` Bridge와 Vehicle Adapter는 있지만 채택된 도구가 없다.
+- **`tools/list`는 카탈로그에서 `adoption`이 `adopted`인 도구다.** 22개 중 20개이고, `get_fuel_economy`와 `get_toll_status`는 에뮬레이터에서 값을 받지 못해 제외했다. `get_window_detail_status`는 공개 capability API가 없는 `SMART_GLASS_CONFIG`를 읽지 않은 채 채택했다. 기본 실행 경로는 인자나 환경 변수로 도구를 받지 않는다. 문구는 `src/tool-texts.ts`에 있다.
+- **채택 근거는 `verifiedOn`의 에뮬레이터뿐이다.** 실차와 다른 차량 유형으로 일반화하지 않는다. ChatGPT·Claude 호출 결과는 COM-26에 있다.
 - 테스트의 Bridge는 모두 가짜이며 실제 SDK 결과가 아니다.
 - PoC의 ChatGPT·Claude 성공 기록은 이 서버의 기록이 아니다.
 

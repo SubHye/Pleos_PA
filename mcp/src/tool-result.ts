@@ -24,14 +24,25 @@ export function toolInputSchema(catalog: Catalog, tool: ToolEntry) {
   if (tool.legacy) return z.strictObject({});
   const unique = (values: string[]) => new Set(values).size === values.length;
   const ids = [...propertiesOf(catalog, tool)];
-  const shape: Record<string, z.ZodType> = { properties: z.array(z.enum(ids)).min(1).refine(unique).optional() };
+  const shape: Record<string, z.ZodType> = {
+    properties: z
+      .array(z.enum(ids))
+      .min(1)
+      .refine(unique)
+      .optional()
+      .describe('읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.'),
+  };
   const vocabulary = new Set(ids.flatMap((id) => catalog.areas[propertyOf(catalog, id)?.areaType ?? ''] ?? []));
   if (vocabulary.size > 0) {
+    const [first, second] = vocabulary;
     shape.areas = z
       .array(z.string().refine((area) => isArea(area, vocabulary)))
       .min(1)
       .refine(unique)
-      .optional();
+      .optional()
+      .describe(
+        `읽을 영역. 값은 ${[...vocabulary].join(', ')} 중 하나이고, 묶음 영역은 ${first}+${second}처럼 차량이 보고한 묶음 그대로 +로 잇습니다. 묶음의 일부만 고르면 AREA_UNSUPPORTED가 될 수 있으니, 차량이 보고하는 영역을 모르면 생략하세요.`,
+      );
   }
   return z.strictObject(shape);
 }

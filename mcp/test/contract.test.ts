@@ -121,7 +121,7 @@ test('verification and adoption records are consistent', () => {
     if (tool.adoption !== 'adopted') continue;
     const properties = [...propertiesOf(catalog, tool)].map((id) => propertyOf(catalog, id)!);
     assert.ok(
-      properties.every((property) => property.verification !== 'none'),
+      properties.every((property) => property.verification !== 'none' || property.noCapabilityApi),
       tool.name,
     );
     for (const property of properties.filter((entry) => entry.verification === 'console_mismatch')) {
@@ -137,4 +137,20 @@ test('a Console verdict is recorded only for a property the Console map compares
     .filter((property) => property.verification === 'console_matched' || property.verification === 'console_mismatch')
     .map((property) => property.id);
   assert.deepEqual(recorded.sort(), [...compared].sort());
+});
+
+test('adoption changes only with a visible edit here, after a sweep report', () => {
+  const named = (adoption: string) =>
+    catalog.tools.filter((tool) => tool.adoption === adoption).map((tool) => tool.name);
+  assert.deepEqual(named('rejected').sort(), ['get_fuel_economy', 'get_toll_status']);
+  assert.deepEqual(named('undecided'), []);
+  assert.equal(named('adopted').length, 20);
+});
+
+test('only a property the SDK gives no capability API for is exempt, and it stays none', () => {
+  const exempt = catalog.properties.filter((property) => property.noCapabilityApi);
+  assert.deepEqual(
+    exempt.map((property) => [property.id, property.verification]),
+    [['SMART_GLASS_CONFIG', 'none']],
+  );
 });

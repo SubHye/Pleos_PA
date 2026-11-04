@@ -1,5 +1,6 @@
 package com.example.pleos_pa.contract
 
+import java.io.File
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -55,6 +56,25 @@ class CatalogCompletenessTest {
     }
 
     @Test
+    fun theManifestDeclaresWhatAdoptedToolsReadAndNothingElse() {
+        val adopted =
+            objects(root.getJSONArray("tools"))
+                .filter { it.getString("adoption") == "adopted" }
+                .map { it.getString("query") }
+        val needed =
+            properties
+                .filter { it.getString("query") in adopted }
+                .map { it.getString("permission") }
+                .toSet()
+        val declared =
+            Regex("""pleos\.car\.permission\.(\w+)""")
+                .findAll(File("src/main/AndroidManifest.xml").readText())
+                .map { it.groupValues[1] }
+                .toSet()
+        assertEquals(needed.sorted(), declared.sorted())
+    }
+
+    @Test
     fun verificationRecordsUseTheContractsWords() {
         val words = setOf("none", "executed", "console_matched", "console_mismatch")
         assertTrue(properties.all { it.getString("verification") in words })
@@ -76,7 +96,12 @@ class CatalogCompletenessTest {
             if (adoption != "adopted") continue
             val ids = ContractFixtures.catalog.propertiesOf(tool.getString("query"))
             val own = properties.filter { it.getString("id") in ids }
-            assertTrue(name, own.none { it.getString("verification") == "none" })
+            assertTrue(
+                name,
+                own.none {
+                    it.getString("verification") == "none" && !it.optBoolean("noCapabilityApi")
+                },
+            )
             if (own.any { it.getString("verification") == "console_mismatch" }) {
                 assertTrue(name, tool.has("adoptionNote"))
             }

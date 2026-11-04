@@ -16,6 +16,7 @@ import ai.pleos.playground.vehicle.constant.area.SeatValue
 import ai.pleos.playground.vehicle.constant.area.WheelValue
 import ai.pleos.playground.vehicle.constant.area.WindowValue
 import ai.pleos.playground.vehicle.constant.unit.TemperatureUnit
+import android.annotation.SuppressLint
 import com.example.pleos_pa.contract.SmartGlassConfigValue
 
 /** The SDK calls behind one catalog property. */
@@ -126,6 +127,17 @@ private fun mirrorArea(area: String?) =
 
 private fun wheelArea(area: String?) =
     WheelArea(*parts(area).map(WheelValue::valueOf).toTypedArray())
+
+// get_toll_status is rejected, so the manifest leaves out CAR_TOLL and a direct Bridge query reads
+// PERMISSION_DENIED.
+@SuppressLint("MissingPermission")
+private val ETCS_VOICE_GUIDANCE_VOLUME =
+    SdkProperty(
+        { v, done, failed ->
+            v.getToll().checkEtcsVoiceGuidanceVolumeCapabilities(globalBounds(done), failed)
+        },
+        { v, _, value, failed -> v.getToll().getCurrentEtcsVoiceGuidanceVolume(value, failed) },
+    )
 
 /** Every catalog property, spelled out so the compiler checks each SDK signature. */
 val SDK_PROPERTIES: Map<String, SdkProperty> =
@@ -878,15 +890,7 @@ val SDK_PROPERTIES: Map<String, SdkProperty> =
                     v.getTire().getLowTirePressure(wheelArea(a), value, failed)
                 },
             ),
-        "ETCS_VOICE_GUIDANCE_VOLUME" to
-            SdkProperty(
-                { v, done, failed ->
-                    v.getToll().checkEtcsVoiceGuidanceVolumeCapabilities(globalBounds(done), failed)
-                },
-                { v, _, value, failed ->
-                    v.getToll().getCurrentEtcsVoiceGuidanceVolume(value, failed)
-                },
-            ),
+        "ETCS_VOICE_GUIDANCE_VOLUME" to ETCS_VOICE_GUIDANCE_VOLUME,
         "DISTANCE_DRIVEN" to
             SdkProperty(
                 { v, done, failed ->

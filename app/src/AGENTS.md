@@ -1,6 +1,6 @@
 # Android 소스
 
-연결 제어와 차량 조회 앱이다. 읽을 수 있는 속성은 카탈로그의 97개이며, `SMART_GLASS_CONFIG`는 공개 capability API가 없어 읽지 않는다.
+연결 제어와 차량 조회 앱이다. 읽을 수 있는 속성은 카탈로그의 97개이며, `SMART_GLASS_CONFIG`는 공개 capability API가 없어 읽지 않는다. 제외 도구만 쓰는 `CAR_TOLL`은 Manifest에 없어 `ETCS_VOICE_GUIDANCE_VOLUME`은 `PERMISSION_DENIED`가 된다.
 
 | 위치 | 내용 |
 | --- | --- |

@@ -4,7 +4,7 @@ import { mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readVehicle } from '../src/bridge-client.ts';
-import { loadCatalog, propertiesOf } from '../src/contract.ts';
+import { loadCatalog, propertiesOf, propertyOf } from '../src/contract.ts';
 import type { BridgeResponse, BridgeResult, Catalog, Selection, ToolEntry } from '../src/contract.ts';
 
 type Item = BridgeResponse['items'][number];
@@ -98,7 +98,7 @@ async function sweepTool(catalog: Catalog, tool: ToolEntry, options: SweepOption
   const times = calls.map((entry) => entry.elapsedMs);
   const reachedAll = calls.every((entry) => FINISHED.has(entry.outcome));
   const hasOk = calls.every((entry) => entry.items.some((item) => item.status === 'OK'));
-  const allClassified = [...classified.values()].every(Boolean);
+  const allClassified = [...classified].every(([id, answered]) => answered || propertyOf(catalog, id)?.noCapabilityApi);
   return {
     name: tool.name,
     query: tool.query,
