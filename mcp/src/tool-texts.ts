@@ -43,12 +43,12 @@ export const TOOL_TEXTS: Readonly<Record<string, { title: string; description: s
   ),
   get_seat_status: text(
     '좌석 상태',
-    '좌석 점유, 안전벨트 체결, 좌석 위치 원시값, 열선과 통풍 단계를 조회합니다. 에뮬레이터 대조에서 SEAT_OCCUPANCY는 Console과 반대로 나왔고, SEAT_FORE_AFT_POSITION, SEAT_HEIGHT_POSITION, SEAT_TILT_POSITION, SEAT_BACKREST_ANGLE_POSITION, SEAT_LUMBAR_FORE_AFT_POSITION은 Console 값을 따르지 않았습니다. 원인을 확인하지 못했으므로 이 값을 확정된 사실로 말하지 마세요.',
+    '좌석 점유, 안전벨트 체결, 좌석 위치 원시값, 열선과 통풍 단계를 조회합니다. 에뮬레이터 대조에서 SEAT_OCCUPANCY는 Console과 반대로 나왔고 원인을 확인하지 못했으므로 이 값을 확정된 사실로 말하지 마세요. 좌석 위치는 에뮬레이터에서 값을 대조하지 못했습니다.',
   ),
   get_side_mirror_status: text('사이드미러', '사이드미러 열선 단계를 조회합니다.'),
   get_steering_wheel_status: text(
     '스티어링 휠',
-    '스티어링 휠 열선 단계와 조향각(도)을 조회합니다. 에뮬레이터 대조에서 STEERING_WHEEL_ANGLE은 Console과 부호가 반대로 나왔고 원인을 확인하지 못했으므로 회전 방향을 단정하지 마세요.',
+    '스티어링 휠 열선 단계와 앞바퀴 조향각(도)을 조회합니다. 조향각은 핸들 회전각이 아닙니다. 에뮬레이터 대조에서 STEERING_WHEEL_ANGLE은 Console과 부호가 반대로 나왔고 원인을 확인하지 못했으므로 회전 방향을 단정하지 마세요.',
   ),
   get_tire_status: text(
     '저압 임계값',
