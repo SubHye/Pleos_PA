@@ -226,7 +226,9 @@ open class MainActivity : AppCompatActivity() {
         restrictionSource.start { next ->
             runOnUiThread {
                 ux = next
-                renderHistory()
+                // Polls renew freshness; do not replace focused rows on every unchanged sample.
+                if (ux.permitsHistory(SystemClock.elapsedRealtime()) != wasPermitted)
+                    renderHistory()
             }
         }
     }

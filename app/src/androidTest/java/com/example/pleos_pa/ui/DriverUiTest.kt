@@ -74,6 +74,16 @@ class DriverUiTest {
         click(activity, "모의 기록 생성")
         selectEnergy(activity)
         assertTrue(text(activity).contains("fixture-energy-value"))
+        var selectedRow: Button? = null
+        instrumentation.runOnMainSync {
+            selectedRow =
+                all(activity).filterIsInstance<Button>().single {
+                    it.text.startsWith("get_energy_level ·")
+                }
+        }
+        Thread.sleep(1_100) // An unchanged UX refresh must not remove the selected row.
+        instrumentation.waitForIdleSync()
+        instrumentation.runOnMainSync { assertNotNull(selectedRow?.parent) }
         for (mode in listOf("모의: 규제 활성", "모의: 정보 상실")) {
             click(activity, mode)
             assertFalse(text(activity).contains("fixture-energy-value"))
