@@ -3,6 +3,7 @@ package com.example.pleos_pa.ui
 import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -15,6 +16,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import org.json.JSONObject
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -168,8 +170,7 @@ class DriverUiTest {
                 it.arguments.length <= 4096 && it.details.length <= RequestHistory.MAX_DETAILS
             }
         )
-        instrumentation.sendStatus(
-            0,
+        val metrics =
             Bundle().apply {
                 putString("scope", "synthetic Android journal; not a final Pleos UI/heap limit")
                 putInt("retainedRecords", rows.size)
@@ -182,7 +183,12 @@ class DriverUiTest {
                     "processJavaHeapUsedBytes",
                     Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory(),
                 )
-            },
-        )
+            }
+        instrumentation.addResults(metrics)
+        val json = JSONObject()
+        for (key in metrics.keySet()) {
+            @Suppress("DEPRECATION") json.put(key, metrics.get(key))
+        }
+        Log.i("COM5_METRICS", json.toString())
     }
 }

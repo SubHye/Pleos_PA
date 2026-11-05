@@ -53,6 +53,8 @@ jobs:
           adb -s emulator-5554 shell input keyevent 82
       - name: Run real Android widgets with synthetic UX and data
         run: bash ./gradlew -Pcom5Diagnostic=true -Pandroid.testInstrumentationRunnerArguments.class=com.example.pleos_pa.ui.DriverUiTest :app:connectedDebugAndroidTest --no-daemon --console=plain
+      - name: Capture synthetic journal metrics
+        run: adb -s emulator-5554 logcat -d -s COM5_METRICS:I '*:S' > "$RUNNER_TEMP/com5-ui-metrics.txt"
       - name: Verify shared journal across actual process restart
         run: python3 scripts/check-com5-device.py --serial emulator-5554 --output "$RUNNER_TEMP/com5-process-restart.json"
       - name: Keep UI and process evidence
@@ -65,6 +67,7 @@ jobs:
             app/build/reports/androidTests/
             app/build/outputs/androidTest-results/
             ${{ runner.temp }}/com5-process-restart.json
+            ${{ runner.temp }}/com5-ui-metrics.txt
             ${{ runner.temp }}/com5-emulator.log
 
   mcp:
