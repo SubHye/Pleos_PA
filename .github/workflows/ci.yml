@@ -44,8 +44,10 @@ jobs:
       - name: Install SDK and generic API 34 image
         run: sdkmanager "platforms;android-37.0" "build-tools;36.0.0" "emulator" "system-images;android-34;google_apis;x86_64"
       - name: Build diagnostic APKs before emulator startup
+        id: com5_build
         run: bash ./gradlew -Pcom5Diagnostic=true :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon --console=plain
       - name: Boot isolated Android emulator
+        id: com5_boot
         run: |
           sudo chmod a+rw /dev/kvm
           "$ANDROID_HOME/emulator/emulator" -accel-check
@@ -66,17 +68,25 @@ jobs:
             tail -80 "$RUNNER_TEMP/com5-emulator.log"
             exit 1
           }
-          adb -s emulator-5554 shell input keyevent 82
+          adb -s emulator-5554 shell svc power stayon true
+          adb -s emulator-5554 shell input keyevent KEYCODE_WAKEUP
+          adb -s emulator-5554 shell wm dismiss-keyguard
       - name: Run real Android widgets with synthetic UX and data
         run: bash ./gradlew -Pcom5Diagnostic=true -Pandroid.testInstrumentationRunnerArguments.class=com.example.pleos_pa.ui.DriverUiTest :app:connectedDebugAndroidTest --no-daemon --console=plain
       - name: Capture synthetic journal metrics
+        if: ${{ !cancelled() && steps.com5_boot.conclusion == 'success' }}
         run: adb -s emulator-5554 logcat -d -s COM5_METRICS:I '*:S' > "$RUNNER_TEMP/com5-ui-metrics.txt"
       - name: Prepare diagnostic APK for the independent restart check
+        id: com5_probe_install
+        if: ${{ !cancelled() && steps.com5_build.conclusion == 'success' && steps.com5_boot.conclusion == 'success' }}
         run: |
           adb -s emulator-5554 shell pm path com.example.pleos_pa.com5 > "$RUNNER_TEMP/com5-post-test-install.txt" || true
           adb -s emulator-5554 push app/build/outputs/apk/debug/app-debug.apk /data/local/tmp/com5-app.apk
-          adb -s emulator-5554 shell timeout 60 pm install -r -t /data/local/tmp/com5-app.apk
+          install_result=$(adb -s emulator-5554 shell timeout 60 pm install -r -t /data/local/tmp/com5-app.apk)
+          printf '%s\n' "$install_result"
+          python3 -c 'import sys; sys.exit(0 if "Success" in sys.stdin.read().splitlines() else 1)' <<< "$install_result"
       - name: Verify shared journal across actual process restart
+        if: ${{ !cancelled() && steps.com5_probe_install.conclusion == 'success' }}
         run: |
           python3 scripts/check-com5-device.py --serial emulator-5554 --output "$RUNNER_TEMP/com5-process-restart.json" || {
             adb -s emulator-5554 logcat -d -s COM5_STATE:I AndroidRuntime:E '*:S' > "$RUNNER_TEMP/com5-probe-error.txt"

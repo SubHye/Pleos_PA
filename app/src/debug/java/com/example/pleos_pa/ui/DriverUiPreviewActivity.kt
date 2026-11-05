@@ -1,8 +1,10 @@
 package com.example.pleos_pa.ui
 
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.LinearLayout
 import com.example.pleos_pa.MainActivity
@@ -14,6 +16,12 @@ class DriverUiPreviewActivity : MainActivity() {
     override val previewNotice = "모의 화면 검증 · 아래 기록은 실제 차량 값이 아닙니다."
     private val fixture = FixtureSource()
     private var previewConnection: ConnectionStatus = ConnectionStatus.Stopped
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Only the synthetic diagnostic screen stays awake; no device setting is changed.
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
 
     override fun startConnection() {
         previewConnection = ConnectionStatus.Connected()

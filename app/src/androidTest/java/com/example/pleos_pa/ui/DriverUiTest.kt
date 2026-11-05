@@ -8,14 +8,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import org.hamcrest.CoreMatchers.sameInstance
 import org.json.JSONObject
 import org.junit.Assert.*
 import org.junit.Test
@@ -34,13 +37,13 @@ class DriverUiTest {
                     "com.example.pleos_pa.ui.DriverUiPreviewActivity",
                 )
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        val activity = instrumentation.startActivitySync(intent) as DriverUiPreviewActivity
-        instrumentation.waitForIdleSync()
+        val scenario = ActivityScenario.launch<DriverUiPreviewActivity>(intent)
+        lateinit var activity: DriverUiPreviewActivity
+        scenario.onActivity { activity = it }
         try {
             test(activity)
         } finally {
-            instrumentation.runOnMainSync { activity.finish() }
-            instrumentation.waitForIdleSync()
+            scenario.close()
         }
     }
 
@@ -112,9 +115,14 @@ class DriverUiTest {
                 )
             }
             // An off-screen view with VISIBLE set is insufficient: check touch reachability.
-            onView(withText("중지")).check(matches(isDisplayed())).check(matches(isEnabled()))
+            onView(withText("중지"))
+                .inRoot(withDecorView(sameInstance(activity.window.decorView)))
+                .check(matches(isDisplayed()))
+                .check(matches(isEnabled()))
         }
-        onView(withText("중지")).perform(click())
+        onView(withText("중지"))
+            .inRoot(withDecorView(sameInstance(activity.window.decorView)))
+            .perform(click())
         assertTrue(text(activity).contains("중지됨. AI가 차량 값을 읽을 수 없습니다."))
         click(activity, "모의: 제한 없음")
         selectEnergy(activity)
