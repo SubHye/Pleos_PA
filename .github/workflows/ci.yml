@@ -43,6 +43,8 @@ jobs:
       - uses: android-actions/setup-android@v4
       - name: Install SDK and generic API 34 image
         run: sdkmanager "platforms;android-37.0" "build-tools;36.0.0" "emulator" "system-images;android-34;google_apis;x86_64"
+      - name: Build diagnostic APKs before emulator startup
+        run: bash ./gradlew -Pcom5Diagnostic=true :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon --console=plain
       - name: Boot isolated Android emulator
         run: |
           sudo chmod a+rw /dev/kvm
