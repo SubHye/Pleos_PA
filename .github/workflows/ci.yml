@@ -46,9 +46,9 @@ jobs:
       - name: Boot isolated Android emulator
         run: |
           sudo chmod a+rw /dev/kvm
-          emulator -accel-check
+          "$ANDROID_HOME/emulator/emulator" -accel-check
           avdmanager create avd --name com5-ui-api34 --package "system-images;android-34;google_apis;x86_64" --device pixel_2 <<< no
-          emulator @com5-ui-api34 -port 5554 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$RUNNER_TEMP/com5-emulator.log" 2>&1 &
+          "$ANDROID_HOME/emulator/emulator" @com5-ui-api34 -port 5554 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$RUNNER_TEMP/com5-emulator.log" 2>&1 &
           python3 scripts/check-com5-device.py --serial emulator-5554 --wait-for-boot
           adb -s emulator-5554 shell input keyevent 82
       - name: Run real Android widgets with synthetic UX and data

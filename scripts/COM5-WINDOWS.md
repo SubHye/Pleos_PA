@@ -30,4 +30,4 @@ ADB를 찾지 못하면 각 명령에 `-AdbPath 'C:\Users\user\AppData\Local\And
 python scripts/package-com5-verification.py --output C:\Temp\COM5-verification-new.zip
 ```
 
-패키지 도구는 커밋된 깨끗한 소스에서 진단 빌드를 다시 확인한다. Python 표준 라이브러리와 Android SDK Build Tools 36.0.0의 aapt를 사용한다. 이미 만들어진 키트를 실행할 때는 Python이 필요 없다.
+패키지 도구는 커밋된 깨끗한 소스에서 진단 빌드를 다시 확인한다. 소스 커밋 식별용 Git, Python 표준 라이브러리와 Android SDK Build Tools 36.0.0의 aapt를 사용한다. 이미 만들어진 키트를 실행할 때는 Python이 필요 없다.
