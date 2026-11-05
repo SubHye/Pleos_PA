@@ -12,10 +12,10 @@ PACKAGE = "com.example.pleos_pa.com5"
 PROBE = "com.example.pleos_pa.ui.DriverStateProbeActivity"
 
 
-def adb(serial, *args, timeout=30):
+def adb(serial, *args, timeout=30, combined_output=False):
     result = subprocess.run(["adb", "-s", serial, *args], capture_output=True, text=True,
                             timeout=timeout, check=True)
-    return result.stdout.strip()
+    return (result.stdout + (result.stderr if combined_output else "")).strip()
 
 
 def boot(serial, emulator_pid=None):
@@ -37,8 +37,10 @@ def boot(serial, emulator_pid=None):
 
 def probe(serial, operation):
     nonce = str(uuid.uuid4())
-    adb(serial, "shell", "am", "start", "-W", "-n", f"{PACKAGE}/{PROBE}",
-        "--es", "operation", operation, "--es", "nonce", nonce)
+    started = adb(serial, "shell", "am", "start", "-W", "-n", f"{PACKAGE}/{PROBE}",
+                  "--es", "operation", operation, "--es", "nonce", nonce, combined_output=True)
+    if any(marker in started for marker in ("Error:", "Exception", "Permission Denial")):
+        raise RuntimeError("Diagnostic activity could not start: " + started)
     deadline = time.monotonic() + 15
     while time.monotonic() < deadline:
         logs = adb(serial, "logcat", "-d", "-s", "COM5_STATE:I", "*:S")

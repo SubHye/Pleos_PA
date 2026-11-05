@@ -69,8 +69,17 @@ jobs:
         run: bash ./gradlew -Pcom5Diagnostic=true -Pandroid.testInstrumentationRunnerArguments.class=com.example.pleos_pa.ui.DriverUiTest :app:connectedDebugAndroidTest --no-daemon --console=plain
       - name: Capture synthetic journal metrics
         run: adb -s emulator-5554 logcat -d -s COM5_METRICS:I '*:S' > "$RUNNER_TEMP/com5-ui-metrics.txt"
+      - name: Prepare diagnostic APK for the independent restart check
+        run: |
+          adb -s emulator-5554 shell pm path com.example.pleos_pa.com5 > "$RUNNER_TEMP/com5-post-test-install.txt" || true
+          adb -s emulator-5554 push app/build/outputs/apk/debug/app-debug.apk /data/local/tmp/com5-app.apk
+          adb -s emulator-5554 shell timeout 60 pm install -r -t /data/local/tmp/com5-app.apk
       - name: Verify shared journal across actual process restart
-        run: python3 scripts/check-com5-device.py --serial emulator-5554 --output "$RUNNER_TEMP/com5-process-restart.json"
+        run: |
+          python3 scripts/check-com5-device.py --serial emulator-5554 --output "$RUNNER_TEMP/com5-process-restart.json" || {
+            adb -s emulator-5554 logcat -d -s COM5_STATE:I AndroidRuntime:E '*:S' > "$RUNNER_TEMP/com5-probe-error.txt"
+            exit 1
+          }
       - name: Keep UI and process evidence
         if: always()
         uses: actions/upload-artifact@v7.0.2
@@ -82,6 +91,8 @@ jobs:
             app/build/outputs/androidTest-results/
             ${{ runner.temp }}/com5-process-restart.json
             ${{ runner.temp }}/com5-ui-metrics.txt
+            ${{ runner.temp }}/com5-post-test-install.txt
+            ${{ runner.temp }}/com5-probe-error.txt
             ${{ runner.temp }}/com5-emulator.log
 
   mcp:
