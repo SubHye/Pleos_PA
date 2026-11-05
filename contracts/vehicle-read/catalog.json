@@ -305,7 +305,7 @@
       "legacy": false,
       "resultForm": "items",
       "adoption": "adopted",
-      "adoptionNote": "Console과 다른 속성이 있다. SEAT_FORE_AFT_POSITION, SEAT_HEIGHT_POSITION, SEAT_TILT_POSITION, SEAT_BACKREST_ANGLE_POSITION, SEAT_LUMBAR_FORE_AFT_POSITION은 Console 값이 SDK에 반영되지 않았고, SEAT_OCCUPANCY는 Console 운전석 점유와 SDK ROW_1_LEFT 값이 반대로 나왔다. 원인 미확정.",
+      "adoptionNote": "SEAT_OCCUPANCY는 Console 좌석 4개 모두 점유와 SDK 값이 반대로 나왔다. 원인 미확정. 좌석 위치 5개는 숨겨진 Console 값이 SDK에 전달되지 않아 대조하지 못했다.",
       "fixedItems": []
     },
     {
@@ -1317,7 +1317,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "console_mismatch"
+      "verification": "executed"
     },
     {
       "id": "SEAT_LUMBAR_FORE_AFT_POSITION",
@@ -1330,7 +1330,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "console_mismatch"
+      "verification": "executed"
     },
     {
       "id": "SEAT_LUMBAR_SIDE_SUPPORT_POSITION",
@@ -1356,7 +1356,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "console_mismatch"
+      "verification": "executed"
     },
     {
       "id": "SEAT_DEPTH_POSITION",
@@ -1382,7 +1382,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "console_mismatch"
+      "verification": "executed"
     },
     {
       "id": "SEAT_HEADREST_ANGLE_POSITION",
@@ -1408,7 +1408,7 @@
       "unit": null,
       "permission": "CAR_SEATS",
       "console": "listed",
-      "verification": "console_mismatch"
+      "verification": "executed"
     },
     {
       "id": "SEAT_BELT_BUCKLED_STATE",
