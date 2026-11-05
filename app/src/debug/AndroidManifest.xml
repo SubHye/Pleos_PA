@@ -2,5 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
         <activity android:name=".ui.DriverUiPreviewActivity" android:exported="true" />
+        <activity
+            android:name=".ui.DriverStateProbeActivity"
+            android:enabled="${com5DiagnosticsEnabled}"
+            android:exported="true" />
     </application>
 </manifest>

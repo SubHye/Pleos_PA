@@ -1,10 +1,18 @@
 package com.example.pleos_pa.ui
 
 import android.content.Intent
+import android.os.Bundle
+import android.os.SystemClock
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isEnabled
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.*
@@ -101,7 +109,11 @@ class DriverUiTest {
                         .isEnabled
                 )
             }
+            // An off-screen view with VISIBLE set is insufficient: check touch reachability.
+            onView(withText("중지")).check(matches(isDisplayed())).check(matches(isEnabled()))
         }
+        onView(withText("중지")).perform(click())
+        assertTrue(text(activity).contains("중지됨. AI가 차량 값을 읽을 수 없습니다."))
         click(activity, "모의: 제한 없음")
         selectEnergy(activity)
         assertTrue(text(activity).contains("fixture-energy-value"))
@@ -136,5 +148,41 @@ class DriverUiTest {
         assertFalse(text(activity).contains("fixture-energy-value"))
         assertFalse(text(activity).contains("first-fixture"))
         assertTrue(text(activity).contains("아직 받은 요청이 없습니다."))
+    }
+
+    @Test
+    fun workingHistoryLimitHasBoundedPayloadOnAndroid() {
+        val start = SystemClock.elapsedRealtime()
+        val journal = RequestHistory()
+        val arguments = "x".repeat(8_000)
+        val result = "z".repeat(32_000)
+        repeat(2_000) {
+            val token = journal.begin("$it", "synthetic_load", arguments, "synthetic_time")
+            journal.finish(token, "COMPLETE", "simulation", result)
+        }
+        val rows = journal.snapshot()
+        assertEquals(100, rows.size)
+        assertEquals("1999", rows.first().requestId)
+        assertTrue(
+            rows.all {
+                it.arguments.length <= 4096 && it.details.length <= RequestHistory.MAX_DETAILS
+            }
+        )
+        instrumentation.sendStatus(
+            0,
+            Bundle().apply {
+                putString("scope", "synthetic Android journal; not a final Pleos UI/heap limit")
+                putInt("retainedRecords", rows.size)
+                putInt(
+                    "retainedPayloadChars",
+                    rows.sumOf { it.arguments.length + it.details.length },
+                )
+                putLong("elapsedMs", SystemClock.elapsedRealtime() - start)
+                putLong(
+                    "processJavaHeapUsedBytes",
+                    Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory(),
+                )
+            },
+        )
     }
 }

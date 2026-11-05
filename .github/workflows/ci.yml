@@ -31,6 +31,42 @@ jobs:
       - name: Build, unit test and lint
         run: bash ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest :app:lintDebug --no-daemon --console=plain
 
+  android-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: android-actions/setup-android@v4
+      - name: Install SDK and generic API 34 image
+        run: sdkmanager "platforms;android-37.0" "build-tools;36.0.0" "emulator" "system-images;android-34;google_apis;x86_64"
+      - name: Boot isolated Android emulator
+        run: |
+          sudo chmod a+rw /dev/kvm
+          emulator -accel-check
+          avdmanager create avd --name com5-ui-api34 --package "system-images;android-34;google_apis;x86_64" --device pixel_2 <<< no
+          emulator @com5-ui-api34 -port 5554 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$RUNNER_TEMP/com5-emulator.log" 2>&1 &
+          python3 scripts/check-com5-device.py --serial emulator-5554 --wait-for-boot
+          adb -s emulator-5554 shell input keyevent 82
+      - name: Run real Android widgets with synthetic UX and data
+        run: bash ./gradlew -Pcom5Diagnostic=true -Pandroid.testInstrumentationRunnerArguments.class=com.example.pleos_pa.ui.DriverUiTest :app:connectedDebugAndroidTest --no-daemon --console=plain
+      - name: Verify shared journal across actual process restart
+        run: python3 scripts/check-com5-device.py --serial emulator-5554 --output "$RUNNER_TEMP/com5-process-restart.json"
+      - name: Keep UI and process evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: com5-android-ui-evidence
+          retention-days: 14
+          path: |
+            app/build/reports/androidTests/
+            app/build/outputs/androidTest-results/
+            ${{ runner.temp }}/com5-process-restart.json
+            ${{ runner.temp }}/com5-emulator.log
+
   mcp:
     runs-on: ubuntu-latest
     timeout-minutes: 10

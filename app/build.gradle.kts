@@ -42,12 +42,14 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["com5DiagnosticsEnabled"] = false
     }
 
     buildTypes {
         debug {
             if (providers.gradleProperty("com5Diagnostic").orNull == "true") {
                 applicationIdSuffix = ".com5"
+                manifestPlaceholders["com5DiagnosticsEnabled"] = true
             }
         }
         release {

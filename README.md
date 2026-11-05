@@ -31,7 +31,7 @@ npm --prefix mcp run format:check
 npm --prefix mcp test
 ```
 
-PR과 main push에서 CI가 같은 검사와 Structurizr 모델 검증을 실행한다.
+PR과 main push에서 CI가 같은 검사와 Structurizr 모델 검증을 실행한다. 별도 android-ui 작업은 일반 API34 에뮬레이터에서 모의 UI와 실제 프로세스 재시작을 검증하며, Pleos SDK/정책 검수와 구분한다.
 
 ## 연결 제어
 
@@ -49,18 +49,15 @@ Bridge는 사용자가 앱 화면에서 시작해야 열리고, 앱 실행이나
 
 기록에는 요청 선택 인자와 검증된 차량 조회 결과만 남긴다. 메일·일정 원문, HTTP 원문, 신원·인증 헤더는 받지 않는다. 최근 100건·인자 4,096자·결과 16,384자 상한과 10건씩 탐색은 검수용 초기값이다. OQ-09의 최종 상한은 실제 기기의 UI·힙 검수 후 정한다. 기록 삭제 후 늦게 도착한 응답은 기록을 복구하지 않는다. Android 화면 상태 저장에도 값과 선택을 맡기지 않는다.
 
-`debug`에만 `com.example.pleos_pa.ui.DriverUiPreviewActivity`가 있다. 모의 기록·규제·연결 제어는 실제 SDK, Bridge, 공용 기록과 분리된다. 아래 빌드 옵션은 기존 앱 서명·데이터를 건드리지 않도록 별도 패키지에 설치할 때 사용한다. 실제 앱·알림 중지와 프로세스 재시작 검수는 기본 MainActivity에서 수행해야 한다.
+`debug` 전용 검수 화면의 모의 기록·규제·연결 제어는 실제 SDK·Bridge·공용 기록과 분리된다. `.com5` 진단 빌드에만 켜지는 별도 probe는 공용 기록에 모의 값을 추가하고 건수/PID만 출력한다. 기본 debug나 release에는 이 probe가 활성화되지 않는다. 실제 앱·알림 중지 검수는 기본 MainActivity에서 수행한다.
+
+Windows 설치·화면 검사·프로세스 재시작은 [실행 절차](scripts/COM5-WINDOWS.md)를 따른다. 키트는 Python 없이 PowerShell에서 실행하며, 기존 앱 삭제 없이 별도 패키지를 사용한다. 소스 빌드는 다음과 같다.
 
 ```powershell
 .\gradlew.bat -Pcom5Diagnostic=true :app:assembleDebug :app:assembleDebugAndroidTest
-# 설치는 동일 PC에서 빌드한 두 APK를 사용한다. 기존 앱을 삭제하지 않는다.
-# 기본 debug 빌드는 com.example.pleos_pa, 위 옵션은 com.example.pleos_pa.com5다.
-$com5Adb = Join-Path $env:LOCALAPPDATA 'Android\Sdk\platform-tools\adb.exe'
-& $com5Adb -s emulator-5554 shell am start -n com.example.pleos_pa.com5/com.example.pleos_pa.ui.DriverUiPreviewActivity
-& $com5Adb -s emulator-5554 shell am instrument -w -r -e class com.example.pleos_pa.ui.DriverUiTest com.example.pleos_pa.com5.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
-위 테스트는 Android 위젯에서 모의 규제·정보 상실·갱신 만료·기록 삭제를 검사한다. 실제 Car UX 또는 실제 차량 값을 검증하지 않는다. 기본 화면에서는 실제 조회 후 제한 안내의 기록 건수를 확인한 뒤 프로세스를 종료하고 다시 열어 기록이 0건이고 연결이 중지 상태인지 검수한다. 실제 상세 값·이전 상태 비복원 검수는 화면 정책 및 내비 구현 연결 후 수행한다. Activity 재생성이나 메모리 모델의 새 인스턴스 검사는 프로세스 재시작 증거가 아니다.
+CI는 일반 API34 에뮬레이터에서 `DriverUiTest`와 `scripts/check-com5-device.py`를 실행한다. 공용 메모리 기록을 모의 데이터로 채운 뒤 실제 프로세스를 종료하고 새 PID·기록0·중지 초기 상태를 확인한다. 이는 새 모델 인스턴스 검사와 구분하며, 실제 내비 이전 상태나 Pleos 규제 전환의 증거로 사용하지 않는다. 검사 결과와 처리 시간·Java 힙 측정은 Actions의 `com5-android-ui-evidence` artifact에 남는다.
 
 ## Bridge 신뢰 경계
 
