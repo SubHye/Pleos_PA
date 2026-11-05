@@ -2,6 +2,7 @@
 """CI-owned Android emulator checks; does not claim Pleos SDK/Car UX evidence."""
 import argparse
 import json
+import os
 from pathlib import Path
 import subprocess
 import time
@@ -17,13 +18,18 @@ def adb(serial, *args, timeout=30):
     return result.stdout.strip()
 
 
-def boot(serial):
+def boot(serial, emulator_pid=None):
     deadline = time.monotonic() + 360
     while time.monotonic() < deadline:
+        if emulator_pid is not None:
+            try:
+                os.kill(emulator_pid, 0)
+            except ProcessLookupError as error:
+                raise RuntimeError("CI emulator exited before boot; inspect its log") from error
         try:
             if adb(serial, "shell", "getprop", "sys.boot_completed", timeout=10) == "1":
                 return
-        except (subprocess.SubprocessError, OSError):
+        except subprocess.SubprocessError:
             pass
         time.sleep(2)
     raise RuntimeError("Selected emulator did not complete boot in 360 seconds")
@@ -64,11 +70,12 @@ def main():
     parser.add_argument("--serial", required=True)
     parser.add_argument("--wait-for-boot", action="store_true")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--emulator-pid", type=int)
     args = parser.parse_args()
     if not args.serial.startswith("emulator-") or not args.serial[9:].isdigit():
         parser.error("Only an explicitly named emulator is supported")
     if args.wait_for_boot:
-        boot(args.serial)
+        boot(args.serial, args.emulator_pid)
         return
     result = restart_check(args.serial)
     if args.output:
