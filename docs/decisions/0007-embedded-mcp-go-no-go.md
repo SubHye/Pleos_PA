@@ -26,12 +26,12 @@
 
 **Go를 제안한다.** COM-12의 후보 구성은 Kotlin MCP SDK **0.14.0**(Ktor 3.4.3 CIO)의 **stateless** Streamable HTTP다.
 
-단, 남은 조건이 있다. Claude Code가 실제 도구를 호출하는 확인은 실행하지 못했다. 서버 연결까지는 됐지만 계정 크레딧 부족으로 막혔다(BLOCKED). 이 확인 전에는 COM-12를 Todo로 옮기지 않는다.
+실제 AI 호출은 ChatGPT 계열에서 확인했다. Codex CLI 0.166.0(ChatGPT 로그인)이 Streamable HTTP로 내장 서버의 `get_energy_level`을 호출했고, Console의 EV SOC 42와 같은 "42%"로 답했다. Claude Code는 서버 연결까지만 확인했고, 계정 크레딧 부족으로 도구 호출은 하지 못했다(BLOCKED). 두 계열의 E2E는 COM-12에서 다시 검증한다.
 
 | 조건 | 결과 |
 | --- | --- |
 | 빌드 | 통과. AGP 9.4.1 내장 Kotlin 2.2.10으로 CI 검사 4종과 release 조립이 통과했다. |
-| 동작 | 일부 통과. 공식 TS 클라이언트로 `tools/list`·`get_energy_level`이 동작했고, 프로토콜 `2025-11-25`로 협상됐다. EV SOC 100·58이 Console, SDK 로그, Bridge, 두 MCP 경로에서 일치했다. Claude Code 실제 호출은 BLOCKED다. |
+| 동작 | 통과. 공식 TS 클라이언트로 `tools/list`·`get_energy_level`이 동작했고, 프로토콜 `2025-11-25`로 협상됐다. EV SOC 100·58이 Console, SDK 로그, Bridge, 두 MCP 경로에서 일치했다. ChatGPT(Codex CLI) 실제 호출이 SOC 42를 그대로 답했고, 앱 로그의 `requestId`가 일치했다. Claude Code 도구 호출은 BLOCKED(크레딧)다. |
 | 결과 동등성 | 통과. 공용 `tool-results.json`의 items 형식 14개 사례가 Node와 같았다. 에뮬레이터에서도 수신 시각을 빼면 결과 문장이 같았다. |
 | 생명주기 | 통과. 중지·재개 3회 동안 중지하면 두 포트가 닫히고 호출이 실패했으며, 재개하면 다시 성공했다. 동시 호출 시 읽기 슬롯을 공유해 한쪽이 `BUSY`를 받았다. |
 | 공개 범위 | 통과. `127.0.0.1`에만 바인드됐다. `Origin` 헤더가 있거나 Host가 `127.0.0.1`이 아니면 403이다. 인증은 없다. |
@@ -77,9 +77,9 @@
 - 도구 설명이 `mcp/src/tool-texts.ts`에 있으므로, 이를 공유하는 것은 계약 변경으로 다룬다.
 
 **남은 위험**
-- 인증이 없다. Host/Origin 검사는 인증이 아니다.
+- 인증이 없다. Host/Origin 검사는 인증이 아니다. `127.0.0.1`은 같은 기기의 다른 앱도 접근할 수 있어서, 차량 권한이 없는 앱이 이 서버를 거쳐 값을 읽을 수 있다. 지금의 18765 Bridge도 같은 문제를 가진다. 실차 전에 인증이 필요하다.
 - 외부 AI가 PC·ADB 없이 앱에 닿는 경로는 여전히 없다(COM-15).
-- ChatGPT 계열이 HTTP로 연결되는지는 확인하지 않았다.
+- 클라이언트마다 HTTP 연결 지원이 다르다. Codex CLI와 Claude Code는 URL로 연결됐다. Claude Desktop의 설정 파일 방식은 확인하지 않았다. 로컬 HTTP를 바로 등록할 수 없으면 stdio↔HTTP 중계가 필요하다.
 - 실제 SDK로 대조한 속성은 에너지뿐이다.
 - 앱마켓 보안 가이드의 HTTPS·노출 최소화 원칙에 loopback HTTP가 해당하는지 확인하지 않았다.
 
