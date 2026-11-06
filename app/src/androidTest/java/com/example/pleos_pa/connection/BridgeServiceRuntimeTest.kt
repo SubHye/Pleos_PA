@@ -19,6 +19,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.pleos_pa.MainActivity
 import com.example.pleos_pa.R
+import com.example.pleos_pa.awaitFocusedActivity
 import com.example.pleos_pa.ui.DriverHistory
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -84,6 +85,7 @@ class BridgeServiceRuntimeTest {
         lateinit var activity: MainActivity
         scenario.onActivity { activity = it }
         try {
+            awaitFocusedActivity(activity)
             await("no service before test") { serviceGone() }
             assertTrue(ConnectionStatusBoard.status is ConnectionStatus.Stopped)
             manager.cancelAll()

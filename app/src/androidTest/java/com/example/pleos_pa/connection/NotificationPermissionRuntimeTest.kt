@@ -18,6 +18,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.pleos_pa.MainActivity
 import com.example.pleos_pa.R
+import com.example.pleos_pa.awaitFocusedActivity
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -68,6 +69,7 @@ class NotificationPermissionRuntimeTest {
         lateinit var activity: MainActivity
         scenario.onActivity { activity = it }
         try {
+            awaitFocusedActivity(activity)
             onView(withText(context.getString(R.string.action_start)))
                 .inRoot(withDecorView(sameInstance(activity.window.decorView)))
                 .perform(click())
@@ -108,6 +110,7 @@ class NotificationPermissionRuntimeTest {
                 }
                 ready
             }
+            awaitFocusedActivity(activity)
             onView(withText(context.getString(R.string.notifications_off)))
                 .inRoot(withDecorView(sameInstance(activity.window.decorView)))
                 .check(matches(isDisplayed()))

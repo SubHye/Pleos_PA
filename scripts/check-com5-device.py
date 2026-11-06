@@ -3,7 +3,6 @@
 import argparse
 import json
 import os
-import re
 from pathlib import Path
 import subprocess
 import time
@@ -92,6 +91,25 @@ def inspect_non_automotive(serial):
     raise RuntimeError("No correlated live-inspection event")
 
 
+def run_instrumentation(serial, class_name, expected):
+    result = adb(serial, "shell", "am", "instrument", "--user", "current", "-w", "-r",
+                 "-e", "class", class_name,
+                 f"{PACKAGE}.test/androidx.test.runner.AndroidJUnitRunner",
+                 timeout=180, combined_output=True)
+    success = f"OK ({expected} test" + ("s" if expected != 1 else "") + ")"
+    if success not in result or any(marker in result for marker in (
+            "FAILURES!!!", "INSTRUMENTATION_FAILED", "INSTRUMENTATION_ABORTED",
+            "Process crashed", "shortMsg=")):
+        raise RuntimeError(f"Expected {success} for {class_name}:\n" + result)
+    return {"serial": serial, "tests": expected, "instrumentation": result, "passed": True}
+
+
+def service_check(serial):
+    result = run_instrumentation(serial, "com.example.pleos_pa.connection.BridgeServiceRuntimeTest", 3)
+    result["scope"] = "Production service, posted PendingIntent, idle sockets; no vehicle read requests"
+    return result
+
+
 def permission_check(serial):
     # Host-side revocation precedes instrumentation: Android can kill the affected app.
     # Only the isolated diagnostic app is affected; no vehicle permissions are changed.
@@ -99,16 +117,9 @@ def permission_check(serial):
         "android.permission.POST_NOTIFICATIONS", combined_output=True)
     adb(serial, "shell", "pm", "clear-permission-flags", "--user", "current", PACKAGE,
         "android.permission.POST_NOTIFICATIONS", "user-set", "user-fixed", combined_output=True)
-    result = adb(serial, "shell", "am", "instrument", "--user", "current", "-w", "-r",
-                 "-e", "class", "com.example.pleos_pa.connection.NotificationPermissionRuntimeTest",
-                 f"{PACKAGE}.test/androidx.test.runner.AndroidJUnitRunner",
-                 timeout=180, combined_output=True)
-    if not re.search(r"OK \(1 test\)", result) or any(marker in result for marker in (
-            "FAILURES!!!", "INSTRUMENTATION_FAILED", "INSTRUMENTATION_ABORTED",
-            "Process crashed", "shortMsg=")):
-        raise RuntimeError("Expected one successful real permission-dialog test:\n" + result)
-    return {"scope": "Actual diagnostic notification permission dialog/denial/app stop; no vehicle requests",
-            "serial": serial, "tests": 1, "instrumentation": result, "passed": True}
+    result = run_instrumentation(serial, "com.example.pleos_pa.connection.NotificationPermissionRuntimeTest", 1)
+    result["scope"] = "Actual diagnostic notification permission dialog/denial/app stop; no vehicle requests"
+    return result
 
 
 def main():
@@ -119,13 +130,16 @@ def main():
     parser.add_argument("--emulator-pid", type=int)
     parser.add_argument("--inspect-non-automotive", action="store_true")
     parser.add_argument("--permission-check", action="store_true")
+    parser.add_argument("--service-check", action="store_true")
     args = parser.parse_args()
     if not args.serial.startswith("emulator-") or not args.serial[9:].isdigit():
         parser.error("Only an explicitly named emulator is supported")
     if args.wait_for_boot:
         boot(args.serial, args.emulator_pid)
         return
-    if args.permission_check:
+    if args.service_check:
+        result = service_check(args.serial)
+    elif args.permission_check:
         result = permission_check(args.serial)
     else:
         result = inspect_non_automotive(args.serial) if args.inspect_non_automotive else restart_check(args.serial)

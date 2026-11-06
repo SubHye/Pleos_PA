@@ -18,6 +18,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.example.pleos_pa.awaitFocusedActivity
 import org.hamcrest.CoreMatchers.sameInstance
 import org.json.JSONObject
 import org.junit.Assert.*
@@ -41,6 +42,7 @@ class DriverUiTest {
         lateinit var activity: DriverUiPreviewActivity
         scenario.onActivity { activity = it }
         try {
+            awaitFocusedActivity(activity)
             test(activity)
         } finally {
             scenario.close()
