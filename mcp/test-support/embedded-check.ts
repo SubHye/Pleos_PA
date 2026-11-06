@@ -31,6 +31,9 @@ const client = new Client({ name: 'com13-embedded-check', version: '0' });
 const connectStart = performance.now();
 await client.connect(transport);
 const connectMs = performance.now() - connectStart;
+// Read before close(), which clears both.
+const protocolVersion = client.getNegotiatedProtocolVersion() ?? null;
+const server = client.getServerVersion() ?? null;
 const listed = await client.listTools();
 
 const calls = [];
@@ -63,8 +66,8 @@ const median = sorted.length === 0 ? null : (sorted[(sorted.length - 1) >> 1] + 
 const report = {
   target,
   endpoint: target === 'embedded' ? EMBEDDED_URL : 'stdio src/server.ts -> 127.0.0.1:18765',
-  protocolVersion: client.getNegotiatedProtocolVersion() ?? null,
-  server: client.getServerVersion() ?? null,
+  protocolVersion,
+  server,
   connectMs: Math.round(connectMs * 10) / 10,
   tools: listed.tools.map((tool) => tool.name),
   count,

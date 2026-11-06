@@ -7,12 +7,11 @@ import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
-import io.modelcontextprotocol.kotlin.sdk.server.mcpStreamableHttp
+import io.modelcontextprotocol.kotlin.sdk.server.mcpStatelessStreamableHttp
 import io.modelcontextprotocol.kotlin.sdk.types.Implementation
 import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.ToolAnnotations
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
-import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonObject
 
@@ -35,13 +34,14 @@ class EmbeddedMcpServer(
     override fun start() {
         val created =
             embeddedServer(CIO, host = HOST, port = port) {
-                mcpStreamableHttp(
+                // Stateless: no session survives a request, so clients that leave without a DELETE
+                // cannot use up a session cap. Read-only tools need no server-to-client stream.
+                // The stateful variant refused new clients after eight abandoned sessions (COM-13).
+                mcpStatelessStreamableHttp(
                     path = PATH,
                     allowedHosts = listOf(HOST),
                     // An empty list refuses every request that carries an Origin header.
                     allowedOrigins = emptyList(),
-                    sessionIdleTimeout = SESSION_IDLE_TIMEOUT,
-                    maxSessions = MAX_SESSIONS,
                 ) {
                     mcpServer()
                 }
@@ -87,7 +87,5 @@ class EmbeddedMcpServer(
         const val NAME = "pleos-pa-vehicle-embedded"
         const val VERSION = "0.0.1-com13"
         private const val STOP_TIMEOUT_MILLIS = 1_000L
-        private const val MAX_SESSIONS = 8
-        private val SESSION_IDLE_TIMEOUT = 10.minutes
     }
 }
