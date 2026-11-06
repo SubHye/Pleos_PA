@@ -12,7 +12,7 @@ Android 앱에 연결 제어 화면, Foreground Service, `/v3/vehicle-read` Brid
 
 | 항목 | 기준 |
 | --- | --- |
-| Gradle / AGP | Wrapper 9.6.0 / 9.5.0 |
+| Gradle / AGP | Wrapper 9.6.0 / 9.5.1 |
 | Kotlin | 2.4.21 (AGP 내장 Kotlin을 루트 빌드의 KGP로 지정) |
 | Android Studio | AGP 9.5를 지원하는 Rabbit 2 (2026.2.2) 이상 |
 | JDK | 25 (Java 컴파일 타깃 11) |

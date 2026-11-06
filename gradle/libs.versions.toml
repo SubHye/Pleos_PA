@@ -1,5 +1,5 @@
 [versions]
-agp = "9.5.0"
+agp = "9.5.1"
 # Overrides the KGP that AGP's built-in Kotlin brings; the MCP Kotlin SDK 0.15+ needs stdlib 2.4.
 kotlin = "2.4.21"
 coreKtx = "1.19.1"
