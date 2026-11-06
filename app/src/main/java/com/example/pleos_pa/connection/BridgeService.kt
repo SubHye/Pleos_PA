@@ -24,6 +24,9 @@ import com.example.pleos_pa.bridge.BridgeEvents
 import com.example.pleos_pa.bridge.BridgeServer
 import com.example.pleos_pa.bridge.ReaderBridgeGateway
 import com.example.pleos_pa.contract.VehicleReadCatalog
+import com.example.pleos_pa.mcp.EmbeddedMcpServer
+import com.example.pleos_pa.mcp.EndpointGroup
+import com.example.pleos_pa.mcp.VehicleReadTool
 import com.example.pleos_pa.vehicle.PleosVehicleSdk
 import com.example.pleos_pa.vehicle.ReadScheduler
 import com.example.pleos_pa.vehicle.VehicleReader
@@ -122,9 +125,12 @@ class BridgeService : Service() {
         val events = Events()
         val gateway = ReaderBridgeGateway(catalog, reader, scheduler, events)
         val server = BridgeServer(catalog, gateway, events, SystemClock::elapsedRealtime)
+        // COM-13 experiment: the embedded MCP endpoint shares the gateway, so the read slot too.
+        val tool = VehicleReadTool(catalog, gateway, events, SystemClock::elapsedRealtime)
+        val endpoints = EndpointGroup(listOf(server, EmbeddedMcpServer(tool)))
         return ConnectionSession(
             gateway::close,
-            server,
+            endpoints,
             { released -> reader.close { main.post(released) } },
             bindExecutor,
         ) { session, status ->
