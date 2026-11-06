@@ -109,6 +109,10 @@ class BridgeServiceRuntimeTest {
             }
             ConnectionStatusBoard.status is ConnectionStatus.Connected
         }
+        await("running notification replaces old resume action") {
+            notificationAction(context.getString(R.string.action_stop)) != null &&
+                notificationAction(context.getString(R.string.action_resume)) == null
+        }
     }
 
     private fun idleSocket() =
@@ -178,6 +182,9 @@ class BridgeServiceRuntimeTest {
                 .inRoot(withDecorView(sameInstance(activity.window.decorView)))
                 .perform(click())
             assertStopped(socket)
+        }
+        await("app stop leaves explicit resume notification") {
+            notificationAction(context.getString(R.string.action_resume)) != null
         }
         assertEquals(
             "No vehicle request was submitted",

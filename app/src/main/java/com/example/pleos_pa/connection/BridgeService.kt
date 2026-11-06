@@ -85,6 +85,9 @@ class BridgeService : Service() {
             controller.stop()
             return START_NOT_STICKY
         }
+        // A new connection replaces the plain terminal notification. Use a different ID:
+        // removal of the old foreground notification can complete asynchronously in Android.
+        getSystemService(NotificationManager::class.java).cancel(TERMINAL_NOTIFICATION_ID)
         // A foreground start must reach startForeground promptly, even during a teardown.
         try {
             ServiceCompat.startForeground(
@@ -184,8 +187,12 @@ class BridgeService : Service() {
         ConnectionStatusBoard.publish(status)
         if (destroyed) return
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-        getSystemService(NotificationManager::class.java)
-            .notify(NOTIFICATION_ID, notification(status))
+        // Do not reuse the foreground ID: the platform can remove it during service teardown
+        // after notify() returns, losing the explicit Resume action while the app is backgrounded.
+        getSystemService(NotificationManager::class.java).apply {
+            cancel(NOTIFICATION_ID) // Also removes a pre-upgrade plain notification on a cold Stop.
+            notify(TERMINAL_NOTIFICATION_ID, notification(status))
+        }
         stopSelf()
     }
 
@@ -243,6 +250,7 @@ class BridgeService : Service() {
         private const val ACTION_STOP = "com.example.pleos_pa.action.STOP_BRIDGE"
         private const val CHANNEL_ID = "bridge"
         private const val NOTIFICATION_ID = 1
+        private const val TERMINAL_NOTIFICATION_ID = 2
         private const val FOREGROUND_NOT_ALLOWED = "FOREGROUND_NOT_ALLOWED"
         private const val BRIDGE_LISTENER_FAILED = "BRIDGE_LISTENER_FAILED"
 
