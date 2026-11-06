@@ -21,7 +21,7 @@ ADB를 찾지 못하면 각 명령에 `-AdbPath 'C:\Users\user\AppData\Local\And
 - 재시작: 공용 DriverHistory에 모의 기록을 넣고 **진단 패키지만** force-stop한다. 새 PID, 기록 0건, 중지 초기 상태를 비교한다. 기존 앱·AVD·ADB 서버는 종료하지 않는다.
 - 수동 화면: `모의 기록 생성` → 에너지 기록 선택 → 모의 규제 활성/정보 상실/갱신 중단 → 상세 숨김·중지 유지 → 제한 없음 복귀를 관찰한다. 모의 화면의 연결 제어는 실제 SDK/Bridge를 열지 않는다.
 
-이 검수는 실제 주행 규제 전환, 운전자 표시 영역, 실제 FGS/알림 패널 중지, 내비 변경·복원 성공을 증명하지 않는다. 실제 앱의 상세 기록은 화면 정책 검증 전까지 차단한다. 내비 계약(COM-11) 연결 전에는 접수/완료/결과 불명과 복원 동작을 실제 호출로 검수할 수 없다. DDS 복구는 이 키트 범위 밖이다.
+앞의 UI/재시작 검수만으로 실제 주행 규제 전환, 운전자 표시 영역, 실제 FGS/알림 패널 중지, 내비 변경·복원 성공을 증명하지 않는다. 아래 ServiceTest는 실제 서비스/게시 알림 액션을 별도로 검사한다. 실제 앱의 상세 기록은 화면 정책 검증 전까지 차단한다. 내비 계약(COM-11) 연결 전에는 접수/완료/결과 불명과 복원 동작을 실제 호출로 검수할 수 없다. DDS 복구는 이 키트 범위 밖이다.
 
 소스에서 다시 만들려면 저장소 루트에서 다음을 실행한다. 기존 버전·lockfile은 바꾸지 않는다.
 
@@ -31,3 +31,24 @@ python scripts/package-com5-verification.py --output C:\Temp\COM5-verification-n
 ```
 
 패키지 도구는 커밋된 깨끗한 소스에서 진단 빌드를 다시 확인한다. 소스 커밋 식별용 Git, Python 표준 라이브러리와 Android SDK Build Tools 36.0.0의 aapt를 사용한다. 이미 만들어진 키트를 실행할 때는 Python이 필요 없다.
+
+## COM-22 실제 경로 추가 검수
+
+같은 키트 설치 후, 외부 AI/MCP 호출을 멈춘 상태에서 다음을 실행한다. 다른 앱이 18765 포트를 쓰고 있으면 오류로 기록하며 스크립트가 그 앱을 중지하지 않는다.
+
+```powershell
+.\scripts\verify-com5-local.ps1 -Stage PermissionTest -Serial emulator-5554
+.\scripts\verify-com5-local.ps1 -Stage ServiceTest -Serial emulator-5554
+.\scripts\verify-com5-local.ps1 -Stage LiveStart -Serial emulator-5554
+.\scripts\verify-com5-local.ps1 -Stage LiveCapture -Serial emulator-5554
+```
+
+PermissionTest는 진단 앱에 한해서 알림 권한을 회수하고 해당 권한의 user-set/user-fixed 플래그를 해제한 뒤 실제 권한 요청 창에서 거부하고, 안내 표시와 실제 화면 중지를 검사한다(1개 테스트). 권한 회수로 진단 프로세스가 종료될 수 있다. 고유 앱 이름 `Pleos PA 검수 (.com5)`를 확인해 다른 앱의 권한 창은 누르지 않는다. 이어서 ServiceTest를 실행하면 진단 앱의 알림 권한을 부여한다. 기존 앱·차량 권한은 변경하지 않는다.
+
+ServiceTest는 실제 MainActivity·Foreground Service·게시된 알림 PendingIntent·소켓을 사용한다. 진단 앱에 POST_NOTIFICATIONS 권한만 부여하며 Car 권한/정책은 우회하지 않는다. 차량 조회 요청은 보내지 않는다. 3개 테스트가 모두 통과해야 성공이며, 이 결과는 실제 알림 패널의 터치/주행 중 접근성을 증명하지 않는다.
+
+LiveStart는 실제 플랫폼 관찰 화면을 열며 SDK의 UX 값이나 기어를 주입하지 않는다. LiveStart 후 최초 API 응답을 몇 초 기다리고 LiveCapture한다. 이후 화면의 `실제 UX 관찰 연결 해제`를 누르고 다시 LiveCapture한다. `화면 제한 상태 다시 확인` 후 한 번 더 LiveCapture하여 실제 초기 조회·관찰 연결 해제·재관찰을 각각 보관한다. 세션 UUID로 로그를 구분하고 캐시된 이전 값을 현재 연결의 증거로 사용하지 않는다. 콜백에 실제 전달된 제한값은 CALLBACK/ux_callback으로, 이후 현재값 재조회는 SAMPLE/callback_refresh로 구분한다. 폴링 SAMPLE/poll을 실제 제한 전환 callback으로 계산하지 않는다. elapsedMillis는 클라이언트의 수신/조회 시각이며 차량 센서의 측정 시각이 아니다.
+
+`cleanupCallsSucceeded`는 클라이언트의 해제 API 호출이 오류 없이 반환됐다는 뜻이다. 시스템 전체 리스너 수나 실제 주행 전환 성공을 뜻하지 않는다. driverDisplayVerified/historyAllowed는 계속 false다. sourceCurrentlyLive는 최신 SAMPLE의 단말 monotonic 시각으로 판단하며, captureOnly 결과는 AT-11 통과 표시가 아니다. 일반 Android에서는 UNAVAILABLE/null을 기록하고 값을 만들어내지 않는다.
+
+DDS unavailable이 계속되면 주행 전환은 시도 성공으로 기록하지 않는다. 실제 규제 callback이 없으면 restrictedCallbackObserved=false로 남긴다. 실제 Pleos의 정책·운전자 표시 영역·알림 패널 접근성과 허용 결과 안내 검수는 별도로 필요하다. 다른 이슈인 COM-25의 기록 상한/내비 계약을 COM-22의 추가 완료 조건으로 삼지 않는다.

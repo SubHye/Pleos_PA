@@ -121,9 +121,9 @@ open class MainActivity : AppCompatActivity() {
         start =
             Button(this).apply {
                 setOnClickListener {
-                    everStarted = true
                     isEnabled = false
                     startConnection()
+                    everStarted = true
                 }
             }
         stop =

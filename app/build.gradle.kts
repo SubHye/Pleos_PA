@@ -43,6 +43,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["com5DiagnosticsEnabled"] = false
+        manifestPlaceholders["com5AppLabel"] = "@string/app_name"
     }
 
     buildTypes {
@@ -50,6 +51,7 @@ android {
             if (providers.gradleProperty("com5Diagnostic").orNull == "true") {
                 applicationIdSuffix = ".com5"
                 manifestPlaceholders["com5DiagnosticsEnabled"] = true
+                manifestPlaceholders["com5AppLabel"] = "@string/com22_app_name"
             }
         }
         release {

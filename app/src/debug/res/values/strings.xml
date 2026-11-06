@@ -1,0 +1,5 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="com22_disconnect_observer">실제 UX 관찰 연결 해제</string>
+    <!-- Referenced by the manifest placeholder only in the isolated diagnostic variant. -->
+    <string name="com22_app_name" tools:ignore="UnusedResources">Pleos PA 검수 (.com5)</string>
+</resources>

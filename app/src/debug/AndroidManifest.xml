@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application android:label="${com5AppLabel}" tools:replace="android:label">
         <activity android:name=".ui.DriverUiPreviewActivity" android:exported="true" />
         <activity
             android:name=".ui.DriverStateProbeActivity"
+            android:enabled="${com5DiagnosticsEnabled}"
+            android:exported="true" />
+        <activity
+            android:name=".ui.Com22InspectionActivity"
             android:enabled="${com5DiagnosticsEnabled}"
             android:exported="true" />
     </application>

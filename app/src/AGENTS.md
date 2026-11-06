@@ -6,8 +6,8 @@
 | --- | --- |
 | `main/` | Manifest, 리소스, `keepRules/rules.keep` |
 | `main/java/com/example/pleos_pa/MainActivity.kt` | 연결 시작·중지·재개와 상태를 보여 주는 연결 상태·기능 목록·요청별 기록·Car UX 제한 화면 |
-| `main/java/com/example/pleos_pa/ui/` | 메모리 요청 기록, 검증된 조회 결과 표시, 현재 화면의 Car UX 관찰과 만료 정책 |
-| `debug/java/com/example/pleos_pa/ui/` | 모의 기록·규제·연결 상태를 쓰는 화면 검수 Activity와 .com5 전용 공용 기록 재시작 probe. 실제 SDK·Bridge를 사용하지 않고 probe는 건수/PID만 기록한다 |
+| `main/java/com/example/pleos_pa/ui/` | 메모리 요청 기록, 검증된 조회 결과 표시, 현재 화면의 Car UX 관찰과 만료 정책, 선택적인 읽기 전용 플랫폼 관찰 메타데이터 |
+| `debug/java/com/example/pleos_pa/ui/` | 모의 화면, .com5 전용 공용 기록 재시작 probe와 실제 Car UX 점검 화면. 모의 화면/재시작 probe는 SDK·Bridge를 사용하지 않는다. 실제 점검 화면은 공개 Car UX 조회와 기존 실제 서비스 제어만 사용하고 값 주입/변경은 하지 않는다 |
 | `main/java/com/example/pleos_pa/connection/` | Foreground Service, 알림, 세션과 명령 순서, 메모리 상태 |
 | `main/java/com/example/pleos_pa/bridge/` | loopback HTTP 서버, 요청 문법·헤더 검사, 조회기로 넘기는 게이트웨이 |
 | `main/java/com/example/pleos_pa/vehicle/` | 앱 전체 조회 슬롯, SDK 경계와 97개 속성의 호출 표, 실행 환경 판별 |
@@ -15,6 +15,6 @@
 | `test/java/com/example/pleos_pa/contract/` | 공용 fixture와 SDK 클래스 대조로 계약을 고정하는 JVM 테스트. SDK를 실행하지 않으므로 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/{bridge,connection,vehicle,ui}/` | 실제 소켓과 SDK 대역으로 Bridge·세션·조회기를 검사하는 JVM 테스트. 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/` | 산술 예제 1개 |
-| `androidTest/java/com/example/pleos_pa/` | 기기 테스트. 예제와 모의 Car UX 기반 실제 위젯 검사. CI의 일반 API34 에뮬레이터에서 모의 UX/값으로 실행한다. 실제 Pleos 정책·SDK 검수는 별도다 |
+| `androidTest/java/com/example/pleos_pa/` | 기기 테스트. 예제와 모의 Car UX 기반 실제 위젯 검사. CI의 일반 API34 에뮬레이터에서 모의 UX/값으로 실행한다. 실제 서비스·소켓·게시 알림 액션도 검사하며 차량 조회 요청은 보내지 않는다. 실제 Pleos 규제 전환/알림 패널 검수는 별도다 |
 
 기능을 추가하면 이 표에 실제 위치를 함께 갱신한다. SDK 접근은 Android Adapter에 두고 Node로 옮기지 않는다 ([ADR-0002](../../docs/decisions/0002-boundaries-and-transport.md)).
