@@ -15,6 +15,6 @@
 | `test/java/com/example/pleos_pa/contract/` | 공용 fixture와 SDK 클래스 대조로 계약을 고정하는 JVM 테스트. SDK를 실행하지 않으므로 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/{bridge,connection,vehicle,ui}/` | 실제 소켓과 SDK 대역으로 Bridge·세션·조회기를 검사하는 JVM 테스트. 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/` | 산술 예제 1개 |
-| `androidTest/java/com/example/pleos_pa/` | 기기 테스트. 예제와 모의 Car UX 기반 실제 위젯 검사. CI의 일반 API34 에뮬레이터에서 모의 UX/값으로 실행한다. 실제 서비스·소켓·게시 알림 액션·알림 권한 요청과 거부 후 화면 중지도 검사하며 차량 조회 요청은 보내지 않는다. 실제 Pleos 규제 전환/알림 패널 검수는 별도다 |
+| `androidTest/java/com/example/pleos_pa/` | 기기 테스트. 예제와 모의 Car UX 기반 실제 위젯 검사. CI의 일반 API34 에뮬레이터에서 모의 UX/값으로 실행한다. 실제 서비스·소켓·게시 알림 액션·알림 권한 요청과 거부 후 화면 중지도 검사한다. COM-22 서비스 검사는 차량 요청을 보내지 않고, COM-25 요청 기록 검사는 읽기 전용 에너지/표시 단위 조회를 실제 HTTP로 보내며 일반 Android 미지원 응답과 실제 Pleos SDK 결과를 구분한다. 실제 Pleos 규제 전환/알림 패널 검수는 별도다 |
 
 기능을 추가하면 이 표에 실제 위치를 함께 갱신한다. SDK 접근은 Android Adapter에 두고 Node로 옮기지 않는다 ([ADR-0002](../../docs/decisions/0002-boundaries-and-transport.md)).

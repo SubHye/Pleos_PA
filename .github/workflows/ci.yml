@@ -93,6 +93,9 @@ jobs:
       - name: Verify actual production service and posted Stop action
         if: ${{ !cancelled() && steps.com5_probe_install.conclusion == 'success' }}
         run: python3 scripts/check-com5-device.py --serial emulator-5554 --service-check --output "$RUNNER_TEMP/com22-service-instrumentation.json"
+      - name: Verify real HTTP reaches shared history without bypassing UI restrictions
+        if: ${{ !cancelled() && steps.com5_probe_install.conclusion == 'success' }}
+        run: python3 scripts/check-com5-device.py --serial emulator-5554 --history-check --output "$RUNNER_TEMP/com25-history-instrumentation.json"
       - name: Verify first permission request and denial with actual Android dialog
         if: ${{ !cancelled() && steps.com5_probe_install.conclusion == 'success' }}
         run: python3 scripts/check-com5-device.py --serial emulator-5554 --permission-check --output "$RUNNER_TEMP/com22-permission-denial.json"
@@ -101,6 +104,7 @@ jobs:
         run: |
           adb -s emulator-5554 logcat -d -s COM22_SERVICE:I '*:S' > "$RUNNER_TEMP/com22-service-results.txt"
           adb -s emulator-5554 logcat -d -s COM22_PERMISSION:I '*:S' > "$RUNNER_TEMP/com22-permission-results.txt"
+          adb -s emulator-5554 logcat -d -s COM25_RUNTIME:I '*:S' > "$RUNNER_TEMP/com25-history-results.txt"
       - name: Verify shared journal across actual process restart
         if: ${{ !cancelled() && steps.com5_probe_install.conclusion == 'success' }}
         run: |
@@ -126,6 +130,8 @@ jobs:
             ${{ runner.temp }}/com22-service-instrumentation.json
             ${{ runner.temp }}/com22-permission-denial.json
             ${{ runner.temp }}/com22-permission-results.txt
+            ${{ runner.temp }}/com25-history-instrumentation.json
+            ${{ runner.temp }}/com25-history-results.txt
             ${{ runner.temp }}/com22-unavailable-platform.json
             ${{ runner.temp }}/com5-post-test-install.txt
             ${{ runner.temp }}/com5-probe-error.txt

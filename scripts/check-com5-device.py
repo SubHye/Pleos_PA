@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import time
@@ -110,6 +111,27 @@ def service_check(serial):
     return result
 
 
+def history_check(serial):
+    result = run_instrumentation(serial, "com.example.pleos_pa.ui.BridgeHistoryRuntimeTest", 1)
+    match = re.search(r"^INSTRUMENTATION_RESULT: com25_history=(\{.*\})$", result["instrumentation"], re.M)
+    if not match:
+        raise RuntimeError("Missing count-only production history result")
+    evidence = json.loads(match.group(1))
+    required = ("duplicateAttemptsSeparated", "activityRecreationPreservedRecords",
+                "restrictedDetailsHidden", "explicitUiClear", "stoppedConnectionRefused")
+    if (evidence.get("source") != "production_http_shared_history"
+            or not all(evidence.get(k) is True for k in required)
+            or evidence.get("validReadOnlyRequests") != 2 or evidence.get("rejectedRequests") != 1
+            or evidence.get("queries") != ["energy_level", "display_units"]
+            or not isinstance(evidence.get("sdkOkValueObserved"), bool)
+            or len(evidence.get("httpStatuses", [])) != 2
+            or (evidence.get("sdkOkValueObserved") and 200 not in evidence["httpStatuses"])):
+        raise RuntimeError("Production history evidence is incomplete")
+    result["history"] = evidence
+    result["scope"] = "Real HTTP and shared history; SDK success depends on recorded platform response; no Pleos UI policy acceptance"
+    return result
+
+
 def permission_check(serial):
     # Host-side revocation precedes instrumentation: Android can kill the affected app.
     # Only the isolated diagnostic app is affected; no vehicle permissions are changed.
@@ -131,13 +153,16 @@ def main():
     parser.add_argument("--inspect-non-automotive", action="store_true")
     parser.add_argument("--permission-check", action="store_true")
     parser.add_argument("--service-check", action="store_true")
+    parser.add_argument("--history-check", action="store_true")
     args = parser.parse_args()
     if not args.serial.startswith("emulator-") or not args.serial[9:].isdigit():
         parser.error("Only an explicitly named emulator is supported")
     if args.wait_for_boot:
         boot(args.serial, args.emulator_pid)
         return
-    if args.service_check:
+    if args.history_check:
+        result = history_check(args.serial)
+    elif args.service_check:
         result = service_check(args.serial)
     elif args.permission_check:
         result = permission_check(args.serial)

@@ -52,3 +52,19 @@ LiveStart는 실제 플랫폼 관찰 화면을 열며 SDK의 UX 값이나 기어
 `cleanupCallsSucceeded`는 클라이언트의 해제 API 호출이 오류 없이 반환됐다는 뜻이다. 시스템 전체 리스너 수나 실제 주행 전환 성공을 뜻하지 않는다. driverDisplayVerified/historyAllowed는 계속 false다. sourceCurrentlyLive는 최신 SAMPLE의 단말 monotonic 시각으로 판단하며, captureOnly 결과는 AT-11 통과 표시가 아니다. 일반 Android에서는 UNAVAILABLE/null을 기록하고 값을 만들어내지 않는다.
 
 DDS unavailable이 계속되면 주행 전환은 시도 성공으로 기록하지 않는다. 실제 규제 callback이 없으면 restrictedCallbackObserved=false로 남긴다. 실제 Pleos의 정책·운전자 표시 영역·알림 패널 접근성과 허용 결과 안내 검수는 별도로 필요하다. 다른 이슈인 COM-25의 기록 상한/내비 계약을 COM-22의 추가 완료 조건으로 삼지 않는다.
+
+## COM-25 실제 요청·메모리 기록 검수
+
+같은 키트를 설치하고 외부 AI/MCP 호출을 멈춘 상태에서 실행한다.
+
+```powershell
+.\scripts\verify-com5-local.ps1 -Stage HistoryTest -Serial emulator-5554
+```
+
+HistoryTest는 별도 `.com5` 앱에서 실제 HTTP 요청을 실제 Service/Bridge/공용 DriverHistory로 보낸다. 시작 전에 진단 기록이 남아 있으면 실패하고 기존 기록을 지우지 않는다. 필요한 경우 진단 앱에서 직접 `메모리 기록 지우기`를 누른 뒤 다시 실행한다. 다른 앱이나 그 데이터는 변경하지 않는다.
+
+POST_NOTIFICATIONS만 진단 앱에 부여한다. 거부할 합성 요청1개와 읽기 전용 EV 배터리 잔량·온도 표시 단위 조회 각1개를 보낸다. Pleos에서는 SDK가 실제 값을 읽을 수 있으나 차량 값/기어/정책을 주입하지 않는다. 서로 다른 두 도구에 같은 requestId를 사용해 시도를 분리한다. 실패한 조회를 재시도하지 않으며 두 조회는 동시 스냅샷이 아니다. 실제 SDK의 OK 값이 계약 검증을 통과하고 메모리 값과 일치한 경우에만 `sdkOkValueObserved=true`다. 일반 Android는 `APP_NOT_READY`를 기록하며 실제 SDK 성공으로 보고하지 않는다. 실제 SDK가 오류를 반환해도 그 상태를 기록하므로 테스트 성공만으로 값 조회 성공을 판단하지 않는다.
+
+거부된 입력 미저장, 같은 requestId의 별도 시도2건, Activity 재생성 후 메모리 유지, 기본 제한 중 상세 숨김, 직접 UI 삭제, 중지 후 새 연결 거부를 확인한다. 이 테스트가 만든2건만 UI에서 지우며, 다른 요청이 끼면 삭제 전에 실패한다. 차량 값/요청 원문은 증거 로그에 출력하지 않는다. SDK 자체 로그의 값은 수집하지 않는다.
+
+결과 `result.json`의 `history`에는 HTTP 코드·결과 상태·출처·불리언 검증값만 저장한다. `OK (1 test)` 및 해당 결과가 모두 있어야 성공이다. 실제 결과 상세 화면·운전자 표시 영역/주행 정책·최종 힙 상한·내비 연동은 별도 검수다.

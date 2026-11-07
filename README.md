@@ -57,7 +57,7 @@ Windows 설치·화면 검사·프로세스 재시작은 [실행 절차](scripts
 .\gradlew.bat -Pcom5Diagnostic=true :app:assembleDebug :app:assembleDebugAndroidTest
 ```
 
-CI는 일반 API34 에뮬레이터에서 `DriverUiTest`·`BridgeServiceRuntimeTest`·별도 `NotificationPermissionRuntimeTest`와 `scripts/check-com5-device.py`를 실행한다. 공용 메모리 기록을 모의 데이터로 채운 뒤 실제 프로세스를 종료하고 새 PID·기록0·중지 초기 상태를 확인한다. 이는 새 모델 인스턴스 검사와 구분하며, 실제 내비 이전 상태나 Pleos 규제 전환의 증거로 사용하지 않는다. 검사 결과와 처리 시간·Java 힙 측정은 Actions의 `com5-android-ui-evidence` artifact에 남는다.
+CI는 일반 API34 에뮬레이터에서 `DriverUiTest`·`BridgeServiceRuntimeTest`·별도 `BridgeHistoryRuntimeTest`·`NotificationPermissionRuntimeTest`와 `scripts/check-com5-device.py`를 실행한다. 공용 메모리 기록을 모의 데이터로 채운 뒤 실제 프로세스를 종료하고 새 PID·기록0·중지 초기 상태를 확인한다. 이는 새 모델 인스턴스 검사와 구분하며, 실제 내비 이전 상태나 Pleos 규제 전환의 증거로 사용하지 않는다. 검사 결과와 처리 시간·Java 힙 측정은 Actions의 `com5-android-ui-evidence` artifact에 남는다.
 
 ## Bridge 신뢰 경계
 

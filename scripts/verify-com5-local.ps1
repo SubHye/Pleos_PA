@@ -1,7 +1,7 @@
 # PowerShell 5.1/7. Explicit emulator only; original app/data/ADB server are preserved.
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$true)][ValidateSet('Install','UiTest','ProcessRestart','Preview','PermissionTest','ServiceTest','LiveStart','LiveCapture')][string]$Stage,
+    [Parameter(Mandatory=$true)][ValidateSet('Install','UiTest','ProcessRestart','Preview','HistoryTest','PermissionTest','ServiceTest','LiveStart','LiveCapture')][string]$Stage,
     [Parameter(Mandatory=$true)][ValidatePattern('^emulator-[0-9]+$')][string]$Serial,
     [string]$AdbPath,
     [string]$KitDirectory = (Join-Path $PSScriptRoot '..'),
@@ -113,6 +113,24 @@ try {
         if ($result -match 'FAILURES!!!|INSTRUMENTATION_FAILED|INSTRUMENTATION_ABORTED|Process crashed|shortMsg=' -or
             $result -notmatch 'OK \(4 tests\)') { throw 'Expected OK (4 tests). ADB exit 0 alone is insufficient.' }
         $report['ui_tests'] = 4
+    } elseif ($Stage -eq 'HistoryTest') {
+        $result = Invoke-Adb -AdbArguments @('-s',$Serial,'shell','am','instrument','--user','current','-w','-r','-e','class',
+            'com.example.pleos_pa.ui.BridgeHistoryRuntimeTest',"$package.test/androidx.test.runner.AndroidJUnitRunner") -TimeoutMillis 240000
+        Write-Evidence 'history-instrumentation.txt' $result
+        if ($result -match 'FAILURES!!!|INSTRUMENTATION_FAILED|INSTRUMENTATION_ABORTED|Process crashed|shortMsg=' -or
+            $result -notmatch 'OK \(1 test\)') { throw 'Expected OK (1 test) for the production HTTP/shared-history path.' }
+        $match = [regex]::Match($result, '(?m)^INSTRUMENTATION_RESULT: com25_history=(\{.*\})\r?$')
+        if (-not $match.Success) { throw 'Missing production history evidence.' }
+        $history = $match.Groups[1].Value | ConvertFrom-Json
+        if ($history.source -ne 'production_http_shared_history' -or $history.validReadOnlyRequests -ne 2 -or $history.rejectedRequests -ne 1 -or
+            ($history.queries -join ',') -ne 'energy_level,display_units' -or -not ($history.sdkOkValueObserved -is [bool]) -or
+            @($history.httpStatuses).Count -ne 2 -or ($history.sdkOkValueObserved -and 200 -notin $history.httpStatuses)) { throw 'Production history evidence is incomplete.' }
+        foreach ($field in @('duplicateAttemptsSeparated','activityRecreationPreservedRecords','restrictedDetailsHidden','explicitUiClear','stoppedConnectionRefused')) {
+            if (-not ($history.$field -is [bool]) -or -not $history.$field) { throw 'Production history evidence is incomplete.' }
+        }
+        $report['history_tests'] = 1
+        $report['history'] = $history
+        $report['scope'] = 'Real HTTP/shared history; one read-only EV battery request and one temperature-display-unit request, one rejected synthetic request. Diagnostic notification permission is granted. sdkOkValueObserved alone distinguishes an actual OK SDK value; result-detail UI and Pleos policy remain unverified.'
     } elseif ($Stage -eq 'PermissionTest') {
         # Android may terminate only this diagnostic process on revocation; do it BEFORE the runner.
         [void](Invoke-Adb -AdbArguments @('-s',$Serial,'shell','pm','revoke','--user','current',$package,'android.permission.POST_NOTIFICATIONS'))
