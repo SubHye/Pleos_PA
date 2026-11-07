@@ -125,7 +125,7 @@ try {
         if ($history.source -ne 'production_http_shared_history' -or $history.validReadOnlyRequests -ne 2 -or $history.rejectedRequests -ne 1 -or
             ($history.queries -join ',') -ne 'energy_level,display_units' -or -not ($history.sdkOkValueObserved -is [bool]) -or
             @($history.httpStatuses).Count -ne 2 -or ($history.sdkOkValueObserved -and 200 -notin $history.httpStatuses)) { throw 'Production history evidence is incomplete.' }
-        foreach ($field in @('duplicateAttemptsSeparated','activityRecreationPreservedRecords','restrictedDetailsHidden','explicitUiClear','stoppedConnectionRefused')) {
+        foreach ($field in @('duplicateAttemptsSeparated','activityRecreationPreservedRecords','resumeLabelRestored','restrictedDetailsHidden','explicitUiClear','stoppedConnectionRefused')) {
             if (-not ($history.$field -is [bool]) -or -not $history.$field) { throw 'Production history evidence is incomplete.' }
         }
         $report['history_tests'] = 1

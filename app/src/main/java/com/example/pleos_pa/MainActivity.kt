@@ -284,6 +284,8 @@ open class MainActivity : AppCompatActivity() {
     protected open fun renderConnection(current: ConnectionStatus) {
         status.text = BridgeService.statusText(this, current)
         val down = current is ConnectionStatus.Stopped || current is ConnectionStatus.Failed
+        // A live service proves a prior start even when this Activity was recreated.
+        if (!down) everStarted = true
         start.isEnabled = down
         start.setText(if (everStarted) R.string.action_resume else R.string.action_start)
         stop.isEnabled = !down

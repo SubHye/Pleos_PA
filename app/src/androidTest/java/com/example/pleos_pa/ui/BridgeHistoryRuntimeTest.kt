@@ -14,7 +14,9 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.scrollTo
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.withDecorView
+import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -305,6 +307,10 @@ class BridgeHistoryRuntimeTest {
                     visible.contains(sentinel),
             )
             assertTrue(visible.contains(context.getString(R.string.client_unknown)))
+            assertTrue(
+                "Live service state survives screen recreation",
+                visible.contains(context.getString(R.string.connection_connected)),
+            )
 
             onView(withText(context.getString(R.string.action_stop)))
                 .inRoot(withDecorView(sameInstance(activity.window.decorView)))
@@ -315,6 +321,9 @@ class BridgeHistoryRuntimeTest {
                 fail("Stopped bridge must refuse new connections")
             } catch (_: java.net.ConnectException) {}
             instrumentation.waitForIdleSync()
+            onView(withText(context.getString(R.string.action_resume)))
+                .inRoot(withDecorView(sameInstance(activity.window.decorView)))
+                .check(matches(isEnabled()))
             // Only our two attempts may be deleted. Fail before clearing if another caller
             // intervened.
             assertTrue(
@@ -340,6 +349,7 @@ class BridgeHistoryRuntimeTest {
                     .put("sdkOkValueObserved", okValueObserved)
                     .put("duplicateAttemptsSeparated", true)
                     .put("activityRecreationPreservedRecords", true)
+                    .put("resumeLabelRestored", true)
                     .put("restrictedDetailsHidden", true)
                     .put("explicitUiClear", true)
                     .put("stoppedConnectionRefused", true)
