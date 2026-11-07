@@ -1,4 +1,3 @@
-import { TOOL_TEXTS } from '../src/tool-texts.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
@@ -30,20 +29,19 @@ test('accepted tool inputs make requests the bridge contract accepts', () => {
 });
 
 test('every catalog tool has wording that warns against guessing', () => {
-  assert.deepEqual(Object.keys(TOOL_TEXTS).sort(), catalog.tools.map((tool) => tool.name).sort());
-  for (const { title, description } of Object.values(TOOL_TEXTS)) {
-    assert.ok(title);
-    assert.match(description, /추정/);
+  for (const { name, title, description } of catalog.tools) {
+    assert.ok(title, name);
+    assert.match(description, /추정/, name);
   }
-  assert.match(TOOL_TEXTS.get_tire_status.description, /현재 타이어 공기압이 아니/);
-  assert.match(TOOL_TEXTS.get_front_left_door_position.description, /ok가 true/);
+  assert.match(toolNamed('get_tire_status').description, /현재 타이어 공기압이 아니/);
+  assert.match(toolNamed('get_front_left_door_position').description, /ok가 true/);
 });
 
 test('the wording of an adopted tool names the properties that differed from the Console', () => {
   for (const tool of catalog.tools.filter((entry) => entry.adoption === 'adopted')) {
     for (const property of catalog.properties.filter((entry) => entry.query === tool.query)) {
       if (property.verification !== 'console_mismatch') continue;
-      assert.ok(TOOL_TEXTS[tool.name].description.includes(property.id), `${tool.name} ${property.id}`);
+      assert.ok(tool.description.includes(property.id), `${tool.name} ${property.id}`);
     }
   }
 });

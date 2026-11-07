@@ -18,3 +18,9 @@
 -keepattributes Signature
 -keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
 -keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
+
+# Ktor (embedded MCP server) checks for an IntelliJ debugger through java.lang.management, which
+# Android does not have. The call is wrapped in catch (Throwable) and answers false, so only the
+# missing-class warning needs silencing.
+-dontwarn java.lang.management.ManagementFactory
+-dontwarn java.lang.management.RuntimeMXBean

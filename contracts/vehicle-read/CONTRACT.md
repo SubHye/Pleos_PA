@@ -134,13 +134,18 @@
 
 ## MCP 도구와 응답
 
-Node만 담당하는 구간이다. 사례는 [fixtures/tool-inputs.json](fixtures/tool-inputs.json), [fixtures/tool-results.json](fixtures/tool-results.json)에 있다. 아래 규칙은 PoC `0d288c8`에서 추출하고 달라지는 점만 고쳤다.
+Node 서버(`mcp/`)와 앱 내장 서버(`app/.../mcp/`)가 같은 규칙을 따른다. 사례는 [fixtures/tool-inputs.json](fixtures/tool-inputs.json), [fixtures/tool-results.json](fixtures/tool-results.json), [fixtures/tool-list.json](fixtures/tool-list.json)에 있고 두 서버의 테스트가 같은 파일을 읽는다. 아래 규칙은 PoC `0d288c8`에서 추출하고 달라지는 점만 고쳤다.
+
+- `tool-list.json`은 Node 서버의 `tools/list` 결과다. 내장 서버는 이 목록과 같아야 하며, Kotlin MCP SDK의 `ToolSchema`가 `additionalProperties`를 담지 못해 `inputSchema`에 `additionalProperties: false`가 없는 것만 다르다. 그 밖의 키는 두 서버 모두 인자 검사에서 거부한다.
+- `tool-results.json`의 `expect.text`는 Node 서버가 쓰는 결과 글 전체다. 내장 서버도 같은 글을 써야 한다.
 
 **입력과 힌트**
 
 - 기존 4개 도구는 인자가 없다. 후보 도구는 선택 인자 `properties`와, 영역이 있는 속성을 가진 도구에 한해 `areas`를 받는다. 그 밖의 키는 거부한다.
 - 모든 도구는 `readOnlyHint: true`, `destructiveHint: false`, `idempotentHint: false`, `openWorldHint: false`다.
-- 도구 설명은 한 번 읽는다는 점과 확인되지 않은 값을 추정하지 말라는 점을 적는다. 구체적 문구는 COM-23에서 정한다.
+- 도구 설명은 한 번 읽는다는 점과 확인되지 않은 값을 추정하지 말라는 점을 적는다. 도구별 `title`과 `description`은 카탈로그 `tools[]`에 있고 두 서버가 그대로 쓴다.
+- 인자가 스키마를 벗어나면 `isError: true`이고 `structuredContent`가 없는 결과로 답한다. 글은 `Input validation error:`로 시작하며, 이유 문구는 서버마다 다를 수 있다. 차량을 읽지 않는다.
+- `tools/list`에 없는 도구(카탈로그에 없거나 `adoption`이 `adopted`가 아닌 도구)를 부르면 JSON-RPC 오류 `-32602`다.
 
 **오류 표시**
 
@@ -163,7 +168,19 @@ Node만 담당하는 구간이다. 사례는 [fixtures/tool-inputs.json](fixture
 | `scalar` | 항목 실패 | `{ok:false, origin:"android", code, requestId, source, area, status, sdkVersion, capability, errorType, errorCode, observation}`. 값을 받았으면 `observation`이 `{rawValue, receivedAt}`, 아니면 `null` |
 | `scalar` | 호출 단위 실패 | `{ok:false, origin, code, requestId, area}` |
 
-`scalar`의 TIMEOUT·CANCELLED는 값이 확인됐으면 `isError` 없는 값 확인으로, 아니면 `code`를 outcome으로 둔 항목 실패로 보낸다. 항목이 하나뿐이라 확인된 값이 곧 도구의 답이기 때문이다. `requestId`는 Node가 만든 값을 항상 넣는다.
+`scalar`의 TIMEOUT·CANCELLED는 값이 확인됐으면 `isError` 없는 값 확인으로, 아니면 `code`를 outcome으로 둔 항목 실패로 보낸다. 항목이 하나뿐이라 확인된 값이 곧 도구의 답이기 때문이다. `requestId`는 MCP 서버가 만든 값을 항상 넣는다.
+
+**내장 서버의 호출 단위 실패**
+
+내장 서버는 Bridge HTTP를 거치지 않고 같은 게이트웨이를 앱 안에서 부른다. 그래서 PC 구간이 없고, 호출 단위 실패의 `origin`은 모두 `"android"`다.
+
+| 상황 | `code` |
+| --- | --- |
+| 다른 조회 중, 준비 전, 연결 중지 | `BUSY`, `APP_NOT_READY`, `CONNECTION_STOPPED` (Bridge와 같은 판정) |
+| 앱 자신의 응답이 계약 검증을 통과하지 못해 보내지 않음 | `INVALID_RESPONSE` |
+| 데드라인보다 1초 더 기다려도 답이 없음 | `TIMEOUT` |
+
+`ANDROID_UNREACHABLE`와 `origin:"pc"`인 실패는 내장 서버에서 생기지 않는다. 연결이 중지되어 포트가 닫혀 있으면 MCP 클라이언트가 HTTP 연결 실패를 직접 받는다.
 
 **`content` 글**
 

@@ -19,6 +19,9 @@ export interface ItemKey {
 export interface ToolEntry {
   name: string;
   query: string;
+  /** What clients read about the tool. Names and properties come from the catalog itself. */
+  title: string;
+  description: string;
   legacy: boolean;
   resultForm: 'items' | 'scalar';
   adoption: 'undecided' | 'adopted' | 'rejected';

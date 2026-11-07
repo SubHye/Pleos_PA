@@ -4,7 +4,7 @@
 
 ## 현재 상태
 
-- **`tools/list`는 카탈로그에서 `adoption`이 `adopted`인 도구다.** 22개 중 20개이고, `get_fuel_economy`와 `get_toll_status`는 에뮬레이터에서 값을 받지 못해 제외했다. `get_window_detail_status`는 공개 capability API가 없는 `SMART_GLASS_CONFIG`를 읽지 않은 채 채택했다. 기본 실행 경로는 인자나 환경 변수로 도구를 받지 않는다. 문구는 `src/tool-texts.ts`에 있다.
+- **`tools/list`는 카탈로그에서 `adoption`이 `adopted`인 도구다.** 22개 중 20개이고, `get_fuel_economy`와 `get_toll_status`는 에뮬레이터에서 값을 받지 못해 제외했다. `get_window_detail_status`는 공개 capability API가 없는 `SMART_GLASS_CONFIG`를 읽지 않은 채 채택했다. 기본 실행 경로는 인자나 환경 변수로 도구를 받지 않는다. 도구 문구는 카탈로그 `tools[]`의 `title`·`description`에 있다.
 - **채택 근거는 `verifiedOn`의 에뮬레이터뿐이다.** 실차와 다른 차량 유형으로 일반화하지 않는다. ChatGPT·Claude 호출 결과는 COM-26에 있다.
 - 테스트의 Bridge는 모두 가짜이며 실제 SDK 결과가 아니다.
 - PoC의 ChatGPT·Claude 성공 기록은 이 서버의 기록이 아니다.
@@ -93,6 +93,21 @@ Claude Desktop 설정 예시:
 ```
 
 Codex CLI와 Claude Code의 연결은 데스크톱 클라이언트의 증거로 쓰지 않는다. 클라이언트별 실제 연결 결과는 PR 본문에 기록한다.
+
+## 앱 내장 MCP 서버 (COM-12)
+
+앱이 연결을 시작하면 Bridge와 함께 같은 도구를 내놓는 MCP 서버가 `127.0.0.1:18766/mcp`에 열린다(stateless Streamable HTTP). Node 서버와 같은 게이트웨이와 읽기 슬롯을 쓰므로 두 경로가 동시에 부르면 한쪽이 `BUSY`를 받는다. 연결을 중지하면 두 포트가 함께 닫힌다. Node 경로를 지우기 전까지 두 경로를 같이 둔다.
+
+```powershell
+adb -s <기기 serial> forward --no-rebind tcp:18766 tcp:18766
+```
+
+| 클라이언트 | 등록 | 상태 |
+| --- | --- | --- |
+| Codex CLI / ChatGPT Desktop 로컬 Codex 호스트 | `~/.codex/config.toml`의 `[mcp_servers.<이름>]`에 `url = "http://127.0.0.1:18766/mcp"` | COM-12 E2E 대상 |
+| 그 밖의 클라이언트 | URL 방식 등록이 되는지 확인하지 않았다 | 확인하지 않음 |
+
+인증은 없다. Host가 `127.0.0.1`이 아니거나 `Origin` 헤더가 있으면 403이지만, 이는 요청자 인증이 아니다. 같은 기기의 다른 앱과, forward가 켜진 PC의 다른 로컬 프로세스도 이 포트로 요청할 수 있다. 외부 네트워크에 공개하지 않는다.
 
 ## COM-10 모의 도구 연결
 
