@@ -130,7 +130,7 @@ try {
         }
         $report['history_tests'] = 1
         $report['history'] = $history
-        $report['scope'] = 'Real HTTP/shared history; one read-only EV battery request and one temperature-display-unit request, one rejected synthetic request. Diagnostic notification permission is granted. sdkOkValueObserved alone distinguishes an actual OK SDK value; result-detail UI and Pleos policy remain unverified.'
+        $report['scope'] = 'Real HTTP/shared history; one read-only fixed energy query (fuel/EV) and one temperature-display-unit query, one rejected synthetic request. Diagnostic notification permission is granted. sdkOkValueObserved alone distinguishes an actual OK SDK value; result-detail UI and Pleos policy remain unverified.'
     } elseif ($Stage -eq 'PermissionTest') {
         # Android may terminate only this diagnostic process on revocation; do it BEFORE the runner.
         [void](Invoke-Adb -AdbArguments @('-s',$Serial,'shell','pm','revoke','--user','current',$package,'android.permission.POST_NOTIFICATIONS'))

@@ -30,6 +30,7 @@ import com.example.pleos_pa.contract.BridgeResult
 import com.example.pleos_pa.contract.ItemStatus
 import com.example.pleos_pa.contract.ReadSelection
 import com.example.pleos_pa.contract.VehicleReadCatalog
+import com.example.pleos_pa.contract.VehicleReadRequest
 import com.example.pleos_pa.contract.VehicleReadValidator
 import java.io.ByteArrayOutputStream
 import java.net.InetAddress
@@ -159,7 +160,6 @@ class BridgeHistoryRuntimeTest {
                 .put("requestId", requestId)
                 .put("remainingMs", 8_000)
                 .put("query", query)
-                .put("properties", JSONArray().put(property))
                 .toString()
         val sentinel = "synthetic-private-input-${UUID.randomUUID()}"
         val scenario =
@@ -197,14 +197,18 @@ class BridgeHistoryRuntimeTest {
             var okValueObserved = false
             repeat(2) { attempt ->
                 val (query, property, tool) = probes[attempt]
-                val requestBody =
+                val legacy = catalog.tools.getValue(query).legacy
+                val requestJson =
                     JSONObject()
                         .put("requestId", requestId)
                         .put("remainingMs", 8_000)
                         .put("query", query)
-                        .put("properties", JSONArray().put(property))
-                        .toString()
-                val reply = post(requestBody)
+                if (!legacy) requestJson.put("properties", JSONArray().put(property))
+                assertNotNull(
+                    "Probe must obey the repository request contract",
+                    VehicleReadRequest.parse(catalog, requestJson.toString()),
+                )
+                val reply = post(requestJson.toString())
                 replies += reply
                 val verdict =
                     validator.validate(
@@ -212,7 +216,7 @@ class BridgeHistoryRuntimeTest {
                         reply.body,
                         requestId,
                         query,
-                        ReadSelection(setOf(property)),
+                        if (legacy) ReadSelection() else ReadSelection(setOf(property)),
                     )
                 await("terminal shared record") {
                     val rows = DriverHistory.history.snapshot()
@@ -223,7 +227,7 @@ class BridgeHistoryRuntimeTest {
                 assertEquals(tool, row.tool)
                 assertTrue(
                     "Validated selection belongs to this request",
-                    row.arguments.contains(property),
+                    row.arguments.contains(if (legacy) "도구 기본 선택" else property),
                 )
                 assertFalse(
                     "Rejected text must never enter a record",
@@ -239,7 +243,7 @@ class BridgeHistoryRuntimeTest {
                             response.source == "pleos_emulator" ||
                                 response.source == "real_vehicle",
                         )
-                        val item = response.items.single()
+                        val item = response.items.single { it.property == property }
                         assertEquals(property, item.property)
                         assertTrue(
                             "Actual item status must reach the record",
