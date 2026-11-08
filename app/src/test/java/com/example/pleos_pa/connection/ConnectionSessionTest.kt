@@ -181,22 +181,6 @@ class ConnectionSessionTest {
     }
 
     @Test
-    fun aFailureAfterConnectingEndsTheConnectionWithItsCode() {
-        controller.start()
-        finishBind()
-
-        controller.fail("BRIDGE_LISTENER_FAILED")
-        assertEquals(1, steps.count { it == "reader1" })
-        release()
-
-        assertEquals(
-            listOf<ConnectionStatus>(ConnectionStatus.Failed("BRIDGE_LISTENER_FAILED")),
-            ended,
-        )
-        assertEquals(1, created)
-    }
-
-    @Test
     fun aRemovedScreenCannotClearTheNewerOne() {
         val older: (ConnectionStatus) -> Unit = {}
         val seen = mutableListOf<ConnectionStatus>()

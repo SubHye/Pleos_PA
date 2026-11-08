@@ -22,10 +22,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 
 /**
- * The MCP Streamable HTTP endpoint inside the app, on loopback only. It offers the catalog's
- * adopted tools, as the Node server does. The Host allow-list and the Origin refusal stop
- * browser-style requests; like the bridge's checks, they do not identify the caller and are not
- * authentication. Nothing here is reachable off the device without an `adb forward`.
+ * The app's MCP Streamable HTTP endpoint, on loopback only. It offers the catalog's adopted tools.
+ * The Host allow-list and the Origin refusal stop browser-style requests; they do not identify the
+ * caller and are not authentication. Nothing here is reachable off the device without an `adb
+ * forward`. Unlike the old bridge, a server that stops on its own is not detected: Ktor reports no
+ * such event, so the status stays as it was until the next call fails.
  */
 class EmbeddedMcpServer(
     catalog: VehicleReadCatalog,
@@ -87,8 +88,9 @@ class EmbeddedMcpServer(
                 dispatch(it)
             }
         }
-        // The SDK answers an unknown tool with an error result. Node, and the MCP specification,
-        // answer with a JSON-RPC invalid-params error, so this session's tools/call is replaced.
+        // The SDK answers an unknown tool with an error result. The MCP specification, and the Node
+        // server this replaced, answer with a JSON-RPC invalid-params error, so this session's
+        // tools/call is replaced.
         mcp.onConnect {
             mcp.sessions.values.forEach { session ->
                 session.setRequestHandler<CallToolRequest>(Method.Defined.ToolsCall) { request, _ ->

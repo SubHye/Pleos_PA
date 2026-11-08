@@ -5,9 +5,6 @@
     "version": "2.3.2"
   },
   "bridge": {
-    "host": "127.0.0.1",
-    "port": 18765,
-    "path": "/v3/vehicle-read",
     "maxRequestBytes": 4096,
     "maxResponseBytes": 65536,
     "deadlineMs": 10000

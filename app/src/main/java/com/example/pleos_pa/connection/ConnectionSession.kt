@@ -140,12 +140,6 @@ class ConnectionController(
         }
     }
 
-    /** The bridge stopped working on its own. Nothing retries, as with a failed start. */
-    fun fail(code: String) {
-        val session = current ?: return
-        if (!tearingDown) tearDown(session, ConnectionStatus.Failed(code))
-    }
-
     private fun publish(status: ConnectionStatus) {
         lastReported = status
         report(status)

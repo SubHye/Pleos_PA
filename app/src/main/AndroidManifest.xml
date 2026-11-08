@@ -44,7 +44,7 @@
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Read-only loopback (127.0.0.1) bridge and MCP endpoint that answer local vehicle status reads while the app screen is closed; user-stoppable from the notification and the screen." />
+                android:value="Read-only loopback (127.0.0.1) MCP endpoint that answers local vehicle status reads while the app screen is closed; user-stoppable from the notification and the screen." />
         </service>
     </application>
 

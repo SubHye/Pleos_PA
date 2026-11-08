@@ -18,8 +18,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 
 /**
- * One MCP tool call is one read through the same gateway the ADB bridge uses, so the app-wide read
- * slot, the deadline and the stop order stay as they are. No retry.
+ * One MCP tool call is one read through the app's gateway, so the app-wide read slot, the deadline
+ * and the stop order are the gateway's. No retry.
  */
 class VehicleReadTool(
     catalog: VehicleReadCatalog,
@@ -72,6 +72,9 @@ class VehicleReadTool(
                 gateway.submit(request, clock()) { reply ->
                     if (continuation.isActive) continuation.resume(Answer(reply))
                 }
+            // Ktor CIO does not cancel a call when its client disconnects, so this runs only when
+            // the server itself stops. A client that leaves mid-read keeps the slot until the
+            // read ends (EmbeddedMcpServerTest).
             continuation.invokeOnCancellation { giveUp() }
         }
 
