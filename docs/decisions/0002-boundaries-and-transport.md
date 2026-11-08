@@ -1,7 +1,7 @@
 # ADR-0002: SDK 책임과 개발용 통신 경계
 
 - 날짜: 2026-11-01
-- 상태: 채택 (재사용 방향); 세부 계약 채택은 이전 PR에서 확정
+- 상태: [ADR-0008](0008-embedded-mcp-server.md)로 대체 (COM-12). 아래는 대체 전 기록이다
 
 ## 결정
 외부 AI는 사용자 맥락·도구 선택, Node MCP는 MCP 입출력·Bridge 통신, Android Adapter는 SDK 접근을 담당한다. Service가 Android 세션 자원을 소유한다. 개발 연결은 PoC의 stdio + loopback HTTP + ADB forward를 우선 유지한다.
