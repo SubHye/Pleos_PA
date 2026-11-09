@@ -38,13 +38,23 @@ class EmbeddedMcpServer(
             .filter { it.adoption == "adopted" }
             .associate { it.name to (it to ToolInputs(catalog, it)) }
 
-    @Volatile private var server: EmbeddedServer<CIOApplicationEngine, *>? = null
+    private val lock = Any()
+    // Guarded by lock. Single use: once stopped, this endpoint never serves again.
+    private var server: EmbeddedServer<CIOApplicationEngine, *>? = null
+    private var stopped = false
 
-    /** The bound port, which differs from [PORT] only in tests. */
+    /** The bound port, which differs from [PORT] only in tests. -1 when not serving. */
     val localPort: Int
-        get() = server?.let { runBlocking { it.engine.resolvedConnectors().first().port } } ?: -1
+        get() =
+            synchronized(lock) { server }
+                ?.let { runBlocking { it.engine.resolvedConnectors().first().port } } ?: -1
 
+    /**
+     * Runs on the bind executor while [stop] may run on the main thread. A stop that lands before
+     * or during the bind wins: the server bound late is closed here instead of being kept.
+     */
     override fun start() {
+        if (synchronized(lock) { stopped }) return
         val created =
             embeddedServer(CIO, host = HOST, port = port) {
                 // Stateless: no session survives a request, so clients that leave without a DELETE
@@ -61,12 +71,26 @@ class EmbeddedMcpServer(
             }
         // Returns once the socket is bound, and throws when the bind fails.
         created.start(wait = false)
-        server = created
+        val late =
+            synchronized(lock) {
+                if (!stopped) server = created
+                stopped
+            }
+        if (late) close(created)
     }
 
+    /** Idempotent. Also makes a start still in progress close what it binds. */
     override fun stop() {
-        server?.stop(gracePeriodMillis = 0, timeoutMillis = STOP_TIMEOUT_MILLIS)
-        server = null
+        val running =
+            synchronized(lock) {
+                stopped = true
+                server.also { server = null }
+            }
+        running?.let(::close)
+    }
+
+    private fun close(server: EmbeddedServer<CIOApplicationEngine, *>) {
+        server.stop(gracePeriodMillis = 0, timeoutMillis = STOP_TIMEOUT_MILLIS)
     }
 
     /** A new server per request; the stateless transport gives it exactly one session. */
