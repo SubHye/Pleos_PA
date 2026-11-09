@@ -72,6 +72,9 @@ sealed interface NavAdmission {
  *
  * Single-thread use: [submit], [close] and every callback from conditions and actions must run on
  * the same thread. `complete` may run before [submit] returns. [onState] may call [close].
+ *
+ * [onState] only reports. An exception from it is ignored, so the task runs on and still ends with
+ * its result: a display fault does not change navigation or leave the coordinator busy.
  */
 class NavTaskCoordinator(
     private val conditions: NavConditions,
@@ -178,7 +181,11 @@ class NavTaskCoordinator(
      */
     private fun move(task: Task, state: NavTaskState): Boolean {
         task.state = state
-        onState(task.request.requestId, state)
+        try {
+            onState(task.request.requestId, state)
+        } catch (_: Exception) {
+            // Reporting only: the task goes on whatever the observer did.
+        }
         return active === task
     }
 

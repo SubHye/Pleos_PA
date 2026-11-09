@@ -309,6 +309,59 @@ class NavTaskCoordinatorTest {
     }
 
     @Test
+    fun anObserverThatThrowsChangesNeitherTheTaskNorTheNextOne() {
+        for (throwAt in NavTaskState.entries) {
+            val calls = mutableListOf<String>()
+            val seen = mutableListOf<NavTaskState>()
+            val ended = mutableListOf<NavTaskResult>()
+            val failing = throwAt == FAILED
+            val throwing =
+                NavTaskCoordinator(
+                    conditions = { request, done ->
+                        calls += "check:${request.requestId}"
+                        done(if (throwAt == BLOCKED) "DRIVING_RESTRICTED" else null)
+                    },
+                    onState = { id, state ->
+                        seen += state
+                        if (id == "r1" && state == throwAt) throw IllegalStateException("ui")
+                    },
+                )
+            val destination =
+                object : NavAction {
+                    override val name = "destination"
+
+                    override fun start(done: (failure: String?) -> Unit) {
+                        calls += "start:$name"
+                        done(if (failing) "NAV_REJECTED" else null)
+                    }
+                }
+
+            val admission =
+                throwing.submit(NavTaskRequest("r1", listOf(destination))) { ended += it }
+
+            val expected =
+                when (throwAt) {
+                    BLOCKED -> Triple(BLOCKED, "DRIVING_RESTRICTED", listOf("check:r1"))
+                    FAILED ->
+                        Triple(FAILED, "NAV_REJECTED", listOf("check:r1", "start:destination"))
+                    else -> Triple(SUCCEEDED, null, listOf("check:r1", "start:destination"))
+                }
+            val (finalState, code, expectedCalls) = expected
+            assertEquals("throw on $throwAt", NavAdmission.Accepted("r1"), admission)
+            assertEquals("throw on $throwAt", expectedCalls, calls)
+            assertEquals("throw on $throwAt", finalState, ended.single().state)
+            assertEquals("throw on $throwAt", code, ended.single().code)
+            assertEquals("throw on $throwAt", finalState, seen.last())
+            assertEquals(
+                "throw on $throwAt",
+                NavAdmission.Accepted("r2"),
+                throwing.submit(NavTaskRequest("r2", listOf(destination))) { ended += it },
+            )
+            assertEquals("throw on $throwAt", 2, ended.size)
+        }
+    }
+
+    @Test
     fun nothingIsAdmittedAfterTheConnectionStops() {
         coordinator.close()
 
