@@ -71,7 +71,7 @@ sealed interface NavAdmission {
  * its own: a blocked or failed request has to be submitted again as a new task.
  *
  * Single-thread use: [submit], [close] and every callback from conditions and actions must run on
- * the same thread. `complete` may run before [submit] returns.
+ * the same thread. `complete` may run before [submit] returns. [onState] may call [close].
  */
 class NavTaskCoordinator(
     private val conditions: NavConditions,
@@ -100,8 +100,7 @@ class NavTaskCoordinator(
         }
         val task = Task(request, complete)
         active = task
-        onState(request.requestId, NavTaskState.RECEIVED)
-        check(task)
+        if (move(task, NavTaskState.RECEIVED)) check(task)
         return NavAdmission.Accepted(request.requestId)
     }
 
@@ -121,15 +120,14 @@ class NavTaskCoordinator(
     }
 
     private fun check(task: Task) {
-        move(task, NavTaskState.CHECKING)
+        if (!move(task, NavTaskState.CHECKING)) return
         val token = Any()
         task.awaited = token
         try {
             conditions.check(task.request) { block ->
                 if (!consume(task, token)) return@check
                 if (block == null) {
-                    move(task, NavTaskState.EXECUTING)
-                    runNext(task)
+                    if (move(task, NavTaskState.EXECUTING)) runNext(task)
                 } else {
                     finish(task, NavTaskState.BLOCKED, block)
                 }
@@ -140,6 +138,7 @@ class NavTaskCoordinator(
     }
 
     private fun runNext(task: Task) {
+        if (active !== task) return
         val action = task.request.actions.getOrNull(task.next)
         if (action == null) {
             finish(task, NavTaskState.SUCCEEDED, null)
@@ -173,9 +172,14 @@ class NavTaskCoordinator(
         return true
     }
 
-    private fun move(task: Task, state: NavTaskState) {
+    /**
+     * Reports [state], then tells whether [task] is still the one running: the observer may have
+     * closed the coordinator, and nothing of a finished task may go on.
+     */
+    private fun move(task: Task, state: NavTaskState): Boolean {
         task.state = state
         onState(task.request.requestId, state)
+        return active === task
     }
 
     private fun finish(

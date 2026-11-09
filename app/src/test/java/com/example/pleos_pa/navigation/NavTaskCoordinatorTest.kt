@@ -253,6 +253,62 @@ class NavTaskCoordinatorTest {
     }
 
     @Test
+    fun anObserverStoppingTheConnectionOnAnyStateStartsNothingAfterward() {
+        val cases =
+            mapOf(
+                RECEIVED to Pair(BLOCKED, emptyList<String>()),
+                CHECKING to Pair(BLOCKED, emptyList()),
+                EXECUTING to Pair(FAILED, listOf("check:r1")),
+            )
+        for ((stopAt, expected) in cases) {
+            val coordinatorLog = mutableListOf<String>()
+            val seen = mutableListOf<NavTaskState>()
+            val ended = mutableListOf<NavTaskResult>()
+            lateinit var stopping: NavTaskCoordinator
+            stopping =
+                NavTaskCoordinator(
+                    conditions = { request, done ->
+                        coordinatorLog += "check:${request.requestId}"
+                        done(null)
+                    },
+                    onState = { _, state ->
+                        seen += state
+                        if (state == stopAt) stopping.close()
+                    },
+                )
+            val action =
+                object : NavAction {
+                    override val name = "destination"
+
+                    override fun start(done: (failure: String?) -> Unit) {
+                        coordinatorLog += "start:$name"
+                        done(null)
+                    }
+                }
+
+            stopping.submit(NavTaskRequest("r1", listOf(action))) { ended += it }
+
+            val (finalState, calls) = expected
+            assertEquals("stop on $stopAt", calls, coordinatorLog)
+            assertEquals(
+                "stop on $stopAt",
+                NavTaskResult(
+                    requestId = "r1",
+                    state = finalState,
+                    code = NavTaskCoordinator.CONNECTION_STOPPED,
+                    succeeded = emptyList(),
+                    failedAction = null,
+                    unconfirmed = null,
+                    notRun = listOf("destination"),
+                ),
+                ended.single(),
+            )
+            assertEquals("stop on $stopAt", finalState, seen.last())
+            assertEquals("stop on $stopAt", seen.distinct(), seen)
+        }
+    }
+
+    @Test
     fun nothingIsAdmittedAfterTheConnectionStops() {
         coordinator.close()
 
