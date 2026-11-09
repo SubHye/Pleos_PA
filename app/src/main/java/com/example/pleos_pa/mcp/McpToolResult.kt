@@ -3,11 +3,15 @@ package com.example.pleos_pa.mcp
 import com.example.pleos_pa.contract.ToolEntry
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
+import java.math.BigDecimal
+import java.math.MathContext
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.JsonUnquotedLiteral
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -198,24 +202,54 @@ object McpToolResult {
     private fun JsonObject.text(key: String): String = jsString(getValue(key))
 
     /**
-     * Rewrites every number the way JavaScript writes it (`25.0` becomes `25`), as Node's
-     * `JSON.parse` then `JSON.stringify` would.
+     * Rewrites every number the way JavaScript writes it (`25.0` becomes `25`, `1.0E-4` becomes
+     * `0.0001`), as Node's `JSON.parse` then `JSON.stringify` would. Text and structuredContent
+     * then print the same digits the Node server did.
      */
+    @OptIn(ExperimentalSerializationApi::class)
     private fun normalized(element: JsonElement): JsonElement =
         when (element) {
             is JsonObject -> JsonObject(element.mapValues { normalized(it.value) })
             is JsonArray -> JsonArray(element.map(::normalized))
             is JsonPrimitive ->
                 if (element.isString || element is JsonNull) element
-                else element.content.toDoubleOrNull()?.let(::jsNumber) ?: element
+                else
+                    element.content.toDoubleOrNull()?.let { JsonUnquotedLiteral(jsNumber(it)) }
+                        ?: element
         }
 
-    private fun jsNumber(value: Double): JsonPrimitive =
-        if (value.isFinite() && value == Math.floor(value) && Math.abs(value) < 1e15) {
-            JsonPrimitive(value.toLong())
-        } else {
-            JsonPrimitive(value)
-        }
+    /**
+     * ECMAScript Number::toString for a finite number: the shortest digits that round-trip, plain
+     * from 1e-6 up to 1e21, exponent form (`1e-7`, `1e+21`) outside that range.
+     */
+    internal fun jsNumber(value: Double): String {
+        if (value == 0.0) return "0"
+        // The shortest digits that read back as the same double, found the same way on any JVM
+        // or Android runtime (whose Double.toString is not always shortest).
+        val magnitude = BigDecimal(Math.abs(value))
+        val exact =
+            (1..17)
+                .asSequence()
+                .map { magnitude.round(MathContext(it)) }
+                .first { it.toDouble() == Math.abs(value) }
+                .stripTrailingZeros()
+        val digits = exact.unscaledValue().toString()
+        val k = digits.length
+        // value = 0.digits × 10^n
+        val n = k - exact.scale()
+        val body =
+            when {
+                n in k..21 -> digits + "0".repeat(n - k)
+                n in 1..21 -> digits.substring(0, n) + "." + digits.substring(n)
+                n in -5..0 -> "0." + "0".repeat(-n) + digits
+                else -> {
+                    val exponent = n - 1
+                    val mantissa = if (k == 1) digits else digits[0] + "." + digits.substring(1)
+                    mantissa + "e" + (if (exponent >= 0) "+" else "-") + Math.abs(exponent)
+                }
+            }
+        return if (value < 0) "-$body" else body
+    }
 
     private const val SCALAR = "scalar"
     private const val ORIGIN_ANDROID = "android"

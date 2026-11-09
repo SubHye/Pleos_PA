@@ -259,6 +259,46 @@ class EmbeddedMcpServerTest {
         assertTrue("port $port still accepts connections", refused)
     }
 
+    @Test
+    fun aStopBeforeStartLeavesThePortClosed() {
+        val other = EmbeddedMcpServer(catalog, tool, port = freePort())
+        other.stop()
+        other.start()
+
+        assertEquals(-1, other.localPort)
+    }
+
+    /**
+     * ConnectionSession starts on the bind executor and stops on the main thread. However the two
+     * interleave, a stopped endpoint must not leave its port listening (Codex review on #15).
+     */
+    @Test
+    fun aStopDuringStartNeverLeavesThePortListening() {
+        val fixed = freePort()
+        val bind = Executors.newSingleThreadExecutor()
+        try {
+            repeat(RACE_ROUNDS) { round ->
+                val other = EmbeddedMcpServer(catalog, tool, port = fixed)
+                val started = bind.submit { other.start() }
+                Thread.sleep((round % 4).toLong())
+                other.stop()
+                runCatching { started.get(5, TimeUnit.SECONDS) }
+
+                assertEquals("round $round", -1, other.localPort)
+                val free = runCatching {
+                    java.net.ServerSocket(fixed, 1, InetAddress.getByAddress(LOOPBACK)).close()
+                }
+                    .isSuccess
+                assertTrue("round $round: port $fixed is still bound", free)
+            }
+        } finally {
+            bind.shutdownNow()
+        }
+    }
+
+    private fun freePort(): Int =
+        java.net.ServerSocket(0, 1, InetAddress.getByAddress(LOOPBACK)).use { it.localPort }
+
     private fun status(answer: String) = answer.substringAfter(' ').take(3).toInt()
 
     private fun connect() = Socket(InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1)), port)
@@ -281,5 +321,7 @@ class EmbeddedMcpServerTest {
 
     private companion object {
         const val PING = """{"jsonrpc":"2.0","id":1,"method":"ping"}"""
+        const val RACE_ROUNDS = 30
+        val LOOPBACK = byteArrayOf(127, 0, 0, 1)
     }
 }

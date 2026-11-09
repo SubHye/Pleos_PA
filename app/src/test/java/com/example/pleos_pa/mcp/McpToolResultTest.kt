@@ -89,4 +89,44 @@ class McpToolResultTest {
                 .text
         assertTrue(text, text.contains("[FUEL_PERCENT]: 62 %"))
     }
+
+    /** Expected strings are what Node 24 prints for String(value) and JSON.stringify(value). */
+    @Test
+    fun numbersPrintAsJavaScriptPrintsThem() {
+        val cases =
+            listOf(
+                0.0001 to "0.0001",
+                0.000001 to "0.000001",
+                1e-7 to "1e-7",
+                1.5e-10 to "1.5e-10",
+                123.5 to "123.5",
+                -0.5 to "-0.5",
+                25.0 to "25",
+                0.0 to "0",
+                0.1 + 0.2 to "0.30000000000000004",
+                1e20 to "100000000000000000000",
+                1e21 to "1e+21",
+                12345678901234567890.0 to "12345678901234567000",
+            )
+        for ((value, expected) in cases) {
+            assertEquals("$value", expected, McpToolResult.jsNumber(value))
+        }
+    }
+
+    @Test
+    fun aSmallFractionReadsTheSameInTextAndStructuredContent() {
+        val tool = catalog.tools.getValue("energy_level")
+        val case = cases.first { it.getString("name") == "complete is not an error" }
+        val response = case.getJSONObject("bridge").getJSONObject("response").toString()
+        val small = response.replace("\"rawValue\":62", "\"rawValue\":1.0E-4")
+        assertTrue(small != response)
+
+        val result = McpToolResult.of(tool, Json.parseToJsonElement(small).jsonObject)
+        val text = (result.content.single() as TextContent).text
+        assertTrue(text, text.contains("[FUEL_PERCENT]: 0.0001 %"))
+        assertTrue(
+            "${result.structuredContent}",
+            "\"rawValue\":0.0001" in "${result.structuredContent}",
+        )
+    }
 }
