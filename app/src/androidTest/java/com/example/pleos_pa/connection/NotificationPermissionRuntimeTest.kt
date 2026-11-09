@@ -4,6 +4,7 @@ import android.Manifest
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
@@ -18,11 +19,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.pleos_pa.MainActivity
 import com.example.pleos_pa.R
+import com.example.pleos_pa.RuntimeMcpClient
 import com.example.pleos_pa.awaitFocusedActivity
+import com.example.pleos_pa.mcp.EmbeddedMcpServer
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
 import org.hamcrest.CoreMatchers.sameInstance
+import org.json.JSONObject
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -110,6 +114,7 @@ class NotificationPermissionRuntimeTest {
                 }
                 ready
             }
+            RuntimeMcpClient().use { assertEquals(20, it.toolNames().size) }
             awaitFocusedActivity(activity)
             onView(withText(context.getString(R.string.notifications_off)))
                 .inRoot(withDecorView(sameInstance(activity.window.decorView)))
@@ -129,13 +134,26 @@ class NotificationPermissionRuntimeTest {
                     it.connect(
                         InetSocketAddress(
                             InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1)),
-                            18765,
+                            EmbeddedMcpServer.PORT,
                         ),
                         300,
                     )
                 }
                 fail("Bridge must refuse new connections after app stop")
             } catch (_: java.net.ConnectException) {}
+            val evidence =
+                JSONObject()
+                    .put("source", "production_mcp_permission")
+                    .put("transport", "streamable_http")
+                    .put("port", EmbeddedMcpServer.PORT)
+                    .put("permissionDenied", true)
+                    .put("toolsListVerified", true)
+                    .put("actualAppStop", true)
+                    .put("newConnectionRefused", true)
+                    .put("testVehicleReadRequests", 0)
+            instrumentation.addResults(
+                Bundle().apply { putString("com22_permission", evidence.toString()) }
+            )
             Log.i(
                 "COM22_PERMISSION",
                 "requested=true denied=true actualAppStop=true newConnectionRefused=true testVehicleReadRequests=0",

@@ -5,16 +5,18 @@
 | 위치 | 내용 |
 | --- | --- |
 | `main/` | Manifest, 리소스, `keepRules/rules.keep` |
-| `main/java/com/example/pleos_pa/MainActivity.kt` | 연결 시작·중지·재개와 상태를 보여 주는 연결 상태·기능 목록·요청별 기록·Car UX 제한 화면 |
+| `main/java/com/example/pleos_pa/MainActivity.kt` | 연결 상태·기능 목록·요청별 메모리 기록·Car UX 제한·연결 시작/중지/재개 화면 |
 | `main/java/com/example/pleos_pa/ui/` | 메모리 요청 기록, 검증된 조회 결과 표시, 현재 화면의 Car UX 관찰과 만료 정책, 선택적인 읽기 전용 플랫폼 관찰 메타데이터 |
-| `debug/java/com/example/pleos_pa/ui/` | 모의 화면, .com5 전용 공용 기록 재시작 probe와 실제 Car UX 점검 화면. 모의 화면/재시작 probe는 SDK·Bridge를 사용하지 않는다. 실제 점검 화면은 공개 Car UX 조회와 기존 실제 서비스 제어만 사용하고 값 주입/변경은 하지 않는다 |
+| `debug/java/com/example/pleos_pa/ui/` | 모의 화면, .com5 전용 공용 기록 재시작 probe와 실제 Car UX 점검 화면. 모의 화면/재시작 probe는 SDK·MCP 서버를 사용하지 않는다. 실제 점검 화면은 공개 Car UX 조회와 기존 실제 서비스 제어만 사용하고 값 주입/변경은 하지 않는다 |
 | `main/java/com/example/pleos_pa/connection/` | Foreground Service, 알림, 세션과 명령 순서, 메모리 상태 |
-| `main/java/com/example/pleos_pa/bridge/` | loopback HTTP 서버, 요청 문법·헤더 검사, 조회기로 넘기는 게이트웨이 |
+| `main/java/com/example/pleos_pa/bridge/` | 조회기로 넘기는 게이트웨이와 그 응답 형식. COM-12 전의 HTTP Bridge에서 남은 앱 안 경계다 |
 | `main/java/com/example/pleos_pa/vehicle/` | 앱 전체 조회 슬롯, SDK 경계와 97개 속성의 호출 표, 실행 환경 판별 |
-| `main/java/com/example/pleos_pa/contract/` | [차량 조회 계약](../../contracts/vehicle-read/CONTRACT.md)의 wire 모델과 검증, SDK 실패 분류. SDK와 Android 컴포넌트에 의존하지 않는다 |
+| `main/java/com/example/pleos_pa/mcp/` | MCP 서버(`127.0.0.1:18766/mcp`, stateless Streamable HTTP). 카탈로그의 채택 도구, 입력 스키마와 인자 검사, 결과 글과 structuredContent |
+| `main/java/com/example/pleos_pa/contract/` | [차량 조회 계약](../../contracts/vehicle-read/CONTRACT.md)의 요청·응답 모델과 검증, SDK 실패 분류. SDK와 Android 컴포넌트에 의존하지 않는다 |
+| `test/java/com/example/pleos_pa/mcp/` | 공용 `tool-list.json`·`tool-inputs.json`·`tool-results.json` 대조와, 실제 소켓 + SDK 대역으로 MCP 서버를 검사하는 JVM 테스트. 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/contract/` | 공용 fixture와 SDK 클래스 대조로 계약을 고정하는 JVM 테스트. SDK를 실행하지 않으므로 차량 기능 검증이 아니다 |
-| `test/java/com/example/pleos_pa/{bridge,connection,vehicle,ui}/` | 실제 소켓과 SDK 대역으로 Bridge·세션·조회기를 검사하는 JVM 테스트. 차량 기능 검증이 아니다 |
+| `test/java/com/example/pleos_pa/{connection,vehicle,ui}/` | SDK 대역으로 세션·조회기·기록 표시 모델을 검사하는 JVM 테스트. 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/` | 산술 예제 1개 |
-| `androidTest/java/com/example/pleos_pa/` | 기기 테스트. 예제와 모의 Car UX 기반 실제 위젯 검사. CI의 일반 API34 에뮬레이터에서 모의 UX/값으로 실행한다. 실제 서비스·소켓·게시 알림 액션·알림 권한 요청과 거부 후 화면 중지도 검사한다. COM-22 서비스 검사는 차량 요청을 보내지 않고, COM-25 요청 기록 검사는 읽기 전용 에너지/표시 단위 조회를 실제 HTTP로 보내며 일반 Android 미지원 응답과 실제 Pleos SDK 결과를 구분한다. 실제 Pleos 규제 전환/알림 패널 검수는 별도다 |
+| `androidTest/java/com/example/pleos_pa/` | 기기 테스트. 모의 UX/값의 실제 위젯 검사와 실제 서비스·MCP tools/call→공용 기록·알림 권한/중지 검사. 별도 .com5 패키지에서 실행한다. 일반 Android APP_NOT_READY와 실제 Pleos SDK 결과를 구분하며 주행 정책 검수는 별도다 |
 
-기능을 추가하면 이 표에 실제 위치를 함께 갱신한다. SDK 접근은 Android Adapter에 두고 Node로 옮기지 않는다 ([ADR-0002](../../docs/decisions/0002-boundaries-and-transport.md)).
+기능을 추가하면 이 표에 실제 위치를 함께 갱신한다. SDK 접근은 Android Adapter에 둔다 ([ADR-0008](../../docs/decisions/0008-embedded-mcp-server.md)).

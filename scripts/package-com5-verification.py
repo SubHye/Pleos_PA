@@ -42,7 +42,7 @@ def main():
     manifest = {
         "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "package": PACKAGE, "testPackage": PACKAGE + ".test", "sha256": hashes,
-        "scope": "Synthetic UI/journal; real service, read-only HTTP/shared-history and notification-permission tests; optional read-only public Car UX capture. No automatic Pleos regulation/panel/navigation acceptance.",
+        "scope": "Synthetic UI/journal; real service, read-only MCP/shared-history and notification-permission tests; optional read-only public Car UX capture. No automatic Pleos regulation/panel/navigation acceptance.",
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(args.output, "x", compression=zipfile.ZIP_DEFLATED) as archive:

@@ -58,6 +58,14 @@ function Invoke-Adb([string[]]$AdbArguments, [int]$TimeoutMillis = 30000) {
         return $result.Trim()
     } finally { $process.Dispose() }
 }
+function Read-McpEvidence([string]$Output, [string]$Key, [string]$Source) {
+    $pattern = '(?m)^INSTRUMENTATION_RESULT: ' + [regex]::Escape($Key) + '=(\{.*\})\r?$'
+    $found = [regex]::Match($Output, $pattern)
+    if (-not $found.Success) { throw 'Missing embedded MCP evidence. Install the current diagnostic kit.' }
+    $value = $found.Groups[1].Value | ConvertFrom-Json
+    if ($value.source -ne $Source -or $value.transport -ne 'streamable_http' -or $value.port -ne 18766) { throw 'Retired Bridge or wrong transport evidence is not accepted.' }
+    return $value
+}
 function Invoke-Probe([string]$Operation) {
     $nonce = [guid]::NewGuid().ToString()
     $result = Invoke-Adb -AdbArguments @('-s',$Serial,'shell','am','start','-W','-n',
@@ -118,19 +126,20 @@ try {
             'com.example.pleos_pa.ui.BridgeHistoryRuntimeTest',"$package.test/androidx.test.runner.AndroidJUnitRunner") -TimeoutMillis 240000
         Write-Evidence 'history-instrumentation.txt' $result
         if ($result -match 'FAILURES!!!|INSTRUMENTATION_FAILED|INSTRUMENTATION_ABORTED|Process crashed|shortMsg=' -or
-            $result -notmatch 'OK \(1 test\)') { throw 'Expected OK (1 test) for the production HTTP/shared-history path.' }
+            $result -notmatch 'OK \(1 test\)') { throw 'Expected OK (1 test) for the production MCP/shared-history path.' }
         $match = [regex]::Match($result, '(?m)^INSTRUMENTATION_RESULT: com25_history=(\{.*\})\r?$')
         if (-not $match.Success) { throw 'Missing production history evidence.' }
         $history = $match.Groups[1].Value | ConvertFrom-Json
-        if ($history.source -ne 'production_http_shared_history' -or $history.validReadOnlyRequests -ne 2 -or $history.rejectedRequests -ne 1 -or
-            ($history.queries -join ',') -ne 'energy_level,display_units' -or -not ($history.sdkOkValueObserved -is [bool]) -or
-            @($history.httpStatuses).Count -ne 2 -or ($history.sdkOkValueObserved -and 200 -notin $history.httpStatuses)) { throw 'Production history evidence is incomplete.' }
-        foreach ($field in @('duplicateAttemptsSeparated','activityRecreationPreservedRecords','resumeLabelRestored','restrictedDetailsHidden','explicitUiClear','stoppedConnectionRefused')) {
-            if (-not ($history.$field -is [bool]) -or -not $history.$field) { throw 'Production history evidence is incomplete.' }
+        if ($history.source -ne 'production_mcp_shared_history' -or $history.transport -ne 'streamable_http' -or $history.port -ne 18766 -or $history.path -ne '/mcp' -or
+            $history.validToolCalls -ne 2 -or $history.rejectedToolCalls -ne 1 -or ($history.queries -join ',') -ne 'energy_level,display_units' -or
+            -not ($history.sdkOkValueObserved -is [bool]) -or @($history.mcpCodes).Count -ne 2 -or @($history.responseSources).Count -ne 2 -or
+            ($history.sdkOkValueObserved -and 'pleos_emulator' -notin $history.responseSources -and 'real_vehicle' -notin $history.responseSources)) { throw 'Production MCP history evidence is incomplete.' }
+        foreach ($field in @('requestIdsCorrelated','distinctServerRequestIds','activityRecreationPreservedRecords','resumeLabelRestored','restrictedDetailsHidden','explicitUiClear','stoppedConnectionRefused')) {
+            if (-not ($history.$field -is [bool]) -or -not $history.$field) { throw 'Production MCP history evidence is incomplete.' }
         }
         $report['history_tests'] = 1
         $report['history'] = $history
-        $report['scope'] = 'Real HTTP/shared history; one read-only fixed energy query (fuel/EV) and one temperature-display-unit query, one rejected synthetic request. Diagnostic notification permission is granted. sdkOkValueObserved alone distinguishes an actual OK SDK value; result-detail UI and Pleos policy remain unverified.'
+        $report['scope'] = 'Real MCP tools/call/shared history; one read-only fixed energy query (fuel/EV) and one temperature-display-unit query, one rejected synthetic request. Diagnostic notification permission is granted. sdkOkValueObserved alone distinguishes an actual OK SDK value; result-detail UI and Pleos policy remain unverified.'
     } elseif ($Stage -eq 'PermissionTest') {
         # Android may terminate only this diagnostic process on revocation; do it BEFORE the runner.
         [void](Invoke-Adb -AdbArguments @('-s',$Serial,'shell','pm','revoke','--user','current',$package,'android.permission.POST_NOTIFICATIONS'))
@@ -140,6 +149,12 @@ try {
         Write-Evidence 'permission-instrumentation.txt' $result
         if ($result -match 'FAILURES!!!|INSTRUMENTATION_FAILED|INSTRUMENTATION_ABORTED|Process crashed|shortMsg=' -or
             $result -notmatch 'OK \(1 test\)') { throw 'Expected OK (1 test) for the actual diagnostic notification permission dialog.' }
+        $permission = Read-McpEvidence $result 'com22_permission' 'production_mcp_permission'
+        foreach ($field in @('permissionDenied','toolsListVerified','actualAppStop','newConnectionRefused')) {
+            if (-not ($permission.$field -is [bool]) -or -not $permission.$field) { throw 'Incomplete MCP permission evidence.' }
+        }
+        if ($permission.testVehicleReadRequests -ne 0) { throw 'Unexpected vehicle request count.' }
+        $report['permission'] = $permission
         $report['permission_tests'] = 1
         $report['scope'] = 'Diagnostic notification permission revoked before runner; actual permission denial and app Stop. No vehicle permissions or original app changed. ServiceTest grants diagnostic notification permission afterward.'
     } elseif ($Stage -eq 'ServiceTest') {
@@ -148,8 +163,18 @@ try {
         Write-Evidence 'service-instrumentation.txt' $result
         if ($result -match 'FAILURES!!!|INSTRUMENTATION_FAILED|INSTRUMENTATION_ABORTED|Process crashed|shortMsg=' -or
             $result -notmatch 'OK \(3 tests\)') { throw 'Expected OK (3 tests). Other applications are not stopped if the bridge port is occupied.' }
+        $service = [ordered]@{}
+        foreach ($scenario in @('app_stop','notification_action','cold_repeated_stop')) {
+            $value = Read-McpEvidence $result ('com22_' + $scenario) 'production_mcp_service'
+            foreach ($field in @('connectionStopped','serviceGone','newConnectionRefused')) {
+                if (-not ($value.$field -is [bool]) -or -not $value.$field) { throw 'Incomplete MCP service evidence.' }
+            }
+            if ($value.testVehicleReadRequests -ne 0 -or -not ($value.toolsListVerified -is [bool]) -or $value.toolsListVerified -ne ($scenario -ne 'cold_repeated_stop')) { throw 'Missing MCP tools/list check or unexpected vehicle call.' }
+            $service[$scenario] = $value
+        }
+        $report['service'] = $service
         $report['service_tests'] = 3
-        $report['scope'] = 'Production service/sockets/posted PendingIntent; no vehicle read requests. Notification permission is granted to the diagnostic package for this test. Not notification-panel touch or real restricted-state evidence.'
+        $report['scope'] = 'Production MCP service/tools/list/sockets/posted PendingIntent; no vehicle read requests. Notification permission is granted to the diagnostic package for this test. Not notification-panel touch or real restricted-state evidence.'
     } elseif ($Stage -eq 'LiveStart') {
         $sessionId = [guid]::NewGuid().ToString()
         $result = Invoke-Adb -AdbArguments @('-s',$Serial,'shell','am','start','-W','-n',

@@ -105,9 +105,28 @@ def run_instrumentation(serial, class_name, expected):
     return {"serial": serial, "tests": expected, "instrumentation": result, "passed": True}
 
 
+def embedded_result(output, key, source):
+    match = re.search(r"^INSTRUMENTATION_RESULT: " + re.escape(key) + r"=(\{.*\})$", output, re.M)
+    if not match:
+        raise RuntimeError("Missing embedded MCP runtime evidence; install the current diagnostic kit")
+    value = json.loads(match.group(1))
+    if value.get("source") != source or value.get("transport") != "streamable_http" or value.get("port") != 18766:
+        raise RuntimeError("Wrong runtime transport; retired Bridge evidence is not accepted")
+    return value
+
+
 def service_check(serial):
     result = run_instrumentation(serial, "com.example.pleos_pa.connection.BridgeServiceRuntimeTest", 3)
-    result["scope"] = "Production service, posted PendingIntent, idle sockets; no vehicle read requests"
+    records = {}
+    for scenario in ("app_stop", "notification_action", "cold_repeated_stop"):
+        value = embedded_result(result["instrumentation"], "com22_" + scenario, "production_mcp_service")
+        if any(value.get(k) is not True for k in ("connectionStopped", "serviceGone", "newConnectionRefused")) or value.get("testVehicleReadRequests") != 0:
+            raise RuntimeError("Incomplete MCP service evidence")
+        if value.get("toolsListVerified") is not (scenario != "cold_repeated_stop"):
+            raise RuntimeError("Missing real MCP tools/list readiness check")
+        records[scenario] = value
+    result["service"] = records
+    result["scope"] = "Production MCP endpoint, initialization/tools/list, posted PendingIntent and sockets; no vehicle tools/call"
     return result
 
 
@@ -117,18 +136,19 @@ def history_check(serial):
     if not match:
         raise RuntimeError("Missing count-only production history result")
     evidence = json.loads(match.group(1))
-    required = ("duplicateAttemptsSeparated", "activityRecreationPreservedRecords",
+    required = ("requestIdsCorrelated", "distinctServerRequestIds", "activityRecreationPreservedRecords",
                 "resumeLabelRestored", "restrictedDetailsHidden", "explicitUiClear", "stoppedConnectionRefused")
-    if (evidence.get("source") != "production_http_shared_history"
+    if (evidence.get("source") != "production_mcp_shared_history"
+            or evidence.get("transport") != "streamable_http" or evidence.get("port") != 18766 or evidence.get("path") != "/mcp"
             or not all(evidence.get(k) is True for k in required)
-            or evidence.get("validReadOnlyRequests") != 2 or evidence.get("rejectedRequests") != 1
+            or evidence.get("validToolCalls") != 2 or evidence.get("rejectedToolCalls") != 1
             or evidence.get("queries") != ["energy_level", "display_units"]
             or not isinstance(evidence.get("sdkOkValueObserved"), bool)
-            or len(evidence.get("httpStatuses", [])) != 2
-            or (evidence.get("sdkOkValueObserved") and 200 not in evidence["httpStatuses"])):
-        raise RuntimeError("Production history evidence is incomplete")
+            or len(evidence.get("mcpCodes", [])) != 2 or len(evidence.get("responseSources", [])) != 2
+            or (evidence.get("sdkOkValueObserved") and not any(s in ("pleos_emulator", "real_vehicle") for s in evidence["responseSources"]))):
+        raise RuntimeError("Production MCP history evidence is incomplete")
     result["history"] = evidence
-    result["scope"] = "Real HTTP and shared history; SDK success depends on recorded platform response; no Pleos UI policy acceptance"
+    result["scope"] = "Real MCP tools/call and shared history; SDK success depends on recorded platform response; no Pleos UI policy acceptance"
     return result
 
 
@@ -140,7 +160,11 @@ def permission_check(serial):
     adb(serial, "shell", "pm", "clear-permission-flags", "--user", "current", PACKAGE,
         "android.permission.POST_NOTIFICATIONS", "user-set", "user-fixed", combined_output=True)
     result = run_instrumentation(serial, "com.example.pleos_pa.connection.NotificationPermissionRuntimeTest", 1)
-    result["scope"] = "Actual diagnostic notification permission dialog/denial/app stop; no vehicle requests"
+    value = embedded_result(result["instrumentation"], "com22_permission", "production_mcp_permission")
+    if any(value.get(k) is not True for k in ("permissionDenied", "toolsListVerified", "actualAppStop", "newConnectionRefused")) or value.get("testVehicleReadRequests") != 0:
+        raise RuntimeError("Incomplete MCP permission-denial evidence")
+    result["permission"] = value
+    result["scope"] = "Actual notification denial, MCP tools/list and app Stop; no vehicle tools/call"
     return result
 
 

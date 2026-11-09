@@ -19,7 +19,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.pleos_pa.MainActivity
 import com.example.pleos_pa.R
+import com.example.pleos_pa.RuntimeMcpClient
 import com.example.pleos_pa.awaitFocusedActivity
+import com.example.pleos_pa.mcp.EmbeddedMcpServer
 import com.example.pleos_pa.ui.DriverHistory
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -31,7 +33,10 @@ import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Real production service, notification and sockets. No HTTP/vehicle read request is sent. */
+/**
+ * Real production service, notification and sockets. MCP initialization/tools/list are real; no
+ * vehicle tools/call is sent.
+ */
 @RunWith(AndroidJUnit4::class)
 class BridgeServiceRuntimeTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
@@ -103,12 +108,19 @@ class BridgeServiceRuntimeTest {
         onView(withText(context.getString(R.string.action_start)))
             .inRoot(withDecorView(sameInstance(activity.window.decorView)))
             .perform(click())
-        await("real listener ready; stop other callers manually if port 18765 is occupied") {
+        await("real listener ready; stop other callers manually if port 18766 is occupied") {
             if (ConnectionStatusBoard.status is ConnectionStatus.Failed) {
                 fail("Real service failed: ${ConnectionStatusBoard.status}")
             }
             ConnectionStatusBoard.status is ConnectionStatus.Connected
         }
+        RuntimeMcpClient().use { client ->
+            val names = client.toolNames()
+            assertEquals(20, names.size)
+            assertTrue(names.contains("get_energy_level"))
+        }
+        // Closing an MCP client is not a server/AI disconnection signal under ADR-0008.
+        assertTrue(ConnectionStatusBoard.status is ConnectionStatus.Connected)
         await("running notification replaces old resume action") {
             notificationAction(context.getString(R.string.action_stop)) != null &&
                 notificationAction(context.getString(R.string.action_resume)) == null
@@ -118,7 +130,7 @@ class BridgeServiceRuntimeTest {
     private fun idleSocket() =
         Socket().apply {
             soTimeout = 3_000
-            connect(InetSocketAddress(loopback, 18765), 1_000)
+            connect(InetSocketAddress(loopback, EmbeddedMcpServer.PORT), 1_000)
             // No bytes: this cannot reach the gateway or issue a Vehicle SDK query.
         }
 
@@ -144,7 +156,7 @@ class BridgeServiceRuntimeTest {
             }
         }
         try {
-            Socket().use { it.connect(InetSocketAddress(loopback, 18765), 300) }
+            Socket().use { it.connect(InetSocketAddress(loopback, EmbeddedMcpServer.PORT), 300) }
             fail("New connections must be refused after stop")
         } catch (_: java.net.ConnectException) {
             /* Expected refusal, not an arbitrary timeout. */
@@ -155,7 +167,10 @@ class BridgeServiceRuntimeTest {
         val text =
             JSONObject()
                 .put("scenario", scenario)
-                .put("source", "production_service")
+                .put("source", "production_mcp_service")
+                .put("transport", "streamable_http")
+                .put("port", EmbeddedMcpServer.PORT)
+                .put("toolsListVerified", scenario != "cold_repeated_stop")
                 .put("testVehicleReadRequests", 0)
                 .put("connectionStopped", true)
                 .put("serviceGone", true)

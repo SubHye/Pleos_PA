@@ -1,7 +1,7 @@
 # ADR-0001: 1차 외부 MCP와 Embedded 후속 검증 분리
 
 - 날짜: 2026-11-01
-- 상태: 채택 (사용자 확정 방침); 신규 저장소 구현은 미완료
+- 상태: 채택 (사용자 확정 방침). 정한 대로 Embedded 검증(COM-13)을 거쳐 [ADR-0008](0008-embedded-mcp-server.md)에서 MCP 서버를 앱으로 옮긴다
 
 ## 맥락
 Pleos_PA는 빈 Android 모듈이다. 기존 PoC는 외부 Node stdio MCP와 Android HTTP Bridge/Foreground Service를 제공한다. 1차 대표 경험 검증과 서버 실행 위치 이전을 동시에 진행하면 검증 범위가 커진다.

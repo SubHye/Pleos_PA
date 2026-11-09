@@ -1,27 +1,25 @@
 workspace "Pleos_PA" "Current app, first-phase target and separately identified reference implementation; only what the current system describes has been migrated." {
     model {
-        current = softwareSystem "Pleos_PA - current scaffold" "Android connection app with a loopback Bridge over the Vehicle SDK, and a stdio MCP server listing the adopted read tools." {
-            scaffold = container "Android scaffold APK" "Connection and bounded in-memory request history screen with display Car UX restrictions; Foreground Service, /v3/vehicle-read Bridge and a Vehicle SDK boundary covering the catalog. No navigation mutation or persistent history." "Android / Gradle"
-            currentMcp = container "MCP server" "Lists the tools the catalog records as adopted after execution verification." "Node.js / TypeScript / stdio"
+        current = softwareSystem "Pleos_PA - current" "Android connection app whose embedded MCP server offers the adopted vehicle read tools over the Vehicle SDK (ADR-0008)." {
+            scaffold = container "Android app" "Connection and bounded process-memory request history with display Car UX restrictions, Foreground Service, MCP server on loopback 127.0.0.1:18766/mcp (no authentication), read gateway and a Vehicle SDK boundary covering the catalog." "Kotlin / MCP Kotlin SDK / Ktor CIO / Vehicle SDK 2.3.2"
+            sweep = container "vehicle-sweep" "Test support on the development PC: calls every offered tool and compares Virtual Console values to build catalog verification evidence." "Kotlin / JVM"
         }
         client = softwareSystem "Local MCP-capable client" "Reference execution environment; exact AI product integration must be revalidated."
-        carUx = softwareSystem "Android Automotive Car UX service" "Display-scoped distraction restrictions, not parked-state or vehicle mutation approval."
         vehicle = softwareSystem "Pleos Emulator Vehicle Service" "Reference SDK backend; not a live vehicle."
         poc = softwareSystem "pleostest - reference only" "Source reviewed at 0d288c8. The connection service, Bridge, read slot and DOOR_POSITION SDK call were selectively migrated; the rest was not." {
             mcp = container "External MCP server" "Four read tools and HTTP bridge client." "Node.js / stdio"
             android = container "Reference Android app" "Foreground Service owns Bridge and Vehicle SDK adapter." "Kotlin / Vehicle SDK 2.3.2"
         }
-        scaffold -> carUx "Observes display UX; unknown or stale observations hide detailed history" "Public android.car API"
-        scaffold -> vehicle "Queries catalog vehicle properties" "Vehicle SDK"
         client -> mcp "Calls read tools" "MCP / stdio"
-        client -> currentMcp "Connects and lists tools; connection must be revalidated per client" "MCP / stdio"
+        client -> scaffold "Calls read tools; verified with Codex CLI, other clients unverified" "MCP Streamable HTTP via adb forward tcp:18766"
+        sweep -> scaffold "Calls every offered tool" "MCP Streamable HTTP via adb forward tcp:18766"
+        scaffold -> vehicle "Queries catalog vehicle properties" "Vehicle SDK"
         mcp -> android "Reads via PC loopback and ADB forward" "HTTP POST /v2/vehicle-read :18765"
         android -> vehicle "Queries supported vehicle properties" "Vehicle SDK"
 
         driver = person "Driver - target" "Asks for departure help and approves destination changes and messages."
         targetSystem = softwareSystem "Pleos_PA - first-phase target (not implemented)" "Goal structure; nothing here exists in the repository yet." {
-            targetMcp = container "External MCP server - target" "MCP protocol, input validation, request and error mapping. No vehicle SDK logic." "Node.js / TypeScript / stdio"
-            targetApp = container "Android app - target" "Owns SDK permissions, execution, session lifecycle, driving restrictions and result display through Service, Bridge and Adapter. Keeps call records in memory only." "Kotlin / Vehicle SDK, NaviHelper"
+            targetApp = container "Android app - target" "Serves MCP and owns SDK permissions, execution, session lifecycle, driving restrictions and result display through Service, MCP server and Adapter. Keeps call records in memory only." "Kotlin / Vehicle SDK, NaviHelper"
         }
         targetAi = softwareSystem "ChatGPT or Claude - target" "Interprets schedule, selects tools and runs approval dialogue. Exact product, version and connection path must be verified per client."
         targetCalendar = softwareSystem "Calendar service - target" "Schedule source connected to the AI; account data is not copied into the vehicle app."
@@ -31,16 +29,15 @@ workspace "Pleos_PA" "Current app, first-phase target and separately identified 
         driver -> targetApp "Checks results and stops or resumes the connection"
         targetAi -> targetCalendar "Reads appointment"
         targetAi -> targetMessaging "Sends approved message"
-        targetAi -> targetMcp "Calls tools" "MCP; client connection path must be verified"
-        targetMcp -> targetApp "Forwards validated requests" "Loopback HTTP / ADB forward (development)"
+        targetAi -> targetApp "Calls tools" "MCP; adb forward from a development PC. A path without PC (COM-15) is undecided"
         targetApp -> targetVehicle "Sets destination and reads ETA and vehicle data" "Vehicle SDK / NaviHelper"
 
         deploymentEnvironment "Scaffold installation target - unverified" {
             deploymentNode "Development Android device or emulator" "Intended APK installation target, not a confirmed deployment." "Android" {
                 containerInstance scaffold
             }
-            deploymentNode "Development PC" "Local MCP runtime." "Desktop OS" {
-                containerInstance currentMcp
+            deploymentNode "Development PC" "ADB host for the AI client and test support." "Desktop OS" {
+                containerInstance sweep
             }
         }
         deploymentEnvironment "Reference development setup" {

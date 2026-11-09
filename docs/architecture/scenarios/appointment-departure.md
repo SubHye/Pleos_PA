@@ -7,8 +7,8 @@ sequenceDiagram
     actor User as 사용자
     participant AI as 대상 AI
     participant Calendar as 일정 도구
-    participant MCP as 외부 Node MCP
-    participant App as Android Bridge/Adapter
+    participant MCP as 앱 MCP 서버
+    participant App as Android 게이트웨이/Adapter
     participant Navi as 순정 내비 SDK
     participant Message as 연락 도구
     User->>AI: 약속 출발 준비, 늦으면 연락
@@ -18,7 +18,7 @@ sequenceDiagram
     AI->>User: 목적지 변경 확인 (필요한 승인)
     User-->>AI: 승인
     AI->>MCP: 확인된 목적지 설정·시간 조회
-    MCP->>App: Bridge 요청
+    MCP->>App: 게이트웨이 요청
     App->>Navi: 권한·지원·주행 규제 확인 후 호출
     Navi-->>App: 실제 결과·시간 정보
     App-->>User: 차량 화면에 변경 결과 표시

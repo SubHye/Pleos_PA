@@ -21,9 +21,10 @@ import androidx.core.content.ContextCompat
 import com.example.pleos_pa.MainActivity
 import com.example.pleos_pa.R
 import com.example.pleos_pa.bridge.BridgeEvents
-import com.example.pleos_pa.bridge.BridgeServer
 import com.example.pleos_pa.bridge.ReaderBridgeGateway
 import com.example.pleos_pa.contract.VehicleReadCatalog
+import com.example.pleos_pa.mcp.EmbeddedMcpServer
+import com.example.pleos_pa.mcp.VehicleReadTool
 import com.example.pleos_pa.ui.DriverHistory
 import com.example.pleos_pa.ui.HistoryPresentation
 import com.example.pleos_pa.vehicle.PleosVehicleSdk
@@ -48,10 +49,10 @@ private class MainLooperScheduler(private val handler: Handler) : ReadScheduler 
 }
 
 /**
- * Keeps the bridge running while the screen is closed. It exists only while the connection is up:
- * stopping ends the service and leaves a plain notification that can start it again. Never sticky,
- * so the system does not reopen a bridge the user did not start. Nothing binds to it, because a
- * binding would keep it alive after [stopSelf].
+ * Keeps the MCP server running while the screen is closed. It exists only while the connection is
+ * up: stopping ends the service and leaves a plain notification that can start it again. Never
+ * sticky, so the system does not reopen an MCP server the user did not start. Nothing binds to it,
+ * because a binding would keep it alive after [stopSelf].
  */
 class BridgeService : Service() {
     private val main = Handler(Looper.getMainLooper())
@@ -136,10 +137,10 @@ class BridgeService : Service() {
                     { query -> catalog.tools.getValue(query).name },
                 ),
             )
-        val server = BridgeServer(catalog, gateway, events, SystemClock::elapsedRealtime)
+        val tool = VehicleReadTool(catalog, gateway, events, SystemClock::elapsedRealtime)
         return ConnectionSession(
             gateway::close,
-            server,
+            EmbeddedMcpServer(catalog, tool),
             { released -> reader.close { main.post(released) } },
             bindExecutor,
         ) { session, status ->
@@ -147,19 +148,9 @@ class BridgeService : Service() {
         }
     }
 
-    /** Called on bridge threads; only fixed fields reach the log, never a vehicle value. */
+    /** Called on server threads; only fixed fields reach the log, never a vehicle value. */
     private inner class Events : BridgeEvents {
-        override fun requestReceived() {
-            main.post { controller.requestReceived() }
-        }
-
-        override fun peerClosedDuringRead() {
-            main.post { controller.peerClosedDuringRead() }
-        }
-
-        override fun listenerFailed() {
-            main.post { controller.fail(BRIDGE_LISTENER_FAILED) }
-        }
+        override fun requestReceived() = Unit
 
         override fun ownReplyRejected() {
             Log.e(TAG, "OWN_REPLY_REJECTED")
@@ -252,7 +243,6 @@ class BridgeService : Service() {
         private const val NOTIFICATION_ID = 1
         private const val TERMINAL_NOTIFICATION_ID = 2
         private const val FOREGROUND_NOT_ALLOWED = "FOREGROUND_NOT_ALLOWED"
-        private const val BRIDGE_LISTENER_FAILED = "BRIDGE_LISTENER_FAILED"
 
         // Shared across sessions so a new bind waits for the previous session's bind.
         private val bindExecutor = Executors.newSingleThreadExecutor {
@@ -278,14 +268,7 @@ class BridgeService : Service() {
             when (status) {
                 ConnectionStatus.Stopped -> context.getString(R.string.connection_stopped)
                 ConnectionStatus.Starting -> context.getString(R.string.connection_starting)
-                is ConnectionStatus.Connected ->
-                    context.getString(
-                        if (status.interrupted) {
-                            R.string.connection_interrupted
-                        } else {
-                            R.string.connection_connected
-                        }
-                    )
+                ConnectionStatus.Connected -> context.getString(R.string.connection_connected)
                 is ConnectionStatus.Failed ->
                     context.getString(R.string.connection_failed, status.code)
             }

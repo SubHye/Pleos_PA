@@ -29,7 +29,7 @@ jobs:
       - name: Check formatting
         run: bash ./gradlew :spotlessCheck --no-daemon --console=plain
       - name: Build, unit test and lint
-        run: bash ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest :app:lintDebug --no-daemon --console=plain
+        run: bash ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest :app:lintDebug :vehicle-sweep:test --no-daemon --console=plain
 
   android-ui:
     runs-on: ubuntu-latest
@@ -93,7 +93,7 @@ jobs:
       - name: Verify actual production service and posted Stop action
         if: ${{ !cancelled() && steps.com5_probe_install.conclusion == 'success' }}
         run: python3 scripts/check-com5-device.py --serial emulator-5554 --service-check --output "$RUNNER_TEMP/com22-service-instrumentation.json"
-      - name: Verify real HTTP reaches shared history without bypassing UI restrictions
+      - name: Verify real MCP tools/call reaches shared history without bypassing UI restrictions
         if: ${{ !cancelled() && steps.com5_probe_install.conclusion == 'success' }}
         run: python3 scripts/check-com5-device.py --serial emulator-5554 --history-check --output "$RUNNER_TEMP/com25-history-instrumentation.json"
       - name: Verify first permission request and denial with actual Android dialog
@@ -136,53 +136,6 @@ jobs:
             ${{ runner.temp }}/com5-post-test-install.txt
             ${{ runner.temp }}/com5-probe-error.txt
             ${{ runner.temp }}/com5-emulator.log
-
-  mcp:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-      - name: Detect MCP implementation
-        id: mcp
-        shell: bash
-        run: |
-          if [ -f mcp/package.json ]; then
-            test -f mcp/package-lock.json
-            test -s mcp/.node-version
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          elif [ -d mcp ]; then
-            echo "::error::mcp directory exists without package.json"
-            exit 1
-          else
-            echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "MCP not implemented; npm checks are not applicable." >> "$GITHUB_STEP_SUMMARY"
-          fi
-      - uses: actions/setup-node@v6
-        if: steps.mcp.outputs.present == 'true'
-        with:
-          node-version-file: mcp/.node-version
-          cache: npm
-          cache-dependency-path: mcp/package-lock.json
-      - name: Install locked dependencies
-        if: steps.mcp.outputs.present == 'true'
-        working-directory: mcp
-        run: npm ci
-      - name: Type check MCP
-        if: steps.mcp.outputs.present == 'true'
-        working-directory: mcp
-        run: npm run typecheck
-      - name: Lint MCP
-        if: steps.mcp.outputs.present == 'true'
-        working-directory: mcp
-        run: npm run lint
-      - name: Check MCP formatting
-        if: steps.mcp.outputs.present == 'true'
-        working-directory: mcp
-        run: npm run format:check
-      - name: Test MCP
-        if: steps.mcp.outputs.present == 'true'
-        working-directory: mcp
-        run: npm test
 
   architecture:
     runs-on: ubuntu-latest

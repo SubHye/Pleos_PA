@@ -22,6 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.pleos_pa.MainActivity
 import com.example.pleos_pa.R
+import com.example.pleos_pa.RuntimeMcpClient
 import com.example.pleos_pa.awaitFocusedActivity
 import com.example.pleos_pa.connection.BridgeService
 import com.example.pleos_pa.connection.ConnectionStatus
@@ -30,13 +31,14 @@ import com.example.pleos_pa.contract.BridgeResult
 import com.example.pleos_pa.contract.ItemStatus
 import com.example.pleos_pa.contract.ReadSelection
 import com.example.pleos_pa.contract.VehicleReadCatalog
-import com.example.pleos_pa.contract.VehicleReadRequest
 import com.example.pleos_pa.contract.VehicleReadValidator
-import java.io.ByteArrayOutputStream
+import com.example.pleos_pa.mcp.EmbeddedMcpServer
+import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.UUID
+import kotlinx.serialization.json.jsonPrimitive
 import org.hamcrest.CoreMatchers.sameInstance
 import org.json.JSONArray
 import org.json.JSONObject
@@ -44,14 +46,14 @@ import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Real HTTP -> production gateway/reader -> shared history -> restricted MainActivity. */
+/**
+ * Real MCP tools/call -> production gateway/reader -> shared history -> restricted MainActivity.
+ */
 @RunWith(AndroidJUnit4::class)
 class BridgeHistoryRuntimeTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context = instrumentation.targetContext
     private val loopback = InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1))
-    private val property = "EV_BATTERY_PERCENT"
-    private val query = "energy_level"
 
     private data class Probe(val query: String, val property: String, val tool: String)
 
@@ -72,52 +74,6 @@ class BridgeHistoryRuntimeTest {
         fail("Timed out: $label")
     }
 
-    private data class Reply(val status: Int, val body: String)
-
-    private fun post(body: String): Reply =
-        Socket().use { socket ->
-            socket.soTimeout = 15_000
-            socket.connect(InetSocketAddress(loopback, 18765), 1_000)
-            val bytes = body.toByteArray(Charsets.UTF_8)
-            val head =
-                "POST /v3/vehicle-read HTTP/1.1\r\nHost: 127.0.0.1:18765\r\n" +
-                    "Content-Type: application/json\r\nContent-Length: ${bytes.size}\r\nConnection: close\r\n\r\n"
-            socket.getOutputStream().apply {
-                write(head.toByteArray(Charsets.US_ASCII))
-                write(bytes)
-                flush()
-            }
-            // Do not half-close before the response: that is cancellation in this protocol.
-            val input = socket.getInputStream()
-            val header = ByteArrayOutputStream()
-            while (true) {
-                val next = input.read()
-                assertTrue("HTTP response header closed early", next >= 0)
-                header.write(next)
-                assertTrue("HTTP response header must be bounded", header.size() <= 8_192)
-                val h = header.toString(Charsets.US_ASCII.name())
-                if (!h.endsWith("\r\n\r\n")) continue
-                val lines = h.split("\r\n")
-                val status = lines.first().split(' ')[1].toInt()
-                val size =
-                    lines
-                        .single { it.startsWith("Content-Length:", ignoreCase = true) }
-                        .substringAfter(':')
-                        .trim()
-                        .toInt()
-                assertTrue("HTTP response body must be bounded", size in 0..65_536)
-                val content = ByteArray(size)
-                var offset = 0
-                while (offset < size) {
-                    val count = input.read(content, offset, size - offset)
-                    assertTrue("HTTP response body closed early", count > 0)
-                    offset += count
-                }
-                return@use Reply(status, content.toString(Charsets.UTF_8))
-            }
-            @Suppress("UNREACHABLE_CODE") error("unreachable")
-        }
-
     private fun screenText(activity: MainActivity): String {
         fun texts(view: View): List<String> =
             (if (view is TextView) listOf(view.text.toString()) else emptyList()) +
@@ -132,7 +88,7 @@ class BridgeHistoryRuntimeTest {
     }
 
     @Test
-    fun validatedRequestsReachSharedHistoryWithoutLeakingRejectedInputOrUnlockingDetails() {
+    fun mcpCallsReachSharedHistoryWithoutLeakingRejectedInputOrUnlockingDetails() {
         assertEquals("Diagnostic package only", "com.example.pleos_pa.com5", context.packageName)
         assertTrue(
             "Preserve existing diagnostic records; clear them explicitly before testing",
@@ -154,13 +110,6 @@ class BridgeHistoryRuntimeTest {
                 context.assets.open("catalog.json").use { it.readBytes().decodeToString() }
             )
         val validator = VehicleReadValidator(catalog)
-        val requestId = UUID.randomUUID().toString()
-        val body =
-            JSONObject()
-                .put("requestId", requestId)
-                .put("remainingMs", 8_000)
-                .put("query", query)
-                .toString()
         val sentinel = "synthetic-private-input-${UUID.randomUUID()}"
         val scenario =
             ActivityScenario.launch<MainActivity>(
@@ -176,120 +125,130 @@ class BridgeHistoryRuntimeTest {
             onView(withText(context.getString(R.string.action_start)))
                 .inRoot(withDecorView(sameInstance(activity.window.decorView)))
                 .perform(click())
-            await("production listener") {
+            await("production MCP endpoint") {
                 if (ConnectionStatusBoard.status is ConnectionStatus.Failed)
-                    fail(
-                        "Production bridge could not start; another application's port is not stopped"
-                    )
+                    fail("MCP server could not start; another application's port is not stopped")
                 ConnectionStatusBoard.status is ConnectionStatus.Connected
             }
-            val invalid = post(JSONObject(body).put("privateText", sentinel).toString())
-            assertEquals(400, invalid.status)
-            assertFalse("Invalid input must not be reflected", invalid.body.contains(sentinel))
-            assertTrue(
-                "Rejected input must not enter history",
-                DriverHistory.history.snapshot().isEmpty(),
-            )
-
-            val replies = mutableListOf<Reply>()
-            val outcomes = JSONArray()
+            val requestIds = mutableListOf<String>()
+            val codes = JSONArray()
             val sources = JSONArray()
             var okValueObserved = false
-            repeat(2) { attempt ->
-                val (query, property, tool) = probes[attempt]
-                val legacy = catalog.tools.getValue(query).legacy
-                val requestJson =
-                    JSONObject()
-                        .put("requestId", requestId)
-                        .put("remainingMs", 8_000)
-                        .put("query", query)
-                if (!legacy) requestJson.put("properties", JSONArray().put(property))
-                assertNotNull(
-                    "Probe must obey the repository request contract",
-                    VehicleReadRequest.parse(catalog, requestJson.toString()),
-                )
-                val reply = post(requestJson.toString())
-                replies += reply
-                val verdict =
-                    validator.validate(
-                        reply.status,
-                        reply.body,
-                        requestId,
-                        query,
-                        if (legacy) ReadSelection() else ReadSelection(setOf(property)),
-                    )
-                await("terminal shared record") {
-                    val rows = DriverHistory.history.snapshot()
-                    rows.size == attempt + 1 && rows.none { it.state == "RECEIVED" }
-                }
-                val row = DriverHistory.history.snapshot().first()
-                assertEquals(requestId, row.requestId)
-                assertEquals(tool, row.tool)
-                assertTrue(
-                    "Validated selection belongs to this request",
-                    row.arguments.contains(if (legacy) "도구 기본 선택" else property),
-                )
+            RuntimeMcpClient().use { client ->
+                val invalid = client.call("get_energy_level", mapOf("privateText" to sentinel))
+                assertEquals(true, invalid.isError)
+                assertNull("Invalid tool input has no vehicle result", invalid.structuredContent)
                 assertFalse(
-                    "Rejected text must never enter a record",
-                    row.arguments.contains(sentinel) || row.details.contains(sentinel),
+                    "Rejected input must not be reflected",
+                    invalid.content.filterIsInstance<TextContent>().any {
+                        it.text.contains(sentinel)
+                    },
                 )
-                when (verdict) {
-                    is BridgeResult.Accepted -> {
-                        val response = verdict.response
-                        assertEquals(response.outcome.name, row.state)
+                assertTrue(
+                    "Rejected input must not enter history",
+                    DriverHistory.history.snapshot().isEmpty(),
+                )
+                for ((attempt, probe) in probes.withIndex()) {
+                    val (query, property, tool) = probe
+                    val legacy = catalog.tools.getValue(query).legacy
+                    val args: Map<String, Any?> =
+                        if (legacy) emptyMap() else mapOf("properties" to listOf(property))
+                    val result = client.call(tool, args)
+                    val content =
+                        result.structuredContent
+                            ?: error("Valid tool call needs a structured result")
+                    // Gateway IDs are now generated by VehicleReadTool, not supplied by a wire
+                    // caller.
+                    val id = content.getValue("requestId").jsonPrimitive.content
+                    UUID.fromString(id)
+                    requestIds += id
+                    await("terminal shared record") {
+                        DriverHistory.history.snapshot().let {
+                            it.size == attempt + 1 && it.none { row -> row.state == "RECEIVED" }
+                        }
+                    }
+                    val row = DriverHistory.history.snapshot().first()
+                    assertEquals(id, row.requestId)
+                    assertEquals(tool, row.tool)
+                    assertTrue(
+                        "Validated selection belongs to this call",
+                        row.arguments.contains(if (legacy) "도구 기본 선택" else property),
+                    )
+                    assertFalse(
+                        "Rejected text must not enter a record",
+                        row.arguments.contains(sentinel) || row.details.contains(sentinel),
+                    )
+                    val code: String
+                    if (content.containsKey("outcome")) {
+                        val verdict =
+                            validator.validate(
+                                200,
+                                content.toString(),
+                                id,
+                                query,
+                                if (legacy) ReadSelection() else ReadSelection(setOf(property)),
+                            )
+                        assertTrue(
+                            "MCP vehicle content must obey the gateway result contract",
+                            verdict is BridgeResult.Accepted,
+                        )
+                        val response = (verdict as BridgeResult.Accepted).response
+                        code = response.outcome.name
+                        assertEquals(code, row.state)
                         assertEquals(response.source, row.source)
                         assertTrue(
-                            "Response source must identify the selected environment",
+                            "Response source identifies the environment",
                             response.source == "pleos_emulator" ||
                                 response.source == "real_vehicle",
                         )
                         val item = response.items.single { it.property == property }
-                        assertEquals(property, item.property)
                         assertTrue(
-                            "Actual item status must reach the record",
+                            "Actual item status reaches memory",
                             row.details.contains("$property: ${item.status.name}"),
                         )
                         if (item.status == ItemStatus.OK) {
-                            val inMemory =
+                            val value =
                                 row.details.substringAfter("$property: OK · ").substringBefore(' ')
                             val actual = item.rawValue
                             val matches =
-                                if (actual is Number) inMemory.toDoubleOrNull() == actual.toDouble()
-                                else inMemory == actual.toString()
-                            assertTrue("Validated read-only value must match in memory", matches)
+                                if (actual is Number) value.toDoubleOrNull() == actual.toDouble()
+                                else value == actual.toString()
+                            assertTrue("Validated value matches in memory", matches)
                             okValueObserved = true
                         }
-                        outcomes.put(response.outcome.name)
                         sources.put(response.source)
-                    }
-                    is BridgeResult.Failed -> {
+                    } else {
+                        code = content.getValue("code").jsonPrimitive.content
                         assertEquals(
-                            "Expected honest platform-not-ready response",
+                            "Expected honest unsupported-platform result",
                             "APP_NOT_READY",
-                            verdict.code,
+                            code,
                         )
-                        assertEquals(503, reply.status)
-                        assertEquals("APP_NOT_READY", row.state)
+                        assertEquals(true, result.isError)
+                        assertEquals("android", content.getValue("origin").jsonPrimitive.content)
+                        assertEquals(query, content.getValue("query").jsonPrimitive.content)
+                        assertEquals(code, row.state)
                         assertNull(row.source)
                         assertFalse("No fabricated successful value", row.details.contains(": OK"))
-                        outcomes.put(verdict.code)
                         sources.put(JSONObject.NULL)
                     }
+                    codes.put(code)
+                    if (!context.packageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE))
+                        assertEquals(
+                            "Generic Android must not invent SDK success",
+                            "APP_NOT_READY",
+                            code,
+                        )
                 }
-                if (!context.packageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE))
-                    assertEquals(
-                        "Generic Android must not invent vehicle success",
-                        503,
-                        reply.status,
-                    )
             }
+            assertEquals(
+                "Each tool call has its own server-generated gateway ID",
+                2,
+                requestIds.toSet().size,
+            )
             val before = DriverHistory.history.snapshot()
             assertEquals(2, before.size)
-            assertNotSame(
-                "Duplicate request IDs are distinct attempts",
-                before[0].token,
-                before[1].token,
-            )
+            assertNotSame("Calls are distinct attempts", before[0].token, before[1].token)
             val sequences = before.map { it.token.sequence }
             scenario.recreate()
             scenario.onActivity { activity = it }
@@ -301,39 +260,38 @@ class BridgeHistoryRuntimeTest {
             )
             val visible = screenText(activity)
             assertTrue(
-                "Restricted summary updates from real shared history",
+                "Restricted summary observes real history",
                 visible.contains(context.getString(R.string.history_hidden, 2)),
             )
             assertFalse(
                 "Production policy is not bypassed",
-                visible.contains(requestId) ||
+                requestIds.any { visible.contains(it) } ||
                     probes.any { visible.contains(it.property) } ||
                     visible.contains(sentinel),
             )
             assertTrue(visible.contains(context.getString(R.string.client_unknown)))
             assertTrue(
-                "Live service state survives screen recreation",
+                "Closing the MCP client does not report an interrupted connection",
                 visible.contains(context.getString(R.string.connection_connected)),
             )
-
             onView(withText(context.getString(R.string.action_stop)))
                 .inRoot(withDecorView(sameInstance(activity.window.decorView)))
                 .perform(click())
             await("production stop") { ConnectionStatusBoard.status is ConnectionStatus.Stopped }
             try {
-                Socket().use { it.connect(InetSocketAddress(loopback, 18765), 300) }
-                fail("Stopped bridge must refuse new connections")
+                Socket().use {
+                    it.connect(InetSocketAddress(loopback, EmbeddedMcpServer.PORT), 300)
+                }
+                fail("Stopped MCP endpoint must refuse new connections")
             } catch (_: java.net.ConnectException) {}
             instrumentation.waitForIdleSync()
             onView(withText(context.getString(R.string.action_resume)))
                 .inRoot(withDecorView(sameInstance(activity.window.decorView)))
                 .check(matches(isEnabled()))
-            // Only our two attempts may be deleted. Fail before clearing if another caller
-            // intervened.
             assertTrue(
-                "External calls must be stopped for this diagnostic",
-                DriverHistory.history.snapshot().let { rows ->
-                    rows.size == 2 && rows.all { it.requestId == requestId }
+                "Other calls must be stopped; preserve their records",
+                DriverHistory.history.snapshot().let {
+                    it.size == 2 && it.all { row -> row.requestId in requestIds }
                 },
             )
             onView(withText(context.getString(R.string.history_clear)))
@@ -343,15 +301,18 @@ class BridgeHistoryRuntimeTest {
             assertTrue(screenText(activity).contains(context.getString(R.string.history_hidden, 0)))
             val evidence =
                 JSONObject()
-                    .put("source", "production_http_shared_history")
-                    .put("validReadOnlyRequests", 2)
+                    .put("source", "production_mcp_shared_history")
+                    .put("transport", "streamable_http")
+                    .put("port", EmbeddedMcpServer.PORT)
+                    .put("path", "/mcp")
+                    .put("validToolCalls", 2)
                     .put("queries", JSONArray(probes.map { it.query }))
-                    .put("rejectedRequests", 1)
-                    .put("httpStatuses", JSONArray(replies.map { it.status }))
-                    .put("outcomes", outcomes)
+                    .put("rejectedToolCalls", 1)
+                    .put("mcpCodes", codes)
                     .put("responseSources", sources)
                     .put("sdkOkValueObserved", okValueObserved)
-                    .put("duplicateAttemptsSeparated", true)
+                    .put("requestIdsCorrelated", true)
+                    .put("distinctServerRequestIds", true)
                     .put("activityRecreationPreservedRecords", true)
                     .put("resumeLabelRestored", true)
                     .put("restrictedDetailsHidden", true)
@@ -359,7 +320,7 @@ class BridgeHistoryRuntimeTest {
                     .put("stoppedConnectionRefused", true)
                     .put(
                         "scope",
-                        "No injected vehicle values or Car UX. SDK success only when sdkOkValueObserved=true; actual result-detail UI and Pleos policy acceptance remain separate.",
+                        "Real MCP tools/call, no injected vehicle values/UX. SDK OK only when sdkOkValueObserved=true; Pleos detail/policy acceptance is separate.",
                     )
             Log.i("COM25_RUNTIME", evidence.toString())
             instrumentation.addResults(

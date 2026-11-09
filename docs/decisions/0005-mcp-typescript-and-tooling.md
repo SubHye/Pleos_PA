@@ -1,7 +1,7 @@
 # ADR-0005: MCP 서버의 TypeScript 실행과 검사 도구
 
 - 날짜: 2026-11-03
-- 상태: 제안 (COM-19 PR에서 상대 개발자 승인 필요)
+- 상태: [ADR-0008](0008-embedded-mcp-server.md)로 대체 (COM-12에서 Node·TypeScript 제거). 아래는 대체 전 기록이다
 
 ## 맥락
 요구사항 정의서는 MCP 서버를 Node.js·TypeScript 계층으로 적지만, PoC와 COM-16의 코드는 `.mjs`였다. COM-16은 PoC를 따랐을 뿐 언어를 정하지 않았다. COM-19가 언어와 oxlint·oxfmt 도입 여부를 정해야 한다.

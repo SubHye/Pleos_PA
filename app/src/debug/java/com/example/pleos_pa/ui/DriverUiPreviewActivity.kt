@@ -24,7 +24,7 @@ class DriverUiPreviewActivity : MainActivity() {
     }
 
     override fun startConnection() {
-        previewConnection = ConnectionStatus.Connected()
+        previewConnection = ConnectionStatus.Connected
         renderConnection(previewConnection)
     }
 

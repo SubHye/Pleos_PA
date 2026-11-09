@@ -2,10 +2,9 @@
     <string name="app_name">Pleos_pa</string>
     <string name="connection_stopped">중지됨. AI가 차량 값을 읽을 수 없습니다.</string>
     <string name="connection_starting">준비 중</string>
-    <string name="connection_connected">연결됨. Bridge가 요청을 받을 수 있습니다.</string>
-    <string name="connection_interrupted">오류: 조회 중 연결이 끊겼습니다. 다음 요청을 받으면 연결됨으로 돌아갑니다.</string>
+    <string name="connection_connected">연결됨. 앱의 MCP 서버가 요청을 받을 수 있습니다.</string>
     <string name="connection_failed">오류: %1$s</string>
-    <string name="connection_limits">연결됨은 AI가 연결되었다는 뜻이 아닙니다. 요청이 없을 때 끊긴 ADB 연결은 여기에 나타나지 않습니다.</string>
+    <string name="connection_limits">연결됨은 AI가 연결되었다는 뜻이 아닙니다. 요청이 없을 때 끊긴 ADB·MCP 클라이언트 연결은 여기서 감지하지 못합니다.</string>
     <string name="notifications_off">알림 권한이 없어 알림으로 제어할 수 없습니다. 이 화면에서 제어하세요.</string>
     <string name="action_start">시작</string>
     <string name="action_resume">재개</string>
