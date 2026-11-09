@@ -10,3 +10,11 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# Vehicle SDK 2.3.2 parses capability replies with Gson 2.10.1 through anonymous
+# TypeToken subclasses. R8 full mode drops their generic signature unless the class
+# is kept, and every capability read then fails with CAPABILITY_FAILED. Gson 2.11+
+# ships these rules itself; 2.10.1 does not.
+-keepattributes Signature
+-keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
+-keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
