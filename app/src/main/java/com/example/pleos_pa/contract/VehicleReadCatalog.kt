@@ -9,7 +9,14 @@ data class ItemKey(val property: String, val area: String?)
 data class ToolEntry(
     val name: String,
     val query: String,
+    /** What MCP clients read about the tool. */
+    val title: String,
+    val description: String,
     val legacy: Boolean,
+    /** `items` or `scalar`: the shape of the MCP result. */
+    val resultForm: String,
+    /** Only `adopted` tools are offered to MCP clients. */
+    val adoption: String,
     val fixedItems: Set<ItemKey>,
 )
 
@@ -92,7 +99,11 @@ private constructor(
                             ToolEntry(
                                 name = tool.getString("name"),
                                 query = query,
+                                title = tool.getString("title"),
+                                description = tool.getString("description"),
                                 legacy = tool.getBoolean("legacy"),
+                                resultForm = tool.getString("resultForm"),
+                                adoption = tool.getString("adoption"),
                                 fixedItems =
                                     objects(tool.getJSONArray("fixedItems"))
                                         .map {

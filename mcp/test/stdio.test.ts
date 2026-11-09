@@ -3,7 +3,7 @@
 import { loadCatalog } from '../src/contract.ts';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -26,6 +26,10 @@ const ERAS = [
   { era: '2026-07-28', options: { versionNegotiation: { mode: { pin: '2026-07-28' as const } } } },
 ];
 const BASE_ENV = { PATH: process.env.PATH ?? '' };
+// The tools/list both MCP paths must give: the Node server here, the app's embedded server in its JVM tests.
+const TOOL_LIST = JSON.parse(
+  readFileSync(new URL('../../contracts/vehicle-read/fixtures/tool-list.json', import.meta.url), 'utf8'),
+);
 
 async function connect(args: string[], options = {}, env: Record<string, string> = BASE_ENV) {
   const transport = new StdioClientTransport({ command: process.execPath, args, env, stderr: 'pipe' });
@@ -44,7 +48,9 @@ for (const { era, options } of ERAS) {
     const { client } = await connect([SERVER], options);
     try {
       assert.equal(client.getNegotiatedProtocolVersion(), era);
-      assert.deepEqual(names(await client.listTools()), ADOPTED);
+      const listed = await client.listTools();
+      assert.deepEqual(names(listed), ADOPTED);
+      assert.deepEqual(listed.tools, TOOL_LIST);
       if (fake) assert.equal(fake.seen.length, 0);
     } finally {
       await client.close();

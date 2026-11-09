@@ -9,7 +9,9 @@
 | `main/java/com/example/pleos_pa/connection/` | Foreground Service, 알림, 세션과 명령 순서, 메모리 상태 |
 | `main/java/com/example/pleos_pa/bridge/` | loopback HTTP 서버, 요청 문법·헤더 검사, 조회기로 넘기는 게이트웨이 |
 | `main/java/com/example/pleos_pa/vehicle/` | 앱 전체 조회 슬롯, SDK 경계와 97개 속성의 호출 표, 실행 환경 판별 |
+| `main/java/com/example/pleos_pa/mcp/` | 앱 내장 MCP 서버(`127.0.0.1:18766/mcp`, stateless Streamable HTTP). 카탈로그의 채택 도구, 입력 스키마와 인자 검사, `mcp/src/tool-result.ts`의 Kotlin 이식. Bridge와 같은 게이트웨이를 쓴다 |
 | `main/java/com/example/pleos_pa/contract/` | [차량 조회 계약](../../contracts/vehicle-read/CONTRACT.md)의 wire 모델과 검증, SDK 실패 분류. SDK와 Android 컴포넌트에 의존하지 않는다 |
+| `test/java/com/example/pleos_pa/mcp/` | 공용 `tool-list.json`·`tool-inputs.json`·`tool-results.json` 대조와, 실제 소켓 + SDK 대역으로 내장 MCP 서버를 검사하는 JVM 테스트. 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/contract/` | 공용 fixture와 SDK 클래스 대조로 계약을 고정하는 JVM 테스트. SDK를 실행하지 않으므로 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/{bridge,connection,vehicle}/` | 실제 소켓과 SDK 대역으로 Bridge·세션·조회기를 검사하는 JVM 테스트. 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/` | 산술 예제 1개 |

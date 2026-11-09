@@ -9,7 +9,6 @@ import type { ReadOptions } from './bridge-client.ts';
 import { loadCatalog } from './contract.ts';
 import type { Catalog, Selection, ToolEntry } from './contract.ts';
 import { TOOL_ANNOTATIONS, toToolResult, toolInputSchema } from './tool-result.ts';
-import { TOOL_TEXTS } from './tool-texts.ts';
 
 export interface AdoptedTool {
   name: string;
@@ -21,7 +20,7 @@ export interface AdoptedTool {
 export function adoptedTools(catalog: Catalog): AdoptedTool[] {
   return catalog.tools
     .filter((tool) => tool.adoption === 'adopted')
-    .map((tool) => ({ name: tool.name, ...TOOL_TEXTS[tool.name] }));
+    .map(({ name, title, description }) => ({ name, title, description }));
 }
 
 type ToolResult = ReturnType<typeof toToolResult>;

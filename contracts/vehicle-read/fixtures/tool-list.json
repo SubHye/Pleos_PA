@@ -1,0 +1,669 @@
+[
+  {
+    "name": "get_door_status",
+    "title": "문 상태",
+    "description": "문별 열림 위치와 문 잠금 상태를 조회합니다. 잠금은 차량이 보고한 묶음 영역으로 나옵니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_window_status",
+    "title": "창문 위치",
+    "description": "창문별 위치 원시값을 조회합니다. 값의 범위는 capability의 minimum, maximum을 따르며 퍼센트가 아닙니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_energy_level",
+    "title": "에너지 잔량",
+    "description": "연료 잔량과 EV 배터리 잔량을 퍼센트로 조회합니다. 차량 동력원에 맞지 않는 항목은 미지원으로 나옵니다. 주행 가능 거리로 환산하지 마세요. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_front_left_door_position",
+    "title": "앞좌측 문 위치",
+    "description": "앞좌측 문 하나의 열림 상태를 조회합니다. 호출할 때 한 번 읽습니다. ok가 true일 때만 state를 말하고, ok가 false이면 값을 추정하거나 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_brake_status",
+    "title": "브레이크 페달",
+    "description": "브레이크 페달을 밟고 있는지 조회합니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "BRAKE_PEDAL_STATUS"
+            ]
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_display_units",
+    "title": "표시 단위",
+    "description": "온도 표시 단위를 조회합니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "TEMPERATURE_DISPLAY_UNIT"
+            ]
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_glove_box_status",
+    "title": "글로브박스",
+    "description": "글로브박스 잠금 상태를 조회합니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "GLOVE_BOX_LOCK_STATE"
+            ]
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_driving_mode_status",
+    "title": "주행 모드",
+    "description": "주행 모드와 크루즈 컨트롤 상태, 목표 속도(m/s)를 조회합니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "CRUISE_CONTROL_TARGET_SPEED",
+              "CRUISE_CONTROL_STATE",
+              "DRIVING_MODE_STATE"
+            ]
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_ev_status",
+    "title": "EV 상태",
+    "description": "전비(km/kWh), 충전 전류 제한(A), 충전 스위치 상태를 조회합니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "INSTANTANEOUS_EV_EFFICIENCY",
+              "SINCE_CHARGE_EV_EFFICIENCY",
+              "CUMULATIVE_EV_EFFICIENCY",
+              "EV_EFFICIENCY",
+              "EV_CHARGE_CURRENT_DRAW_LIMIT",
+              "EV_CHARGE_SWITCH_STATE"
+            ]
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_hvac_status",
+    "title": "공조 상태",
+    "description": "공조 전원, 에어컨, 오토, 내외기, 제상, 바람 세기와 방향, 설정 온도와 실내 온도(°C)를 조회합니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "HVAC_AC_STATE",
+              "HVAC_AUTO_STATE",
+              "HVAC_AUTO_RECIRCULATION_STATE",
+              "HVAC_DEFROSTER_STATE",
+              "HVAC_DUAL_STATE",
+              "HVAC_FAN_DIRECTION",
+              "HVAC_FAN_SPEED",
+              "HVAC_MAX_AC_STATE",
+              "HVAC_MAX_DEFROST_STATE",
+              "HVAC_POWER_STATE",
+              "HVAC_RECIRCULATION_STATE",
+              "HVAC_AIR_CLEANER_STATE",
+              "HVAC_TEMPERATURE",
+              "HVAC_TEMPERATURE_CURRENT"
+            ]
+          }
+        },
+        "areas": {
+          "description": "읽을 영역. 값은 ROW_1_LEFT, ROW_1_CENTER, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_CENTER, ROW_2_RIGHT, ROW_3_LEFT, ROW_3_CENTER, ROW_3_RIGHT, FRONT_WINDSHIELD, REAR_WINDSHIELD, ROOF_TOP_1, ROOF_TOP_2 중 하나이고, 묶음 영역은 ROW_1_LEFT+ROW_1_CENTER처럼 차량이 보고한 묶음 그대로 +로 잇습니다. 묶음의 일부만 고르면 AREA_UNSUPPORTED가 될 수 있으니, 차량이 보고하는 영역을 모르면 생략하세요.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_light_status",
+    "title": "조명 상태",
+    "description": "실내등, 독서등, 앰비언트, 전조등, 후미등, 안개등의 스위치와 상태를 조회합니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "READING_LIGHT_SWITCH",
+              "READING_LIGHT_STATE",
+              "CABIN_LIGHT_SWITCH",
+              "CABIN_LIGHT_STATE",
+              "HIGH_BEAM_LIGHT_STATE",
+              "HIGH_BEAM_LIGHT_SWITCH",
+              "LOW_BEAM_LIGHT_SWITCH",
+              "LOW_BEAM_LIGHT_STATE",
+              "TAIL_LAMP_LIGHT_STATE",
+              "TAIL_LAMP_LIGHT_SWITCH",
+              "FRONT_FOG_LIGHT_STATE",
+              "FRONT_FOG_LIGHT_SWITCH",
+              "REAR_FOG_LIGHT_STATE",
+              "REAR_FOG_LIGHT_SWITCH",
+              "AMBIENT_LIGHT_BRIGHTNESS",
+              "AMBIENT_LIGHT_BRIGHTNESS_COLOR",
+              "AMBIENT_LIGHT_SWITCH",
+              "AMBIENT_LIGHT_STATE",
+              "AMBIENT_COLOR_AUTO_BY_DRIVE_MODE_ENABLED"
+            ]
+          }
+        },
+        "areas": {
+          "description": "읽을 영역. 값은 ROW_1_LEFT, ROW_1_CENTER, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_CENTER, ROW_2_RIGHT, ROW_3_LEFT, ROW_3_CENTER, ROW_3_RIGHT 중 하나이고, 묶음 영역은 ROW_1_LEFT+ROW_1_CENTER처럼 차량이 보고한 묶음 그대로 +로 잇습니다. 묶음의 일부만 고르면 AREA_UNSUPPORTED가 될 수 있으니, 차량이 보고하는 영역을 모르면 생략하세요.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_trip_status",
+    "title": "주행 기록",
+    "description": "누적 주행거리계(DISTANCE_DRIVEN, km)와 이번 주행, 누적, 주유 이후의 주행 시간(분)과 거리(m)를 조회합니다. 이번 주행 거리는 TRIP_CURRENT_DRIVING_DISTANCE입니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "DISTANCE_DRIVEN",
+              "TRIP_CURRENT_DRIVING_TIME",
+              "TRIP_CUMULATIVE_DRIVING_TIME",
+              "TRIP_SINCE_REFILL_DRIVING_TIME",
+              "TRIP_CURRENT_DRIVING_DISTANCE",
+              "TRIP_CUMULATIVE_DRIVING_DISTANCE",
+              "TRIP_SINCE_REFILL_DRIVING_DISTANCE"
+            ]
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_safety_status",
+    "title": "안전 상태",
+    "description": "오일과 워셔액 수준, 에어백, 안전벨트 미착용 경고, 전원 차단 경고를 조회합니다. SEAT_AIRBAG_ENABLED의 true는 API 문서상 해당 좌석 에어백의 문제이며 이름과 반대로 읽힐 수 있고, POWER_DOWN_WARNING_INDICATOR의 true는 API 문서상 엔진 문제입니다. 실행으로 대조하지 않았으므로 단정하지 마세요. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "ENGINE_OIL_LEVEL_STATE",
+              "BRAKE_FLUID_LEVEL_STATE",
+              "TRANSMISSION_OIL_LEVEL_STATE",
+              "LOW_WASHER_FLUID_WARNING",
+              "SEAT_AIRBAG_BEEN_DEPLOYED",
+              "POWER_DOWN_WARNING_INDICATOR",
+              "SEAT_AIRBAG_ENABLED",
+              "SEAT_BELT_NOT_BUCKLED_WARNING"
+            ]
+          }
+        },
+        "areas": {
+          "description": "읽을 영역. 값은 ROW_1_LEFT, ROW_1_CENTER, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_CENTER, ROW_2_RIGHT, ROW_3_LEFT, ROW_3_CENTER, ROW_3_RIGHT 중 하나이고, 묶음 영역은 ROW_1_LEFT+ROW_1_CENTER처럼 차량이 보고한 묶음 그대로 +로 잇습니다. 묶음의 일부만 고르면 AREA_UNSUPPORTED가 될 수 있으니, 차량이 보고하는 영역을 모르면 생략하세요.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_seat_status",
+    "title": "좌석 상태",
+    "description": "좌석 점유, 안전벨트 체결, 좌석 위치 원시값, 열선과 통풍 단계를 조회합니다. 에뮬레이터 대조에서 SEAT_OCCUPANCY는 Console과 반대로 나왔고 원인을 확인하지 못했으므로 이 값을 확정된 사실로 말하지 마세요. 좌석 위치는 에뮬레이터에서 값을 대조하지 못했습니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "SEAT_OCCUPANCY",
+              "SEAT_HEADREST_FORE_AFT_POSITION",
+              "SEAT_HEADREST_HEIGHT_AFT_POSITION",
+              "SEAT_HEIGHT_POSITION",
+              "SEAT_LUMBAR_FORE_AFT_POSITION",
+              "SEAT_LUMBAR_SIDE_SUPPORT_POSITION",
+              "SEAT_TILT_POSITION",
+              "SEAT_DEPTH_POSITION",
+              "SEAT_FORE_AFT_POSITION",
+              "SEAT_HEADREST_ANGLE_POSITION",
+              "SEAT_BACKREST_ANGLE_POSITION",
+              "SEAT_BELT_BUCKLED_STATE",
+              "SEAT_BELT_HEIGHT_POSITION",
+              "HVAC_SEAT_TEMPERATURE",
+              "HVAC_SEAT_VENTILATION_STATE"
+            ]
+          }
+        },
+        "areas": {
+          "description": "읽을 영역. 값은 ROW_1_LEFT, ROW_1_CENTER, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_CENTER, ROW_2_RIGHT, ROW_3_LEFT, ROW_3_CENTER, ROW_3_RIGHT 중 하나이고, 묶음 영역은 ROW_1_LEFT+ROW_1_CENTER처럼 차량이 보고한 묶음 그대로 +로 잇습니다. 묶음의 일부만 고르면 AREA_UNSUPPORTED가 될 수 있으니, 차량이 보고하는 영역을 모르면 생략하세요.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_side_mirror_status",
+    "title": "사이드미러",
+    "description": "사이드미러 열선 단계를 조회합니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "HVAC_SIDE_MIRROR_HEAT_STATE"
+            ]
+          }
+        },
+        "areas": {
+          "description": "읽을 영역. 값은 DRIVER_LEFT, DRIVER_RIGHT, DRIVER_CENTER 중 하나이고, 묶음 영역은 DRIVER_LEFT+DRIVER_RIGHT처럼 차량이 보고한 묶음 그대로 +로 잇습니다. 묶음의 일부만 고르면 AREA_UNSUPPORTED가 될 수 있으니, 차량이 보고하는 영역을 모르면 생략하세요.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_steering_wheel_status",
+    "title": "스티어링 휠",
+    "description": "스티어링 휠 열선 단계와 앞바퀴 조향각(도)을 조회합니다. 조향각은 핸들 회전각이 아닙니다. 에뮬레이터 대조에서 STEERING_WHEEL_ANGLE은 Console과 부호가 반대로 나왔고 원인을 확인하지 못했으므로 회전 방향을 단정하지 마세요. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "HVAC_STEERING_WHEEL_HEAT_STATE",
+              "STEERING_WHEEL_ANGLE"
+            ]
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_tire_status",
+    "title": "저압 임계값",
+    "description": "바퀴별 저압 경고 임계값(kPa)을 조회합니다. 현재 타이어 공기압이 아니므로 현재 공기압으로 말하지 마세요. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "LOW_TIRE_PRESSURE"
+            ]
+          }
+        },
+        "areas": {
+          "description": "읽을 영역. 값은 UNKNOWN, LEFT_FRONT, RIGHT_FRONT, LEFT_REAR, RIGHT_REAR 중 하나이고, 묶음 영역은 UNKNOWN+LEFT_FRONT처럼 차량이 보고한 묶음 그대로 +로 잇습니다. 묶음의 일부만 고르면 AREA_UNSUPPORTED가 될 수 있으니, 차량이 보고하는 영역을 모르면 생략하세요.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_turn_signal_status",
+    "title": "방향지시등",
+    "description": "방향지시등 상태를 조회합니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "TURN_SIGNAL_STATE"
+            ]
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_window_detail_status",
+    "title": "창문 상세",
+    "description": "창문 잠금, 블라인드 위치, 스마트 글라스 상태와 단계를 조회합니다. SMART_GLASS_CONFIG는 읽을 수 없어 항상 실패로 나옵니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "WINDOW_LOCK_STATE",
+              "WINDOW_BLIND_POSITION",
+              "SMART_GLASS_STATE",
+              "SMART_GLASS_CONFIG",
+              "SMART_GLASS_LEVEL"
+            ]
+          }
+        },
+        "areas": {
+          "description": "읽을 영역. 값은 FRONT_WINDSHIELD, REAR_WINDSHIELD, ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT, ROOF_TOP_1, ROOF_TOP_2 중 하나이고, 묶음 영역은 FRONT_WINDSHIELD+REAR_WINDSHIELD처럼 차량이 보고한 묶음 그대로 +로 잇습니다. 묶음의 일부만 고르면 AREA_UNSUPPORTED가 될 수 있으니, 차량이 보고하는 영역을 모르면 생략하세요.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_wiper_status",
+    "title": "와이퍼",
+    "description": "와이퍼 상태와 스위치를 조회합니다. 호출할 때 한 번 읽습니다. 항목마다 status를 확인하고, status가 OK가 아닌 항목의 값을 추정하거나 0, 꺼짐, 닫힘으로 말하지 마세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "읽을 속성. 생략하면 이 도구의 모든 속성을 읽습니다.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "WIPER_STATE",
+              "WIPER_SWITCH"
+            ]
+          }
+        },
+        "areas": {
+          "description": "읽을 영역. 값은 FRONT_WINDSHIELD, REAR_WINDSHIELD, ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_RIGHT, ROOF_TOP_1, ROOF_TOP_2 중 하나이고, 묶음 영역은 FRONT_WINDSHIELD+REAR_WINDSHIELD처럼 차량이 보고한 묶음 그대로 +로 잇습니다. 묶음의 일부만 고르면 AREA_UNSUPPORTED가 될 수 있으니, 차량이 보고하는 영역을 모르면 생략하세요.",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  }
+]
