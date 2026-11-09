@@ -20,16 +20,15 @@ Linear Issue → Coding Agent(Codex, Claude Code) → 구현·테스트·검증�
 프로젝트 Wrapper만 사용한다. JDK 25, Android SDK API 37, Build Tools 36.0.0이 필요하다. SDK 경로는 `local.properties` 또는 `ANDROID_HOME`으로 지정하고 커밋하지 않는다. Unix에서는 `.\gradlew.bat` 대신 `bash ./gradlew`를 쓴다.
 
 - 구현 중, 커밋 전: `.\gradlew.bat :spotlessApply`
-- PR 제출 전: `.\gradlew.bat :spotlessCheck :app:assembleDebug :app:testDebugUnitTest :app:lintDebug`
-- `mcp/` 변경 시: `npm --prefix mcp run format`, PR 제출 전 `npm --prefix mcp run typecheck`, `lint`, `format:check`, `test`
+- PR 제출 전: `.\gradlew.bat :spotlessCheck :app:assembleDebug :app:testDebugUnitTest :app:lintDebug :vehicle-sweep:test`
 
 CI가 같은 검사를 실행한다. 실행하지 못한 검사, NO-SOURCE/skip, 모의 응답과 실제 SDK 결과를 구분해 보고한다. 빌드 성공을 차량 기능 완료로 보고하지 않는다.
 
 ## 범위
 
-- 1차는 ChatGPT·Claude와 외부 Node.js MCP 방식을 유지한다. AI별 필수 수준은 요구사항 6.2를 따른다. Android Embedded 이전은 별도 검증 Issue다. Gleo 연동과 차량 직접 제어는 넣지 않는다. 문서의 미래안을 구현 사실로 바꾸지 않는다.
+- MCP 서버는 차량 앱 안에 있다([ADR-0008](docs/decisions/0008-embedded-mcp-server.md)). AI 클라이언트는 개발 PC에서 `adb forward`로 연결한다. PC 없는 연결(COM-15)은 아직 없다. AI별 필수 수준은 요구사항 6.2를 따른다. Gleo 연동과 차량 직접 제어는 넣지 않는다. 문서의 미래안을 구현 사실로 바꾸지 않는다.
 - 콘솔이나 문서에 있는 SDK API를 동작한다고 간주하지 않는다. 실행 검증 후 채택하고, 미지원이면 모의 값을 실제 결과로 반환하지 않는다.
-- 폴더 이동, 버전 업그레이드, PoC 전체 복사를 하지 않는다. PoC는 기능 단위로 선택 이전하고, PoC 성공 기록을 신규 앱의 성공으로 옮기지 않는다.
+- 폴더 이동, PoC 전체 복사를 하지 않는다. 버전 업그레이드는 다른 변경과 섞지 않고 별도 PR로 하며 상대 개발자와 합의한다. PoC는 기능 단위로 선택 이전하고, PoC 성공 기록을 신규 앱의 성공으로 옮기지 않는다.
 - 공통 도구 이름·입출력·오류·권한·통신 계약 또는 ADR 변경은 영향과 대안을 PR에 적고 상대 개발자와 합의한다. 양쪽 검사와 문서를 같은 PR에서 갱신한다.
 
 ## 안전
@@ -43,7 +42,7 @@ CI가 같은 검사를 실행한다. 실행하지 못한 검사, NO-SOURCE/skip,
 
 - [app/src](app/src/AGENTS.md): Android 소스
 - [contracts/vehicle-read](contracts/vehicle-read/CONTRACT.md): 차량 조회 계약, 카탈로그, 공용 fixture
-- [mcp](mcp/README.md): Node MCP 서버, 실행 환경, ADB·클라이언트 연결
+- [tools/vehicle-sweep](tools/vehicle-sweep/README.md): 에뮬레이터에서 도구 전체를 실행해 카탈로그 판정 근거를 만드는 도구
 - [docs](docs/AGENTS.md): 문서
 - [docs/architecture](docs/architecture/AGENTS.md): C4 모델과 런타임 시나리오
 - [docs/decisions](docs/decisions/AGENTS.md): ADR

@@ -9,7 +9,14 @@ data class ItemKey(val property: String, val area: String?)
 data class ToolEntry(
     val name: String,
     val query: String,
+    /** What MCP clients read about the tool. */
+    val title: String,
+    val description: String,
     val legacy: Boolean,
+    /** `items` or `scalar`: the shape of the MCP result. */
+    val resultForm: String,
+    /** Only `adopted` tools are offered to MCP clients. */
+    val adoption: String,
     val fixedItems: Set<ItemKey>,
 )
 
@@ -21,10 +28,8 @@ data class PropertyEntry(
     val unit: String?,
 )
 
+/** Limits of one read through the app's gateway. */
 data class BridgeLimits(
-    val host: String,
-    val port: Int,
-    val path: String,
     val maxRequestBytes: Int,
     val maxResponseBytes: Int,
     val deadlineMs: Long,
@@ -76,9 +81,6 @@ private constructor(
                 sdkVersion = root.getJSONObject("sdk").getString("version"),
                 bridge =
                     BridgeLimits(
-                        host = bridge.getString("host"),
-                        port = bridge.getInt("port"),
-                        path = bridge.getString("path"),
                         maxRequestBytes = bridge.getInt("maxRequestBytes"),
                         maxResponseBytes = bridge.getInt("maxResponseBytes"),
                         deadlineMs = bridge.getLong("deadlineMs"),
@@ -92,7 +94,11 @@ private constructor(
                             ToolEntry(
                                 name = tool.getString("name"),
                                 query = query,
+                                title = tool.getString("title"),
+                                description = tool.getString("description"),
                                 legacy = tool.getBoolean("legacy"),
+                                resultForm = tool.getString("resultForm"),
+                                adoption = tool.getString("adoption"),
                                 fixedItems =
                                     objects(tool.getJSONArray("fixedItems"))
                                         .map {

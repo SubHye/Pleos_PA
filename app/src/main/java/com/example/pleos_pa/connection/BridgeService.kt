@@ -21,9 +21,10 @@ import androidx.core.content.ContextCompat
 import com.example.pleos_pa.MainActivity
 import com.example.pleos_pa.R
 import com.example.pleos_pa.bridge.BridgeEvents
-import com.example.pleos_pa.bridge.BridgeServer
 import com.example.pleos_pa.bridge.ReaderBridgeGateway
 import com.example.pleos_pa.contract.VehicleReadCatalog
+import com.example.pleos_pa.mcp.EmbeddedMcpServer
+import com.example.pleos_pa.mcp.VehicleReadTool
 import com.example.pleos_pa.vehicle.PleosVehicleSdk
 import com.example.pleos_pa.vehicle.ReadScheduler
 import com.example.pleos_pa.vehicle.VehicleReader
@@ -121,10 +122,10 @@ class BridgeService : Service() {
         val reader = VehicleReader(catalog, PleosVehicleSdk(this), scheduler, source)
         val events = Events()
         val gateway = ReaderBridgeGateway(catalog, reader, scheduler, events)
-        val server = BridgeServer(catalog, gateway, events, SystemClock::elapsedRealtime)
+        val tool = VehicleReadTool(catalog, gateway, events, SystemClock::elapsedRealtime)
         return ConnectionSession(
             gateway::close,
-            server,
+            EmbeddedMcpServer(catalog, tool),
             { released -> reader.close { main.post(released) } },
             bindExecutor,
         ) { session, status ->
@@ -132,7 +133,7 @@ class BridgeService : Service() {
         }
     }
 
-    /** Called on bridge threads; only fixed fields reach the log, never a vehicle value. */
+    /** Called on server threads; only fixed fields reach the log, never a vehicle value. */
     private inner class Events : BridgeEvents {
         override fun requestReceived() {
             main.post { controller.requestReceived() }
@@ -140,10 +141,6 @@ class BridgeService : Service() {
 
         override fun peerClosedDuringRead() {
             main.post { controller.peerClosedDuringRead() }
-        }
-
-        override fun listenerFailed() {
-            main.post { controller.fail(BRIDGE_LISTENER_FAILED) }
         }
 
         override fun ownReplyRejected() {
@@ -232,7 +229,6 @@ class BridgeService : Service() {
         private const val CHANNEL_ID = "bridge"
         private const val NOTIFICATION_ID = 1
         private const val FOREGROUND_NOT_ALLOWED = "FOREGROUND_NOT_ALLOWED"
-        private const val BRIDGE_LISTENER_FAILED = "BRIDGE_LISTENER_FAILED"
 
         // Shared across sessions so a new bind waits for the previous session's bind.
         private val bindExecutor = Executors.newSingleThreadExecutor {

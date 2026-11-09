@@ -99,6 +99,7 @@
           }
         ]
       },
+      "text": "energy_level 결과 COMPLETE. 실행 환경 pleos_emulator, Vehicle SDK 2.3.2.\n[FUEL_PERCENT]: 62 %, 콜백 수신 2026-11-02T09:30:00.123Z.\n[EV_BATTERY_PERCENT]: 100 %, 콜백 수신 2026-11-02T09:30:00.123Z.\n수신 시각은 앱이 콜백을 받은 시각이며 차량 측 측정 시각이나 값의 최신성을 보장하지 않습니다.\n항목들은 순차로 읽었으며 동시에 읽은 스냅샷이 아닙니다.",
       "textIncludes": [
         "FUEL_PERCENT",
         "EV_BATTERY_PERCENT",
@@ -200,6 +201,7 @@
           }
         ]
       },
+      "text": "energy_level 결과 PARTIAL. 실행 환경 pleos_emulator, Vehicle SDK 2.3.2.\n[FUEL_PERCENT]: 확인 실패 [PROPERTY_UNSUPPORTED].\n[EV_BATTERY_PERCENT]: 100 %, 콜백 수신 2026-11-02T09:30:00.123Z.\n수신 시각은 앱이 콜백을 받은 시각이며 차량 측 측정 시각이나 값의 최신성을 보장하지 않습니다.\n항목들은 순차로 읽었으며 동시에 읽은 스냅샷이 아닙니다.\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
       "textIncludes": [
         "PARTIAL",
         "PROPERTY_UNSUPPORTED",
@@ -288,6 +290,7 @@
           }
         ]
       },
+      "text": "energy_level 결과 FAILED. 실행 환경 pleos_emulator, Vehicle SDK 2.3.2.\n[FUEL_PERCENT]: 확인 실패 [PROPERTY_UNSUPPORTED].\n[EV_BATTERY_PERCENT]: 확인 실패 [PERMISSION_DENIED].\n항목들은 순차로 읽었으며 동시에 읽은 스냅샷이 아닙니다.\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
       "textIncludes": [
         "FAILED",
         "PROPERTY_UNSUPPORTED",
@@ -388,6 +391,7 @@
           }
         ]
       },
+      "text": "energy_level 결과 TIMEOUT. 실행 환경 pleos_emulator, Vehicle SDK 2.3.2.\n[EV_BATTERY_PERCENT]: 100 %, 콜백 수신 2026-11-02T09:30:00.123Z.\n[FUEL_PERCENT]: 확인 실패 [NOT_READ].\n수신 시각은 앱이 콜백을 받은 시각이며 차량 측 측정 시각이나 값의 최신성을 보장하지 않습니다.\n항목들은 순차로 읽었으며 동시에 읽은 스냅샷이 아닙니다.\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
       "textIncludes": [
         "TIMEOUT",
         "100",
@@ -424,6 +428,7 @@
         "sdkVersion": "2.3.2",
         "items": []
       },
+      "text": "seat_status 결과 CANCELLED. 실행 환경 pleos_emulator, Vehicle SDK 2.3.2.\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
       "textIncludes": [
         "CANCELLED",
         "추정하지",
@@ -640,6 +645,7 @@
           }
         ]
       },
+      "text": "door_status 결과 COMPLETE. 실행 환경 pleos_emulator, Vehicle SDK 2.3.2.\n[DOOR_POSITION] ROW_1_LEFT: 0 (closed), 콜백 수신 2026-11-02T09:30:00.123Z.\n[DOOR_POSITION] ROW_1_RIGHT: 0 (closed), 콜백 수신 2026-11-02T09:30:00.123Z.\n[DOOR_POSITION] ROW_2_LEFT: 0 (closed), 콜백 수신 2026-11-02T09:30:00.123Z.\n[DOOR_POSITION] ROW_2_RIGHT: 0 (closed), 콜백 수신 2026-11-02T09:30:00.123Z.\n[DOOR_LOCK] ROW_1_LEFT+ROW_1_RIGHT+ROW_2_LEFT+ROW_2_RIGHT: true (locked), 콜백 수신 2026-11-02T09:30:00.123Z.\n잠김/잠금 해제는 SDK 불리언을 메서드 이름 기준(true=잠김)으로 해석한 것입니다.\n수신 시각은 앱이 콜백을 받은 시각이며 차량 측 측정 시각이나 값의 최신성을 보장하지 않습니다.\n항목들은 순차로 읽었으며 동시에 읽은 스냅샷이 아닙니다.",
       "textIncludes": [
         "DOOR_LOCK",
         "ROW_1_LEFT+ROW_1_RIGHT+ROW_2_LEFT+ROW_2_RIGHT",
@@ -714,6 +720,7 @@
           }
         ]
       },
+      "text": "brake_status 결과 COMPLETE. 실행 환경 simulation, Vehicle SDK 2.3.2.\n[BRAKE_PEDAL_STATUS]: true, 콜백 수신 2026-11-02T09:30:00.123Z.\n수신 시각은 앱이 콜백을 받은 시각이며 차량 측 측정 시각이나 값의 최신성을 보장하지 않습니다.\n시뮬레이션 결과이며 실제 차량 값이 아닙니다.",
       "textIncludes": [
         "실제 차량 값이 아닙니다",
         "측정 시각"
@@ -788,6 +795,7 @@
           }
         ]
       },
+      "text": "brake_status 결과 COMPLETE. 실행 환경 pleos_emulator, Vehicle SDK 2.3.2.\n[BRAKE_PEDAL_STATUS]: true, 콜백 수신 2026-11-02T09:30:00.123Z.\n수신 시각은 앱이 콜백을 받은 시각이며 차량 측 측정 시각이나 값의 최신성을 보장하지 않습니다.",
       "textIncludes": [
         "pleos_emulator"
       ],
@@ -866,6 +874,7 @@
           }
         ]
       },
+      "text": "window_detail_status 결과 COMPLETE. 실행 환경 pleos_emulator, Vehicle SDK 2.3.2.\n[SMART_GLASS_CONFIG] ROOF_TOP_1: {\"zoneCount\":2,\"levelCount\":4}, 콜백 수신 2026-11-02T09:30:00.123Z.\n수신 시각은 앱이 콜백을 받은 시각이며 차량 측 측정 시각이나 값의 최신성을 보장하지 않습니다.",
       "textIncludes": [
         "zoneCount",
         "levelCount"
@@ -937,6 +946,7 @@
           }
         ]
       },
+      "text": "brake_status 결과 FAILED. 실행 환경 pleos_emulator, Vehicle SDK 2.3.2.\n[BRAKE_PEDAL_STATUS]: 확인 실패 [READ_FAILED].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
       "textIncludes": [
         "READ_FAILED",
         "추정하지"
@@ -965,6 +975,7 @@
         "requestId": "22222222-2222-4222-8222-222222222222",
         "query": "door_status"
       },
+      "text": "확인하지 못했습니다 [BUSY, android].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
       "textIncludes": [
         "BUSY",
         "추정하지",
@@ -992,6 +1003,7 @@
         "requestId": "22222222-2222-4222-8222-222222222222",
         "query": "door_status"
       },
+      "text": "확인하지 못했습니다 [ANDROID_UNREACHABLE, pc].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
       "textIncludes": [
         "ANDROID_UNREACHABLE",
         "추정하지"
@@ -1018,6 +1030,7 @@
         "requestId": "22222222-2222-4222-8222-222222222222",
         "query": "door_status"
       },
+      "text": "확인하지 못했습니다 [CONNECTION_STOPPED, android].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
       "textIncludes": [
         "CONNECTION_STOPPED"
       ],
@@ -1079,6 +1092,7 @@
           "maximum": 1.0
         }
       },
+      "text": "ROW_1_LEFT: open. 원시값 1, 콜백 수신 2026-11-02T09:30:00.123Z.\n수신 시각은 앱이 콜백을 받은 시각이며 차량 측 측정 시각이나 값의 최신성을 보장하지 않습니다.",
       "textIncludes": [
         "open",
         "ROW_1_LEFT",
@@ -1144,6 +1158,7 @@
           "maximum": 1.0
         }
       },
+      "text": "ROW_1_LEFT: open. 원시값 1, 콜백 수신 2026-11-02T09:30:00.123Z.\n수신 시각은 앱이 콜백을 받은 시각이며 차량 측 측정 시각이나 값의 최신성을 보장하지 않습니다.\n시뮬레이션 결과이며 실제 차량 값이 아닙니다.",
       "textIncludes": [
         "실제 차량 값이 아닙니다"
       ],
@@ -1210,6 +1225,7 @@
           "receivedAt": "2026-11-02T09:30:00.123Z"
         }
       },
+      "text": "확인하지 못했습니다 [UNKNOWN_VALUE, android].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.\nROW_1_LEFT 문 상태입니다.\n관측 원시값 5, 콜백 수신 2026-11-02T09:30:00.123Z.\n수신 시각은 앱이 콜백을 받은 시각이며 차량 측 측정 시각이나 값의 최신성을 보장하지 않습니다.",
       "textIncludes": [
         "UNKNOWN_VALUE",
         "추정하지",
@@ -1264,6 +1280,7 @@
         "errorCode": null,
         "observation": null
       },
+      "text": "확인하지 못했습니다 [PERMISSION_DENIED, android].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.\nROW_1_LEFT 문 상태입니다.",
       "textIncludes": [
         "PERMISSION_DENIED",
         "추정하지"
@@ -1318,6 +1335,7 @@
         "errorCode": null,
         "observation": null
       },
+      "text": "확인하지 못했습니다 [TIMEOUT, android].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.\nROW_1_LEFT 문 상태입니다.",
       "textIncludes": [
         "TIMEOUT",
         "추정하지"
@@ -1357,6 +1375,7 @@
         "errorCode": null,
         "observation": null
       },
+      "text": "확인하지 못했습니다 [CANCELLED, android].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.\nROW_1_LEFT 문 상태입니다.",
       "textIncludes": [
         "CANCELLED",
         "추정하지"
@@ -1419,6 +1438,7 @@
           "maximum": 1.0
         }
       },
+      "text": "ROW_1_LEFT: open. 원시값 1, 콜백 수신 2026-11-02T09:30:00.123Z.\n수신 시각은 앱이 콜백을 받은 시각이며 차량 측 측정 시각이나 값의 최신성을 보장하지 않습니다.",
       "textIncludes": [
         "open"
       ],
@@ -1446,6 +1466,7 @@
         "requestId": "22222222-2222-4222-8222-222222222222",
         "area": "ROW_1_LEFT"
       },
+      "text": "확인하지 못했습니다 [TIMEOUT, pc].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
       "textIncludes": [
         "TIMEOUT",
         "추정하지",
@@ -1473,6 +1494,7 @@
         "requestId": "22222222-2222-4222-8222-222222222222",
         "area": "ROW_1_LEFT"
       },
+      "text": "확인하지 못했습니다 [INVALID_RESPONSE, pc].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
       "textIncludes": [
         "INVALID_RESPONSE",
         "추정하지"
@@ -1499,6 +1521,7 @@
         "requestId": "22222222-2222-4222-8222-222222222222",
         "query": "seat_status"
       },
+      "text": "확인하지 못했습니다 [INVALID_REQUEST, pc].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
       "textIncludes": [
         "INVALID_REQUEST",
         "추정하지"

@@ -2,7 +2,7 @@
 
 상태: **채택** ([ADR-0004](../../docs/decisions/0004-vehicle-read-contract.md)).
 
-이 문서는 규칙만 적는다. 속성·도구·한도의 값은 [catalog.json](catalog.json), 판정 사례는 [fixtures/](fixtures/)가 기준이다. Android와 Node 테스트가 같은 파일을 읽는다.
+이 문서는 규칙만 적는다. 속성·도구·한도의 값은 [catalog.json](catalog.json), 판정 사례는 [fixtures/](fixtures/)가 기준이다. 앱의 JVM 테스트가 이 파일들을 읽는다. COM-12 전까지는 Node MCP 서버의 테스트도 같은 파일을 읽었다.
 
 ## 근거의 구분
 
@@ -42,29 +42,27 @@
 
 ## 요청 생명주기
 
-1. Node가 핸들러 진입 시 데드라인을 시작하고 `requestId`(UUID)를 만든다. 하나의 도구 호출은 HTTP 요청 1회다.
-2. Node가 도구와 인자를 검사한다. 잘못되면 Bridge를 호출하지 않는다.
-3. Android가 요청을 검사하고 조회 슬롯을 차지한다. 슬롯은 에이전트별이 아니라 앱 전체에 1개이며 큐는 없다.
+1. 앱의 MCP 서버가 도구 호출마다 데드라인을 시작하고 `requestId`(UUID)를 만든다. 하나의 도구 호출은 게이트웨이 조회 1회다.
+2. 서버가 도구와 인자를 검사한다. 잘못되면 조회하지 않는다.
+3. 게이트웨이가 요청을 검사하고 조회 슬롯을 차지한다. 슬롯은 에이전트별이 아니라 앱 전체에 1개이며 큐는 없다.
 4. 속성마다 capability를 한 번 확인한 뒤, 읽을 수 있는 항목을 순차로 읽는다. 동시에 읽은 스냅샷이 아니다.
-5. Android가 전체 결과를 같은 `requestId`로 돌려주고, Node가 검증한 결과만 MCP 응답으로 쓴다.
+5. 게이트웨이가 전체 결과를 같은 `requestId`로 돌려주고, 서버는 계약 검증을 통과한 결과만 MCP 응답으로 쓴다.
 
 | 상황 | 규칙 |
 | --- | --- |
-| 동시 요청 | 진행 중이면 새 요청은 시작하지 않고 `409 BUSY`. 진행 중인 조회는 계속한다 |
+| 동시 요청 | 진행 중이면 새 요청은 시작하지 않고 `BUSY`. 진행 중인 조회는 계속한다 |
 | 재시도 | 어느 계층도 자동 재시도하지 않는다. 다시 묻는 것은 사용자의 새 요청이다 |
-| timeout | 전체 상한은 `deadlineMs`. Node가 남은 시간을 `remainingMs`로 넘기고 Android는 그 안에서 끝낸다 |
-| 취소 | MCP 취소 또는 연결 종료 시 해당 요청만 끝낸다. 이미 받은 항목은 유지하고 나머지는 `NOT_READ` |
-| 중지 | 승인 차단 → 소켓 종료 → 대기 요청 취소 순서. 중지 중 새 요청은 `503 CONNECTION_STOPPED` |
+| timeout | 전체 상한은 `deadlineMs`. 서버가 남은 시간을 `remainingMs`로 넘기고 게이트웨이는 그 안에서 끝낸다 |
+| 클라이언트 이탈 | MCP 서버(Ktor CIO)는 클라이언트가 HTTP 연결을 끊어도 조회를 멈추지 않는다. 조회는 데드라인 안에 끝나고, 그동안 슬롯을 차지해 다른 호출은 `BUSY`를 받는다. stateless 전송이라 MCP 취소 알림도 진행 중인 호출에 닿지 않는다 |
+| 중지 | 승인 차단 → 서버 종료 → 대기 요청 취소 순서. 중지 중 들어온 요청은 `CONNECTION_STOPPED`. 서버가 닫힌 뒤에는 MCP 클라이언트가 연결 실패를 직접 받는다 |
 | 늦은 응답 | 콜백은 요청별 토큰으로 대조해 끝난 요청의 것은 버린다. `requestId`가 다른 응답은 `INVALID_RESPONSE` |
 | 콜백 없음 | 바인더 미준비 때 SDK는 호출을 보관하고 콜백을 주지 않는다(`source_only`). 항목은 timeout으로 끝나며, 나중에 실행돼도 버린다 |
 
 조회는 상태를 바꾸지 않으므로 늦은 실행이 차량을 바꾸지 않는다. 변경 요청의 결과 불명 처리는 COM-11에서 정한다.
 
-## Bridge wire
+## 게이트웨이 요청·응답 형식
 
-주소·경로·크기 한도는 카탈로그 `bridge`를 따른다. loopback 전용이며 Host/Origin 검사는 프로세스 인증이 아니다.
-
-요청과 모든 응답(200과 호출 단위 실패)의 `Content-Type`은 `application/json`이고 `charset=utf-8`만 덧붙일 수 있다. Node는 다른 형식의 응답을 상태 코드와 관계없이 쓰지 않는다.
+앱 안에서 MCP 서버와 게이트웨이가 주고받는 형식이다. COM-12 전에는 `127.0.0.1:18765`의 HTTP Bridge가 이 형식을 PC의 Node 서버에 보냈다. 지금은 소켓을 거치지 않으며, MCP 서버가 `VehicleReadValidator`로 검사한 뒤에만 결과로 쓴다. 상태 코드는 HTTP의 의미를 빌린 내부 표기다. 크기 한도와 데드라인은 카탈로그 `bridge`를 따른다.
 
 ### 요청
 
@@ -77,7 +75,7 @@
 - 기존 4개 query는 선택 인자를 받지 않는다.
 - `properties`는 그 query의 속성이어야 한다. `areas`는 그 query 속성의 영역 표기여야 한다.
 
-### 응답 (HTTP 200)
+### 응답 (상태 200)
 
 ```json
 {"requestId": "<uuid>", "query": "energy_level", "outcome": "PARTIAL",
@@ -121,30 +119,34 @@
 
 ### 호출 단위 실패
 
-| HTTP | 본문 | Node 결과 |
+| 상태 | 본문 | MCP 결과 |
 | --- | --- | --- |
 | 409 | `{requestId, ok:false, code:"BUSY"}` | `origin:"android"` |
 | 503 | `{requestId, ok:false, code:"APP_NOT_READY" 또는 "CONNECTION_STOPPED"}` | `origin:"android"` |
-| 400, 413, 415 | `{ok:false, code:"INVALID_REQUEST"}` | `origin:"android"` |
-| 403 | `{ok:false, code:"REQUEST_FORBIDDEN"}` | `origin:"android"` |
-| 보내기 전 요청 본문이 계약을 어김(실제 본문 기준 `maxRequestBytes` 초과 등) | 없음, HTTP를 보내지 않음 | `INVALID_REQUEST`, `origin:"pc"` |
-| 연결 실패 | 없음 | `ANDROID_UNREACHABLE`, `origin:"pc"` |
-| 형식 위반(`Content-Type` 위반, HTTP가 아닌 응답 포함), 다른 `requestId`, 크기 초과 | 없음 | `INVALID_RESPONSE`, `origin:"pc"` |
-| 데드라인 초과, MCP 취소 | 없음 | `TIMEOUT`, `CANCELLED`, `origin:"pc"` |
+| 400 | `{ok:false, code:"INVALID_REQUEST"}` (고른 영역에 읽을 항목이 없음) | `origin:"android"` |
+| 응답이 계약 검증을 통과하지 못함 | 보내지 않음 | `INVALID_RESPONSE`, `origin:"android"` |
+| 데드라인보다 1초 더 기다려도 답이 없음 | 없음 | `TIMEOUT`, `origin:"android"` |
+
+검증기는 COM-12 전의 HTTP 실패(403, 413, 415)도 그대로 판정하지만, 지금 게이트웨이는 이를 만들지 않는다. `ANDROID_UNREACHABLE`과 `origin:"pc"`인 실패는 Node 경로에만 있었다. `tool-results.json`에 남아 있는 `pc` 사례는 결과 글의 형식을 고정하려는 것이다.
 
 ## MCP 도구와 응답
 
-Node만 담당하는 구간이다. 사례는 [fixtures/tool-inputs.json](fixtures/tool-inputs.json), [fixtures/tool-results.json](fixtures/tool-results.json)에 있다. 아래 규칙은 PoC `0d288c8`에서 추출하고 달라지는 점만 고쳤다.
+앱의 MCP 서버(`app/.../mcp/`)가 담당한다. 사례는 [fixtures/tool-inputs.json](fixtures/tool-inputs.json), [fixtures/tool-results.json](fixtures/tool-results.json), [fixtures/tool-list.json](fixtures/tool-list.json)에 있다. 아래 규칙은 PoC `0d288c8`에서 추출하고 달라지는 점만 고쳤다.
+
+- `tool-list.json`은 COM-12에서 Node 서버의 `tools/list` 결과로 만들었다. 지금 서버는 이 목록과 같아야 한다. 한 가지만 다르다. Kotlin MCP SDK의 `ToolSchema`가 `additionalProperties`를 담지 못해, `inputSchema`에 `additionalProperties: false`가 없다. 알 수 없는 키는 인자 검사에서 거부한다.
+- `tool-results.json`의 `expect.text`는 Node 서버가 쓰던 결과 글 전체다. 지금 서버도 같은 글을 쓴다.
 
 **입력과 힌트**
 
 - 기존 4개 도구는 인자가 없다. 후보 도구는 선택 인자 `properties`와, 영역이 있는 속성을 가진 도구에 한해 `areas`를 받는다. 그 밖의 키는 거부한다.
 - 모든 도구는 `readOnlyHint: true`, `destructiveHint: false`, `idempotentHint: false`, `openWorldHint: false`다.
-- 도구 설명은 한 번 읽는다는 점과 확인되지 않은 값을 추정하지 말라는 점을 적는다. 구체적 문구는 COM-23에서 정한다.
+- 도구 설명은 한 번 읽는다는 점과 확인되지 않은 값을 추정하지 말라는 점을 적는다. 도구별 `title`과 `description`은 카탈로그 `tools[]`에 있고 두 서버가 그대로 쓴다.
+- 인자가 스키마를 벗어나면 `isError: true`이고 `structuredContent`가 없는 결과로 답한다. 글은 `Input validation error:`로 시작하며, 이유 문구는 서버마다 다를 수 있다. 차량을 읽지 않는다.
+- `tools/list`에 없는 도구(카탈로그에 없거나 `adoption`이 `adopted`가 아닌 도구)를 부르면 JSON-RPC 오류 `-32602`다.
 
 **오류 표시**
 
-| Bridge 결과 | `isError` | 이미 받은 값 |
+| 게이트웨이 결과 | `isError` | 이미 받은 값 |
 | --- | --- | --- |
 | `COMPLETE` | 없음 | 전달 |
 | `PARTIAL`, `FAILED` | `true` | 전달 |
@@ -157,13 +159,13 @@ Node만 담당하는 구간이다. 사례는 [fixtures/tool-inputs.json](fixture
 
 | 형식 | 결과 | 내용 |
 | --- | --- | --- |
-| `items` | Bridge 응답 | 검증한 응답 그대로 |
+| `items` | 게이트웨이 응답 | 검증한 응답 그대로 |
 | `items` | 호출 단위 실패 | `{ok:false, origin, code, requestId, query}` |
 | `scalar` | 값 확인 | `{ok:true, requestId, source, area, status, state, rawValue, receivedAt, sdkVersion, capability}`. `status`는 `OPEN`/`CLOSED`, `state`는 `open`/`closed` |
 | `scalar` | 항목 실패 | `{ok:false, origin:"android", code, requestId, source, area, status, sdkVersion, capability, errorType, errorCode, observation}`. 값을 받았으면 `observation`이 `{rawValue, receivedAt}`, 아니면 `null` |
 | `scalar` | 호출 단위 실패 | `{ok:false, origin, code, requestId, area}` |
 
-`scalar`의 TIMEOUT·CANCELLED는 값이 확인됐으면 `isError` 없는 값 확인으로, 아니면 `code`를 outcome으로 둔 항목 실패로 보낸다. 항목이 하나뿐이라 확인된 값이 곧 도구의 답이기 때문이다. `requestId`는 Node가 만든 값을 항상 넣는다.
+`scalar`의 TIMEOUT·CANCELLED는 값이 확인됐으면 `isError` 없는 값 확인으로, 아니면 `code`를 outcome으로 둔 항목 실패로 보낸다. 항목이 하나뿐이라 확인된 값이 곧 도구의 답이기 때문이다. `requestId`는 MCP 서버가 만든 값을 항상 넣는다.
 
 **`content` 글**
 
@@ -203,7 +205,7 @@ Node만 담당하는 구간이다. 사례는 [fixtures/tool-inputs.json](fixture
 | --- | --- |
 | success, partial | `outcome` COMPLETE, PARTIAL |
 | unsupported | 항목 `PROPERTY_UNSUPPORTED`, `AREA_UNSUPPORTED`, `READ_UNAVAILABLE` |
-| disconnected | `ANDROID_UNREACHABLE`, `APP_NOT_READY`, `CONNECTION_STOPPED`, 항목 `SERVICE_UNAVAILABLE` |
+| disconnected | `APP_NOT_READY`, `CONNECTION_STOPPED`, MCP 연결 실패, 항목 `SERVICE_UNAVAILABLE` |
 | timeout, cancelled | `outcome`, 또는 호출 단위 `TIMEOUT`, `CANCELLED` |
 | permission_denied | 항목 `PERMISSION_DENIED` |
 | invalid_argument | `INVALID_REQUEST`, MCP 입력 검증 실패 |
@@ -215,7 +217,7 @@ Node만 담당하는 구간이다. 사례는 [fixtures/tool-inputs.json](fixture
 
 | 변경 | 영향 |
 | --- | --- |
-| 경로 `/v2/vehicle-read` → `/v3/vehicle-read` | 옛 빌드와 섞이면 거부된다 |
+| 경로 `/v2/vehicle-read` → `/v3/vehicle-read` | COM-12에서 HTTP Bridge를 없애 지금은 경로가 없다 |
 | 요청 `properties`, `areas` 추가, 본문 1KB → 4KB | 기존 4개는 인자 없음 유지 |
 | 응답 16KB → 64KB | Seat는 최악 15속성 × 9영역 |
 | 실패 위치 `source`(android/pc) → `origin` | MCP `structuredContent` 키가 바뀐다 |

@@ -47,7 +47,6 @@ android {
         release {
             optimization {
                 enable = true
-                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
         }
     }
@@ -69,8 +68,12 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
     implementation(libs.vehicle.sdk)
+    implementation(libs.mcp.kotlin.sdk.server)
+    implementation(libs.ktor.server.cio)
     testImplementation(libs.junit)
     testImplementation(libs.org.json)
+    testImplementation(libs.mcp.kotlin.sdk.client)
+    testImplementation(libs.ktor.client.cio)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
 }
