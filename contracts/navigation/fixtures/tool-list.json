@@ -1,0 +1,18 @@
+[
+  {
+    "name": "get_navigation_destination",
+    "title": "내비 현재 목적지와 도착 예상",
+    "description": "순정 내비가 지금 안내 중인 목적지의 이름·주소, 남은 거리(m)와 남은 시간(초)을 조회합니다. 남은 시간이 있으면 차량 앱이 수신 시각에 남은 시간을 더해 계산한 추정 도착 시각(UTC)도 돌려줍니다. 호출할 때 한 번 읽습니다. status가 NO_DESTINATION이면 안내 중인 목적지가 없다는 뜻입니다. null인 값은 확인하지 못한 값이므로 추정하거나 0, 곧 도착으로 말하지 마세요. 추정 도착 시각은 교통 변화를 반영한 보장값이 아닙니다.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "$schema": "https://json-schema.org/draft/2020-12/schema"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  }
+]

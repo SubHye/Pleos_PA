@@ -1,6 +1,7 @@
 package com.example.pleos_pa.mcp
 
 import com.example.pleos_pa.bridge.BridgeEndpoint
+import com.example.pleos_pa.contract.NavigationToolEntry
 import com.example.pleos_pa.contract.VehicleReadCatalog
 import io.ktor.server.cio.CIO
 import io.ktor.server.cio.CIOApplicationEngine
@@ -18,19 +19,23 @@ import io.modelcontextprotocol.kotlin.sdk.types.RPCError
 import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolAnnotations
+import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.JsonObject
 
 /**
- * The app's MCP Streamable HTTP endpoint, on loopback only. It offers the catalog's adopted tools.
- * The Host allow-list and the Origin refusal stop browser-style requests; they do not identify the
- * caller and are not authentication. Nothing here is reachable off the device without an `adb
- * forward`. Unlike the old bridge, a server that stops on its own is not detected: Ktor reports no
- * such event, so the status stays as it was until the next call fails.
+ * The app's MCP Streamable HTTP endpoint, on loopback only. It offers the adopted tools of the
+ * vehicle catalog and, when given, of the navigation catalog. The Host allow-list and the Origin
+ * refusal stop browser-style requests; they do not identify the caller and are not authentication.
+ * Nothing here is reachable off the device without an `adb forward`. Unlike the old bridge, a
+ * server that stops on its own is not detected: Ktor reports no such event, so the status stays as
+ * it was until the next call fails.
  */
 class EmbeddedMcpServer(
     catalog: VehicleReadCatalog,
     private val tool: VehicleReadTool,
+    private val navigation: NavigationDestinationTool? = null,
     private val port: Int = PORT,
 ) : BridgeEndpoint {
     private val offered =
@@ -112,6 +117,17 @@ class EmbeddedMcpServer(
                 dispatch(it)
             }
         }
+        navigation?.entry?.let { entry ->
+            mcp.addTool(
+                name = entry.name,
+                title = entry.title,
+                description = entry.description,
+                inputSchema = NO_ARGUMENTS,
+                toolAnnotations = ANNOTATIONS,
+            ) {
+                dispatch(it)
+            }
+        }
         // The SDK answers an unknown tool with an error result. The MCP specification, and the Node
         // server this replaced, answer with a JSON-RPC invalid-params error, so this session's
         // tools/call is replaced.
@@ -126,6 +142,11 @@ class EmbeddedMcpServer(
     }
 
     private suspend fun dispatch(request: CallToolRequest): CallToolResult {
+        val navi = navigation
+        val naviEntry = navi?.entry
+        if (navi != null && naviEntry != null && request.name == naviEntry.name) {
+            return dispatchNavigation(navi, naviEntry, request)
+        }
         val (entry, inputs) =
             offered[request.name]
                 ?: throw McpException(
@@ -148,6 +169,24 @@ class EmbeddedMcpServer(
         }
     }
 
+    private suspend fun dispatchNavigation(
+        navi: NavigationDestinationTool,
+        entry: NavigationToolEntry,
+        request: CallToolRequest,
+    ): CallToolResult =
+        try {
+            navi.refusal(request.arguments)?.let { NavigationToolResult.invalidInput(entry, it) }
+                ?: navi.call(entry)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Never a navigation value: the read did not finish, and no detail leaves the app.
+            CallToolResult(
+                content = listOf(TextContent("Error executing tool ${entry.name}")),
+                isError = true,
+            )
+        }
+
     companion object {
         const val HOST = "127.0.0.1"
         const val PORT = 18766
@@ -155,6 +194,11 @@ class EmbeddedMcpServer(
         const val NAME = "pleos-pa-vehicle"
         const val VERSION = "0.1.0"
         private const val STOP_TIMEOUT_MILLIS = 1_000L
+        private val NO_ARGUMENTS =
+            ToolSchema(
+                schema = "https://json-schema.org/draft/2020-12/schema",
+                properties = JsonObject(emptyMap()),
+            )
         private val ANNOTATIONS =
             ToolAnnotations(
                 readOnlyHint = true,

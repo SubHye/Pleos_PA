@@ -1,0 +1,358 @@
+[
+  {
+    "id": "guiding_complete",
+    "evidence": "mock",
+    "note": "안내 중, 값 모두 있음",
+    "input": {
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "latitude": 37.5547,
+      "longitude": 126.9707,
+      "remainDistance": 12300,
+      "remainTime": 1620
+    },
+    "receivedAt": "2026-11-10T01:00:00Z",
+    "expect": {
+      "status": "COMPLETE",
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "remainDistanceMeters": 12300,
+      "remainTimeSeconds": 1620,
+      "estimatedArrivalAt": "2026-11-10T01:27:00Z",
+      "missing": [],
+      "receivedAt": "2026-11-10T01:00:00Z"
+    }
+  },
+  {
+    "id": "guiding_long_route",
+    "evidence": "mock",
+    "note": "COM-8에서 화면과 일치한 크기의 값(8,640초·185,000m). 장소는 임의로 바꿨다",
+    "input": {
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "latitude": 37.5547,
+      "longitude": 126.9707,
+      "remainDistance": 185000,
+      "remainTime": 8640
+    },
+    "receivedAt": "2026-11-10T03:15:30.125Z",
+    "expect": {
+      "status": "COMPLETE",
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "remainDistanceMeters": 185000,
+      "remainTimeSeconds": 8640,
+      "estimatedArrivalAt": "2026-11-10T05:39:30.125Z",
+      "missing": [],
+      "receivedAt": "2026-11-10T03:15:30.125Z"
+    }
+  },
+  {
+    "id": "utc_midnight",
+    "evidence": "mock",
+    "note": "UTC 날짜가 바뀐다",
+    "input": {
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "latitude": 37.5547,
+      "longitude": 126.9707,
+      "remainDistance": 9000,
+      "remainTime": 1200
+    },
+    "receivedAt": "2026-11-10T23:50:00.250Z",
+    "expect": {
+      "status": "COMPLETE",
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "remainDistanceMeters": 9000,
+      "remainTimeSeconds": 1200,
+      "estimatedArrivalAt": "2026-11-11T00:10:00.250Z",
+      "missing": [],
+      "receivedAt": "2026-11-10T23:50:00.250Z"
+    }
+  },
+  {
+    "id": "kst_midnight",
+    "evidence": "mock",
+    "note": "KST 23:55 수신, KST 날짜가 바뀐다. 결과는 UTC로만 보낸다",
+    "input": {
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "latitude": 37.5547,
+      "longitude": 126.9707,
+      "remainDistance": 4000,
+      "remainTime": 600
+    },
+    "receivedAt": "2026-11-10T14:55:00Z",
+    "expect": {
+      "status": "COMPLETE",
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "remainDistanceMeters": 4000,
+      "remainTimeSeconds": 600,
+      "estimatedArrivalAt": "2026-11-10T15:05:00Z",
+      "missing": [],
+      "receivedAt": "2026-11-10T14:55:00Z"
+    }
+  },
+  {
+    "id": "time_zero",
+    "evidence": "mock",
+    "note": "0초를 곧 도착으로 보내지 않는다",
+    "input": {
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "latitude": 37.5547,
+      "longitude": 126.9707,
+      "remainDistance": 50,
+      "remainTime": 0
+    },
+    "receivedAt": "2026-11-10T01:00:00Z",
+    "expect": {
+      "status": "PARTIAL",
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "remainDistanceMeters": 50,
+      "remainTimeSeconds": null,
+      "estimatedArrivalAt": null,
+      "missing": [
+        "remainTimeSeconds",
+        "estimatedArrivalAt"
+      ],
+      "receivedAt": "2026-11-10T01:00:00Z"
+    }
+  },
+  {
+    "id": "time_negative",
+    "evidence": "mock",
+    "note": "음수 시간",
+    "input": {
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "latitude": 37.5547,
+      "longitude": 126.9707,
+      "remainDistance": 50,
+      "remainTime": -5
+    },
+    "receivedAt": "2026-11-10T01:00:00Z",
+    "expect": {
+      "status": "PARTIAL",
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "remainDistanceMeters": 50,
+      "remainTimeSeconds": null,
+      "estimatedArrivalAt": null,
+      "missing": [
+        "remainTimeSeconds",
+        "estimatedArrivalAt"
+      ],
+      "receivedAt": "2026-11-10T01:00:00Z"
+    }
+  },
+  {
+    "id": "distance_zero",
+    "evidence": "mock",
+    "note": "거리 0",
+    "input": {
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "latitude": 37.5547,
+      "longitude": 126.9707,
+      "remainDistance": 0,
+      "remainTime": 60
+    },
+    "receivedAt": "2026-11-10T01:00:00Z",
+    "expect": {
+      "status": "PARTIAL",
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "remainDistanceMeters": null,
+      "remainTimeSeconds": 60,
+      "estimatedArrivalAt": "2026-11-10T01:01:00Z",
+      "missing": [
+        "remainDistanceMeters"
+      ],
+      "receivedAt": "2026-11-10T01:00:00Z"
+    }
+  },
+  {
+    "id": "distance_negative",
+    "evidence": "mock",
+    "note": "음수 거리",
+    "input": {
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "latitude": 37.5547,
+      "longitude": 126.9707,
+      "remainDistance": -1,
+      "remainTime": 60
+    },
+    "receivedAt": "2026-11-10T01:00:00Z",
+    "expect": {
+      "status": "PARTIAL",
+      "name": "서울역",
+      "address": "서울 중구 한강대로 405",
+      "remainDistanceMeters": null,
+      "remainTimeSeconds": 60,
+      "estimatedArrivalAt": "2026-11-10T01:01:00Z",
+      "missing": [
+        "remainDistanceMeters"
+      ],
+      "receivedAt": "2026-11-10T01:00:00Z"
+    }
+  },
+  {
+    "id": "name_blank_with_coordinates",
+    "evidence": "mock",
+    "note": "이름이 비어도 좌표가 있으면 안내 중으로 본다",
+    "input": {
+      "name": "",
+      "address": "서울 중구 한강대로 405",
+      "latitude": 37.5547,
+      "longitude": 126.9707,
+      "remainDistance": 12300,
+      "remainTime": 1620
+    },
+    "receivedAt": "2026-11-10T01:00:00Z",
+    "expect": {
+      "status": "PARTIAL",
+      "name": null,
+      "address": "서울 중구 한강대로 405",
+      "remainDistanceMeters": 12300,
+      "remainTimeSeconds": 1620,
+      "estimatedArrivalAt": "2026-11-10T01:27:00Z",
+      "missing": [
+        "name"
+      ],
+      "receivedAt": "2026-11-10T01:00:00Z"
+    }
+  },
+  {
+    "id": "address_blank",
+    "evidence": "mock",
+    "note": "주소 공백",
+    "input": {
+      "name": "서울역",
+      "address": "  ",
+      "latitude": 37.5547,
+      "longitude": 126.9707,
+      "remainDistance": 12300,
+      "remainTime": 1620
+    },
+    "receivedAt": "2026-11-10T01:00:00Z",
+    "expect": {
+      "status": "PARTIAL",
+      "name": "서울역",
+      "address": null,
+      "remainDistanceMeters": 12300,
+      "remainTimeSeconds": 1620,
+      "estimatedArrivalAt": "2026-11-10T01:27:00Z",
+      "missing": [
+        "address"
+      ],
+      "receivedAt": "2026-11-10T01:00:00Z"
+    }
+  },
+  {
+    "id": "everything_missing_but_coordinates",
+    "evidence": "mock",
+    "note": "좌표만 있다",
+    "input": {
+      "name": "",
+      "address": "",
+      "latitude": 37.5547,
+      "longitude": 126.9707,
+      "remainDistance": 0,
+      "remainTime": 0
+    },
+    "receivedAt": "2026-11-10T01:00:00Z",
+    "expect": {
+      "status": "PARTIAL",
+      "name": null,
+      "address": null,
+      "remainDistanceMeters": null,
+      "remainTimeSeconds": null,
+      "estimatedArrivalAt": null,
+      "missing": [
+        "name",
+        "address",
+        "remainDistanceMeters",
+        "remainTimeSeconds",
+        "estimatedArrivalAt"
+      ],
+      "receivedAt": "2026-11-10T01:00:00Z"
+    }
+  },
+  {
+    "id": "no_destination",
+    "evidence": "sdk_emulator",
+    "note": "COM-8과 COM-24 제품 앱에서 관찰한 빈 응답",
+    "input": {
+      "name": "",
+      "address": "",
+      "latitude": 0.0,
+      "longitude": 0.0,
+      "remainDistance": 0,
+      "remainTime": 0
+    },
+    "receivedAt": "2026-11-09T16:33:45.425Z",
+    "expect": {
+      "status": "NO_DESTINATION",
+      "name": null,
+      "address": null,
+      "remainDistanceMeters": null,
+      "remainTimeSeconds": null,
+      "estimatedArrivalAt": null,
+      "missing": [],
+      "receivedAt": "2026-11-09T16:33:45.425Z"
+    }
+  },
+  {
+    "id": "no_destination_with_time",
+    "evidence": "mock",
+    "note": "빈 이름과 (0, 0)이면 시간이 있어도 목적지 없음이다",
+    "input": {
+      "name": "",
+      "address": "",
+      "latitude": 0.0,
+      "longitude": 0.0,
+      "remainDistance": 0,
+      "remainTime": 60
+    },
+    "receivedAt": "2026-11-10T01:00:00Z",
+    "expect": {
+      "status": "NO_DESTINATION",
+      "name": null,
+      "address": null,
+      "remainDistanceMeters": null,
+      "remainTimeSeconds": null,
+      "estimatedArrivalAt": null,
+      "missing": [],
+      "receivedAt": "2026-11-10T01:00:00Z"
+    }
+  },
+  {
+    "id": "no_destination_blank_name",
+    "evidence": "mock",
+    "note": "공백 이름과 (0, 0)",
+    "input": {
+      "name": "   ",
+      "address": "",
+      "latitude": 0.0,
+      "longitude": 0.0,
+      "remainDistance": 0,
+      "remainTime": 0
+    },
+    "receivedAt": "2026-11-10T01:00:00Z",
+    "expect": {
+      "status": "NO_DESTINATION",
+      "name": null,
+      "address": null,
+      "remainDistanceMeters": null,
+      "remainTimeSeconds": null,
+      "estimatedArrivalAt": null,
+      "missing": [],
+      "receivedAt": "2026-11-10T01:00:00Z"
+    }
+  }
+]

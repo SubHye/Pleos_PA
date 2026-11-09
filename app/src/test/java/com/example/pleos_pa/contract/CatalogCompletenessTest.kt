@@ -67,7 +67,9 @@ class CatalogCompletenessTest {
                 .map { it.getString("permission") }
                 .toSet()
         val declared =
-            Regex("""pleos\.car\.permission\.(\w+)""")
+            // Vehicle permissions only; NAVI_* belong to the navigation catalog
+            // (NavigationCatalogTest).
+            Regex("""pleos\.car\.permission\.(CAR_\w+)""")
                 .findAll(File("src/main/AndroidManifest.xml").readText())
                 .map { it.groupValues[1] }
                 .toSet()
