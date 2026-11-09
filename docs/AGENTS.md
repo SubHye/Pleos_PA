@@ -5,6 +5,7 @@
 | 정적 구조, 런타임 흐름 | [architecture](architecture/AGENTS.md) |
 | 되돌리기 어려운 결정 | [decisions](decisions/AGENTS.md) |
 | 차량 조회 계약 | [contracts](../contracts/vehicle-read/CONTRACT.md) |
+| 내비 조회 계약 | [contracts](../contracts/navigation/CONTRACT.md) |
 | 협업, 환경, 검증 지침 | [루트 AGENTS.md](../AGENTS.md) |
 | 요구사항, 진행, 후속 작업 | Linear (저장소에 복제하지 않음) |
 | 일회성 검증 결과 | PR 본문 |
