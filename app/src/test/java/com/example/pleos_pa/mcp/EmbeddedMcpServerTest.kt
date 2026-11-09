@@ -63,13 +63,14 @@ class EmbeddedMcpServerTest {
     private val sdk = FakeVehicleSdk()
     private val reader = VehicleReader(catalog, sdk, scheduler, "pleos_emulator")
     private val finished = CopyOnWriteArrayList<String>()
+    private val peersLost = CopyOnWriteArrayList<Unit>()
     private val events =
         object : BridgeEvents {
             override fun requestReceived() = Unit
 
-            override fun peerClosedDuringRead() = Unit
-
-            override fun listenerFailed() = Unit
+            override fun peerClosedDuringRead() {
+                peersLost += Unit
+            }
 
             override fun ownReplyRejected() = Unit
 
@@ -243,6 +244,38 @@ class EmbeddedMcpServerTest {
     }
 
     @Test
+    fun aClientLeavingMidReadDoesNotCancelTheRead() = runBlocking {
+        val call = TOOL_CALL.replace("NAME", "get_energy_level")
+        // Sends a call and leaves before the SDK answers.
+        connect().use { socket ->
+            socket.getOutputStream().write(post(call).toByteArray())
+            waitFor { sdk.calls.size == 1 }
+        }
+        Thread.sleep(200)
+
+        // The read goes on and keeps the slot: a new call is told the app is busy.
+        val client = connectedClient()
+        val busy = withTimeout(5_000) { client.callTool("get_energy_level", emptyMap()) }
+        assertEquals(JsonPrimitive("BUSY"), busy.structuredContent!!["code"])
+        assertEquals(emptyList<Unit>(), peersLost)
+
+        // Once the SDK answers, the abandoned read ends and the slot is free again.
+        answerEnergy(battery = 80, fuel = 62)
+        waitFor { "COMPLETE" in finished }
+        val next = async(Dispatchers.IO) { client.callTool("get_energy_level", emptyMap()) }
+        waitFor { sdk.calls.size == 5 }
+        sdk.answerCapability(PropertyCapability("READ"))
+        waitFor { sdk.calls.size == 6 }
+        sdk.answerRead(80)
+        waitFor { sdk.calls.size == 7 }
+        sdk.answerCapability(PropertyCapability("READ"))
+        waitFor { sdk.calls.size == 8 }
+        sdk.answerRead(62)
+        assertEquals(null, withTimeout(5_000) { next.await() }.isError)
+        client.close()
+    }
+
+    @Test
     fun anOriginHeaderIsRefused() {
         assertEquals(403, status(rawPost(PING, extra = "Origin: http://127.0.0.1\r\n")))
     }
@@ -303,6 +336,17 @@ class EmbeddedMcpServerTest {
 
     private fun connect() = Socket(InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1)), port)
 
+    private fun post(
+        body: String,
+        extra: String = "",
+        host: String = "127.0.0.1:$port",
+    ): String {
+        val size = body.toByteArray().size
+        return "POST /mcp HTTP/1.1\r\nHost: $host\r\nContent-Type: application/json\r\n" +
+            "Accept: application/json, text/event-stream\r\nContent-Length: $size\r\n" +
+            "Connection: close\r\n$extra\r\n$body"
+    }
+
     private fun rawPost(
         body: String,
         extra: String = "",
@@ -310,17 +354,14 @@ class EmbeddedMcpServerTest {
     ): String =
         connect().use { socket ->
             socket.soTimeout = 5_000
-            val size = body.toByteArray().size
-            val request =
-                "POST /mcp HTTP/1.1\r\nHost: $host\r\nContent-Type: application/json\r\n" +
-                    "Accept: application/json, text/event-stream\r\nContent-Length: $size\r\n" +
-                    "Connection: close\r\n$extra\r\n$body"
-            socket.getOutputStream().write(request.toByteArray())
+            socket.getOutputStream().write(post(body, extra, host).toByteArray())
             socket.getInputStream().readBytes().decodeToString()
         }
 
     private companion object {
         const val PING = """{"jsonrpc":"2.0","id":1,"method":"ping"}"""
+        const val TOOL_CALL =
+            """{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"NAME","arguments":{}}}"""
         const val RACE_ROUNDS = 30
         val LOOPBACK = byteArrayOf(127, 0, 0, 1)
     }

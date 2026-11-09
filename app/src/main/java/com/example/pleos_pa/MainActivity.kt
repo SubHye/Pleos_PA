@@ -18,7 +18,8 @@ import com.example.pleos_pa.connection.ConnectionStatus
 import com.example.pleos_pa.connection.ConnectionStatusBoard
 
 /**
- * Starts, stops and resumes the connection and shows its status. The bridge never opens by itself.
+ * Starts, stops and resumes the connection and shows its status. The MCP server never opens by
+ * itself.
  */
 class MainActivity : AppCompatActivity() {
     private lateinit var status: TextView

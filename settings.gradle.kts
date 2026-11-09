@@ -30,3 +30,7 @@ dependencyResolutionManagement {
 rootProject.name = "Pleos_pa"
 
 include(":app")
+
+include(":vehicle-sweep")
+
+project(":vehicle-sweep").projectDir = file("tools/vehicle-sweep")

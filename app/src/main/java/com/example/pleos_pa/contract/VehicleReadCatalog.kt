@@ -28,10 +28,8 @@ data class PropertyEntry(
     val unit: String?,
 )
 
+/** Limits of one read through the app's gateway. */
 data class BridgeLimits(
-    val host: String,
-    val port: Int,
-    val path: String,
     val maxRequestBytes: Int,
     val maxResponseBytes: Int,
     val deadlineMs: Long,
@@ -83,9 +81,6 @@ private constructor(
                 sdkVersion = root.getJSONObject("sdk").getString("version"),
                 bridge =
                     BridgeLimits(
-                        host = bridge.getString("host"),
-                        port = bridge.getInt("port"),
-                        path = bridge.getString("path"),
                         maxRequestBytes = bridge.getInt("maxRequestBytes"),
                         maxResponseBytes = bridge.getInt("maxResponseBytes"),
                         deadlineMs = bridge.getLong("deadlineMs"),
