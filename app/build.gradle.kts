@@ -2,23 +2,34 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-/** Puts only the contract's catalog in the APK, without committing a second copy of it. */
+/** Puts only the contracts' catalogs in the APK, without committing a second copy of them. */
 abstract class CatalogAsset : DefaultTask() {
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val catalog: RegularFileProperty
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val navigationCatalog: RegularFileProperty
 
     @get:OutputDirectory abstract val outputDir: DirectoryProperty
 
     @TaskAction
     fun copy() {
         catalog.get().asFile.copyTo(outputDir.file("catalog.json").get().asFile, overwrite = true)
+        navigationCatalog
+            .get()
+            .asFile
+            .copyTo(outputDir.file("navigation-catalog.json").get().asFile, overwrite = true)
     }
 }
 
 val catalogAsset =
     tasks.register<CatalogAsset>("catalogAsset") {
         catalog.set(rootProject.layout.projectDirectory.file("contracts/vehicle-read/catalog.json"))
+        navigationCatalog.set(
+            rootProject.layout.projectDirectory.file("contracts/navigation/catalog.json")
+        )
     }
 
 androidComponents {
@@ -69,6 +80,9 @@ android {
             it.inputs
                 .dir(rootProject.layout.projectDirectory.dir("contracts/vehicle-read"))
                 .withPathSensitivity(PathSensitivity.RELATIVE)
+            it.inputs
+                .dir(rootProject.layout.projectDirectory.dir("contracts/navigation"))
+                .withPathSensitivity(PathSensitivity.RELATIVE)
         }
     }
 }
@@ -78,6 +92,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
     implementation(libs.vehicle.sdk)
+    implementation(libs.navi.helper)
     implementation(libs.mcp.kotlin.sdk.server)
     implementation(libs.ktor.server.cio)
     testImplementation(libs.junit)

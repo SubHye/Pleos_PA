@@ -50,10 +50,24 @@ class RequestHistory(private val capacity: Int = 100) {
     @Synchronized
     fun finish(token: Token, state: String, source: String?, details: String): Boolean {
         val row = records.firstOrNull { it.token === token } ?: return false
-        if (row.state != "RECEIVED") return false
+        if (row.state !in setOf("RECEIVED", "CHECKING", "EXECUTING")) return false
         val next =
             row.copy(state = state.take(40), source = source?.take(40), details = bounded(details))
         val updated = records.map { if (it.token === token) next else it }
+        records.clear()
+        records.addAll(updated)
+        notifyChanged()
+        return true
+    }
+
+    /** Navigation progress may advance only an unfinished attempt; removed rows never revive. */
+    @Synchronized
+    fun progress(token: Token, state: String): Boolean {
+        val row = records.firstOrNull { it.token === token } ?: return false
+        if (row.state !in setOf("RECEIVED", "CHECKING", "EXECUTING")) return false
+        val updated = records.map {
+            if (it.token === token) row.copy(state = state.take(40)) else it
+        }
         records.clear()
         records.addAll(updated)
         notifyChanged()

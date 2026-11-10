@@ -115,3 +115,9 @@ adb -s <기기 serial> forward --remove tcp:18766   # 끝나면
   - [공모전 1차 Project](https://linear.app/wonsub/project/pleos-connect-mcp-공모전-1차-29bf62b430ba) · [프로젝트 기획서](https://linear.app/wonsub/document/프로젝트-기획서-e1e6374c0bbb) · [요구사항 정의서](https://linear.app/wonsub/document/요구사항-정의서-1b7e6fcd5721) (둘이 충돌하면 최신 결정을 반영한 요구사항 정의서 우선)
 
 클라이언트 이탈은 Ktor CIO에서 조회 취소/화면 상태 변경 신호로 전달되지 않는다. 조회는 데드라인까지 슬롯을 쓰며, 화면의 연결됨은 MCP 서버 준비 상태만 뜻한다. 앱의 명시적 중지는 서버·슬롯·SDK를 종료한다.
+
+### 내비 작업 표시 준비
+
+COM-11의 `NavTaskCoordinator`를 감싸는 `ui/NavTaskHistory`는 접수·검사·실행·성공·실패·차단 및 BUSY를 공용 메모리 기록에 전달한다. 연결 중지 당시 이미 전송한 동작은 `RESULT_UNKNOWN`으로 표시하고 취소·복원 성공으로 단정하지 않는다. 목적지·인자 원문·SDK 오류 문장은 저장하지 않는다.
+
+이 어댑터는 모의 조건/동작으로 검증하며 아직 실제 내비 변경/MCP 경로에 연결하지 않았다. 이후 실행 어댑터가 연결 수명과 함께 생성·종료해야 한다. 기존 `get_navigation_destination`은 읽기 전용 도구이며 내비 변경 성공이나 상태 복원 기능을 뜻하지 않는다. 화면의 기능 목록은 차량·내비 두 카탈로그를 함께 표시한다. 실제 표시 허용은 기존 Car UX 정책을 따른다.

@@ -22,9 +22,13 @@ import com.example.pleos_pa.MainActivity
 import com.example.pleos_pa.R
 import com.example.pleos_pa.bridge.BridgeEvents
 import com.example.pleos_pa.bridge.ReaderBridgeGateway
+import com.example.pleos_pa.contract.NavigationCatalog
 import com.example.pleos_pa.contract.VehicleReadCatalog
 import com.example.pleos_pa.mcp.EmbeddedMcpServer
+import com.example.pleos_pa.mcp.NavigationDestinationTool
 import com.example.pleos_pa.mcp.VehicleReadTool
+import com.example.pleos_pa.navigation.DestinationReader
+import com.example.pleos_pa.navigation.PleosNaviSdk
 import com.example.pleos_pa.ui.DriverHistory
 import com.example.pleos_pa.ui.HistoryPresentation
 import com.example.pleos_pa.vehicle.PleosVehicleSdk
@@ -60,6 +64,11 @@ class BridgeService : Service() {
     private val catalog by lazy {
         VehicleReadCatalog.parse(
             assets.open("catalog.json").use { it.readBytes().decodeToString() }
+        )
+    }
+    private val navigationCatalog by lazy {
+        NavigationCatalog.parse(
+            assets.open(NavigationCatalog.ASSET).use { it.readBytes().decodeToString() }
         )
     }
     private val controller by lazy {
@@ -138,10 +147,34 @@ class BridgeService : Service() {
                 ),
             )
         val tool = VehicleReadTool(catalog, gateway, events, SystemClock::elapsedRealtime)
+        val destinations =
+            DestinationReader(
+                PleosNaviSdk(this),
+                scheduler,
+                source,
+                navigationCatalog.staleHoldMs,
+            ) { connected ->
+                Log.i(TAG, if (connected) "NAVI_CONNECTED" else "NAVI_CONNECT_FAILED")
+            }
+        // Outside the Pleos emulator every read is refused, so the SDK is not even connected.
+        if (source != null) destinations.open()
+        val navigation =
+            NavigationDestinationTool(
+                navigationCatalog,
+                destinations,
+                source,
+                events,
+                SystemClock::elapsedRealtime,
+            )
         return ConnectionSession(
-            gateway::close,
-            EmbeddedMcpServer(catalog, tool),
-            { released -> reader.close { main.post(released) } },
+            {
+                gateway.close()
+                destinations.closeAdmission()
+            },
+            EmbeddedMcpServer(catalog, tool, navigation),
+            { released ->
+                reader.close { destinations.close { main.post(released) } }
+            },
             bindExecutor,
         ) { session, status ->
             main.post { controller.onStatus(session, status) }

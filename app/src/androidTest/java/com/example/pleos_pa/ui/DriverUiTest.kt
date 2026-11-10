@@ -145,6 +145,7 @@ class DriverUiTest {
     @Test
     fun identityUndoAndClearDoNotInventCapabilitiesOrRestoreValues() = exercise { activity ->
         assertTrue(text(activity).contains("연결된 AI: 알 수 없음"))
+        assertTrue(text(activity).contains("get_navigation_destination"))
         instrumentation.runOnMainSync {
             assertFalse(
                 all(activity)

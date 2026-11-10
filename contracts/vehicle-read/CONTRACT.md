@@ -35,7 +35,7 @@
 
 대상은 Vehicle SDK 2.3.2의 공개 일회성 조회다. 제외한 항목과 사유는 카탈로그의 `excluded`, `excludedOperations`에 있다.
 
-- 제어, 구독, 비공개·Deprecated API, 내비게이션(COM-11)은 대상이 아니다.
+- 제어, 구독, 비공개·Deprecated API, 내비게이션은 대상이 아니다. 내비 조회는 [내비 조회 계약](../navigation/CONTRACT.md), 내비 변경은 COM-11이 정한다.
 - VIN은 요구사항 부록 B.1에 따라 제외한다. SDK가 조회 값을 logcat에 남기는 경로이기도 하다.
 - 필수 도구는 기존 4개다(요구사항 3.4.3). 나머지 18개는 검증 후 채택하는 후보다.
 - 카탈로그는 SDK 2.3.2 소스·클래스와 [API Reference](https://document.pleos.ai/docs/pleos-only/connect-sdk-pleos/Vehicle/entry)로 대조했다. API Reference는 소스 주석에서 생성된 문서로 보이므로 일치해도 실제 동작의 증거가 아니다.

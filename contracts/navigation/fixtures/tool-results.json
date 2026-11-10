@@ -1,0 +1,293 @@
+[
+  {
+    "id": "guiding_complete_pleos_emulator",
+    "given": {
+      "kind": "received",
+      "destinationCase": "guiding_complete",
+      "source": "pleos_emulator",
+      "requestId": "00000000-0000-4000-8000-000000000024"
+    },
+    "expect": {
+      "isError": false,
+      "text": "get_navigation_destination 결과 COMPLETE. 실행 환경 pleos_emulator, NaviHelper 3.0.5.\n목적지 서울역, 주소 서울 중구 한강대로 405.\n남은 거리 12300m, 남은 시간 1620초, 추정 도착 2026-11-10T01:27:00Z.\n콜백 수신 2026-11-10T01:00:00Z.\n수신 시각은 앱이 콜백을 받은 시각이며 내비가 값을 계산한 시각이나 값의 최신성을 보장하지 않습니다.\n추정 도착 시각은 차량 앱이 수신 시각에 남은 시간을 더해 계산한 값이며 교통 변화를 반영한 보장값이 아닙니다. 내비 화면 표시와 반올림이 다를 수 있습니다.",
+      "structuredContent": {
+        "ok": true,
+        "requestId": "00000000-0000-4000-8000-000000000024",
+        "source": "pleos_emulator",
+        "sdkVersion": "NaviHelper 3.0.5",
+        "status": "COMPLETE",
+        "receivedAt": "2026-11-10T01:00:00Z",
+        "destination": {
+          "name": "서울역",
+          "address": "서울 중구 한강대로 405"
+        },
+        "remainDistanceMeters": 12300,
+        "remainTimeSeconds": 1620,
+        "estimatedArrivalAt": "2026-11-10T01:27:00Z",
+        "missing": []
+      }
+    }
+  },
+  {
+    "id": "time_zero_pleos_emulator",
+    "given": {
+      "kind": "received",
+      "destinationCase": "time_zero",
+      "source": "pleos_emulator",
+      "requestId": "00000000-0000-4000-8000-000000000024"
+    },
+    "expect": {
+      "isError": true,
+      "text": "get_navigation_destination 결과 PARTIAL. 실행 환경 pleos_emulator, NaviHelper 3.0.5.\n목적지 서울역, 주소 서울 중구 한강대로 405.\n남은 거리 50m, 남은 시간 확인 못 함, 추정 도착 확인 못 함.\n콜백 수신 2026-11-10T01:00:00Z.\n수신 시각은 앱이 콜백을 받은 시각이며 내비가 값을 계산한 시각이나 값의 최신성을 보장하지 않습니다.\n확인하지 못한 값: remainTimeSeconds, estimatedArrivalAt.\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": true,
+        "requestId": "00000000-0000-4000-8000-000000000024",
+        "source": "pleos_emulator",
+        "sdkVersion": "NaviHelper 3.0.5",
+        "status": "PARTIAL",
+        "receivedAt": "2026-11-10T01:00:00Z",
+        "destination": {
+          "name": "서울역",
+          "address": "서울 중구 한강대로 405"
+        },
+        "remainDistanceMeters": 50,
+        "remainTimeSeconds": null,
+        "estimatedArrivalAt": null,
+        "missing": [
+          "remainTimeSeconds",
+          "estimatedArrivalAt"
+        ]
+      }
+    }
+  },
+  {
+    "id": "name_blank_with_coordinates_pleos_emulator",
+    "given": {
+      "kind": "received",
+      "destinationCase": "name_blank_with_coordinates",
+      "source": "pleos_emulator",
+      "requestId": "00000000-0000-4000-8000-000000000024"
+    },
+    "expect": {
+      "isError": true,
+      "text": "get_navigation_destination 결과 PARTIAL. 실행 환경 pleos_emulator, NaviHelper 3.0.5.\n목적지 확인 못 함, 주소 서울 중구 한강대로 405.\n남은 거리 12300m, 남은 시간 1620초, 추정 도착 2026-11-10T01:27:00Z.\n콜백 수신 2026-11-10T01:00:00Z.\n수신 시각은 앱이 콜백을 받은 시각이며 내비가 값을 계산한 시각이나 값의 최신성을 보장하지 않습니다.\n추정 도착 시각은 차량 앱이 수신 시각에 남은 시간을 더해 계산한 값이며 교통 변화를 반영한 보장값이 아닙니다. 내비 화면 표시와 반올림이 다를 수 있습니다.\n확인하지 못한 값: name.\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": true,
+        "requestId": "00000000-0000-4000-8000-000000000024",
+        "source": "pleos_emulator",
+        "sdkVersion": "NaviHelper 3.0.5",
+        "status": "PARTIAL",
+        "receivedAt": "2026-11-10T01:00:00Z",
+        "destination": {
+          "name": null,
+          "address": "서울 중구 한강대로 405"
+        },
+        "remainDistanceMeters": 12300,
+        "remainTimeSeconds": 1620,
+        "estimatedArrivalAt": "2026-11-10T01:27:00Z",
+        "missing": [
+          "name"
+        ]
+      }
+    }
+  },
+  {
+    "id": "no_destination_pleos_emulator",
+    "given": {
+      "kind": "received",
+      "destinationCase": "no_destination",
+      "source": "pleos_emulator",
+      "requestId": "00000000-0000-4000-8000-000000000024"
+    },
+    "expect": {
+      "isError": false,
+      "text": "get_navigation_destination 결과 NO_DESTINATION. 실행 환경 pleos_emulator, NaviHelper 3.0.5.\n안내 중인 목적지가 없습니다. 남은 거리, 남은 시간, 추정 도착 시각은 없습니다.\n콜백 수신 2026-11-09T16:33:45.425Z.\n수신 시각은 앱이 콜백을 받은 시각이며 내비가 값을 계산한 시각이나 값의 최신성을 보장하지 않습니다.",
+      "structuredContent": {
+        "ok": true,
+        "requestId": "00000000-0000-4000-8000-000000000024",
+        "source": "pleos_emulator",
+        "sdkVersion": "NaviHelper 3.0.5",
+        "status": "NO_DESTINATION",
+        "receivedAt": "2026-11-09T16:33:45.425Z",
+        "destination": null,
+        "remainDistanceMeters": null,
+        "remainTimeSeconds": null,
+        "estimatedArrivalAt": null,
+        "missing": []
+      }
+    }
+  },
+  {
+    "id": "guiding_complete_simulation",
+    "given": {
+      "kind": "received",
+      "destinationCase": "guiding_complete",
+      "source": "simulation",
+      "requestId": "00000000-0000-4000-8000-000000000024"
+    },
+    "expect": {
+      "isError": false,
+      "text": "get_navigation_destination 결과 COMPLETE. 실행 환경 simulation, NaviHelper 3.0.5.\n목적지 서울역, 주소 서울 중구 한강대로 405.\n남은 거리 12300m, 남은 시간 1620초, 추정 도착 2026-11-10T01:27:00Z.\n콜백 수신 2026-11-10T01:00:00Z.\n수신 시각은 앱이 콜백을 받은 시각이며 내비가 값을 계산한 시각이나 값의 최신성을 보장하지 않습니다.\n추정 도착 시각은 차량 앱이 수신 시각에 남은 시간을 더해 계산한 값이며 교통 변화를 반영한 보장값이 아닙니다. 내비 화면 표시와 반올림이 다를 수 있습니다.\n시뮬레이션 결과이며 실제 차량 값이 아닙니다.",
+      "structuredContent": {
+        "ok": true,
+        "requestId": "00000000-0000-4000-8000-000000000024",
+        "source": "simulation",
+        "sdkVersion": "NaviHelper 3.0.5",
+        "status": "COMPLETE",
+        "receivedAt": "2026-11-10T01:00:00Z",
+        "destination": {
+          "name": "서울역",
+          "address": "서울 중구 한강대로 405"
+        },
+        "remainDistanceMeters": 12300,
+        "remainTimeSeconds": 1620,
+        "estimatedArrivalAt": "2026-11-10T01:27:00Z",
+        "missing": []
+      }
+    }
+  },
+  {
+    "id": "failure_busy",
+    "given": {
+      "kind": "failed",
+      "code": "BUSY",
+      "requestId": "00000000-0000-4000-8000-000000000024"
+    },
+    "expect": {
+      "isError": true,
+      "text": "확인하지 못했습니다 [BUSY, android].\n다른 내비 조회가 진행 중이라 이번 조회를 시작하지 않았습니다.\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "BUSY",
+        "requestId": "00000000-0000-4000-8000-000000000024"
+      }
+    }
+  },
+  {
+    "id": "failure_app_not_ready",
+    "given": {
+      "kind": "failed",
+      "code": "APP_NOT_READY",
+      "requestId": "00000000-0000-4000-8000-000000000024"
+    },
+    "expect": {
+      "isError": true,
+      "text": "확인하지 못했습니다 [APP_NOT_READY, android].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "APP_NOT_READY",
+        "requestId": "00000000-0000-4000-8000-000000000024"
+      }
+    }
+  },
+  {
+    "id": "failure_connection_stopped",
+    "given": {
+      "kind": "failed",
+      "code": "CONNECTION_STOPPED",
+      "requestId": "00000000-0000-4000-8000-000000000024"
+    },
+    "expect": {
+      "isError": true,
+      "text": "확인하지 못했습니다 [CONNECTION_STOPPED, android].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "CONNECTION_STOPPED",
+        "requestId": "00000000-0000-4000-8000-000000000024"
+      }
+    }
+  },
+  {
+    "id": "failure_navi_not_connected",
+    "given": {
+      "kind": "failed",
+      "code": "NAVI_NOT_CONNECTED",
+      "requestId": "00000000-0000-4000-8000-000000000024"
+    },
+    "expect": {
+      "isError": true,
+      "text": "확인하지 못했습니다 [NAVI_NOT_CONNECTED, android].\n차량 앱이 아직 내비 서비스에 연결되지 않았거나 연결에 실패했습니다.\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "NAVI_NOT_CONNECTED",
+        "requestId": "00000000-0000-4000-8000-000000000024"
+      }
+    }
+  },
+  {
+    "id": "failure_previous_response_pending",
+    "given": {
+      "kind": "failed",
+      "code": "PREVIOUS_RESPONSE_PENDING",
+      "requestId": "00000000-0000-4000-8000-000000000024"
+    },
+    "expect": {
+      "isError": true,
+      "text": "확인하지 못했습니다 [PREVIOUS_RESPONSE_PENDING, android].\n이전 조회의 응답을 아직 받지 못해 새 조회를 보내지 않았습니다.\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "PREVIOUS_RESPONSE_PENDING",
+        "requestId": "00000000-0000-4000-8000-000000000024"
+      }
+    }
+  },
+  {
+    "id": "failure_permission_denied",
+    "given": {
+      "kind": "failed",
+      "code": "PERMISSION_DENIED",
+      "requestId": "00000000-0000-4000-8000-000000000024"
+    },
+    "expect": {
+      "isError": true,
+      "text": "확인하지 못했습니다 [PERMISSION_DENIED, android].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "PERMISSION_DENIED",
+        "requestId": "00000000-0000-4000-8000-000000000024"
+      }
+    }
+  },
+  {
+    "id": "failure_timeout",
+    "given": {
+      "kind": "failed",
+      "code": "TIMEOUT",
+      "requestId": "00000000-0000-4000-8000-000000000024"
+    },
+    "expect": {
+      "isError": true,
+      "text": "확인하지 못했습니다 [TIMEOUT, android].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "TIMEOUT",
+        "requestId": "00000000-0000-4000-8000-000000000024"
+      }
+    }
+  },
+  {
+    "id": "failure_read_failed",
+    "given": {
+      "kind": "failed",
+      "code": "READ_FAILED",
+      "requestId": "00000000-0000-4000-8000-000000000024"
+    },
+    "expect": {
+      "isError": true,
+      "text": "확인하지 못했습니다 [READ_FAILED, android].\n확인하지 못한 값을 추정하지 마세요. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "READ_FAILED",
+        "requestId": "00000000-0000-4000-8000-000000000024"
+      }
+    }
+  }
+]

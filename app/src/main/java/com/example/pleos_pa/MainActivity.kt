@@ -42,20 +42,25 @@ open class MainActivity : AppCompatActivity() {
     private lateinit var historyRows: LinearLayout
     private lateinit var features: TextView
     private val featureText: String by lazy {
-        val tools =
-            JSONObject(assets.open("catalog.json").use { it.readBytes().decodeToString() })
-                .getJSONArray("tools")
         getString(R.string.feature_title) +
             "\n" +
-            (0 until tools.length()).joinToString("\n") { index ->
-                val tool = tools.getJSONObject(index)
-                tool.getString("name") +
-                    " · " +
-                    getString(
-                        if (tool.optString("adoption") == "adopted") R.string.feature_adopted
-                        else R.string.feature_unavailable
-                    )
-            }
+            listOf("catalog.json", "navigation-catalog.json")
+                .flatMap { file ->
+                    val tools =
+                        JSONObject(assets.open(file).use { it.readBytes().decodeToString() })
+                            .getJSONArray("tools")
+                    (0 until tools.length()).map { index ->
+                        val tool = tools.getJSONObject(index)
+                        tool.getString("name") +
+                            " · " +
+                            getString(
+                                if (tool.optString("adoption") == "adopted")
+                                    R.string.feature_adopted
+                                else R.string.feature_unavailable
+                            )
+                    }
+                }
+                .joinToString("\n")
     }
     private lateinit var details: TextView
     private lateinit var older: Button
@@ -314,7 +319,7 @@ open class MainActivity : AppCompatActivity() {
                             R.string.history_restricted_summary,
                             getString(R.string.history_hidden, records.size),
                             records.firstOrNull()?.let {
-                                getString(R.string.history_latest, stateText(it.state))
+                                getString(R.string.history_latest, stateText(it.state, it.tool))
                             } ?: "",
                         )
                 }
@@ -332,7 +337,7 @@ open class MainActivity : AppCompatActivity() {
                         getString(
                             R.string.history_row,
                             record.tool,
-                            stateText(record.state),
+                            stateText(record.state, record.tool),
                             record.requestId,
                             record.receivedAt,
                         )
@@ -357,7 +362,7 @@ open class MainActivity : AppCompatActivity() {
                     record.requestId,
                     record.arguments,
                     record.receivedAt,
-                    stateText(record.state),
+                    stateText(record.state, record.tool),
                     sourceText(record.source),
                     getString(R.string.receipt_not_measurement),
                     record.details,
@@ -373,8 +378,22 @@ open class MainActivity : AppCompatActivity() {
             else -> "미확인"
         }
 
-    private fun stateText(state: String) =
-        when (state) {
+    private fun stateText(state: String, tool: String): String {
+        if (tool == "navigation_task")
+            return when (state) {
+                "RECEIVED" -> "내비 작업 접수"
+                "CHECKING" -> "실행 조건 검사 중"
+                "EXECUTING" -> "내비 작업 실행 중 · 완료 전"
+                "SUCCEEDED" -> "내비 작업 성공"
+                "FAILED" -> "내비 작업 실패 · 복원 완료 아님"
+                "BLOCKED" -> "실행 차단 · 자동 재실행 없음"
+                "RESULT_UNKNOWN" -> "결과 불명 · 취소·복원 완료 아님"
+                "BUSY" -> "다른 내비 작업 처리 중 (BUSY)"
+                "INCOMPLETE" -> "필수 정보 부족 · 실행 안 됨"
+                "UNAVAILABLE" -> "연결 중지 · 실행 안 됨"
+                else -> "결과 미확인 ($state)"
+            }
+        return when (state) {
             "RECEIVED" -> "조회 처리 중"
             "COMPLETE" -> "조회 완료"
             "PARTIAL" -> "일부 항목만 확인"
@@ -385,6 +404,7 @@ open class MainActivity : AppCompatActivity() {
             "APP_NOT_READY" -> "조회 준비 안 됨"
             else -> "결과 미확인 ($state)"
         }
+    }
 
     companion object {
         private const val PAGE_SIZE = 10
