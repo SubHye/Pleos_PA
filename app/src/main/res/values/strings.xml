@@ -16,7 +16,7 @@
     <string name="ux_unrestricted">현재 화면의 UX 제한 없음 · 정차 또는 차량 변경 허가를 뜻하지 않습니다.</string>
     <string name="ux_restricted">규제 활성 또는 상태·화면 허용 범위 미확인: 상세 결과와 긴 기록 탐색을 제한합니다. 연결 중지는 위 버튼을 사용하세요.</string>
     <string name="undo_action">내비 변경 되돌리기</string>
-    <string name="undo_unavailable">되돌리기 불가: 현재 차량 조회만 지원하며, 되돌릴 내비 변경이 없습니다.</string>
+    <string name="undo_unavailable">되돌리기 불가: 이전 경로의 복원과 현재 경로의 충돌 확인이 검증되지 않았습니다. 이전 목적지를 다시 설정해도 경유지·경로 옵션까지 복원되는 것은 아닙니다.</string>
     <string name="history_title">요청 기록</string>
     <string name="history_newer">최근 기록</string>
     <string name="history_older">이전 기록</string>
