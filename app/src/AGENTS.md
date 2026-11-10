@@ -11,9 +11,9 @@
 | `main/java/com/example/pleos_pa/navigation/` | 내비 조회 슬롯(`DestinationReader`)과 NaviHelper 경계(`NaviSdk`, `PleosNaviSdk`). [내비 조회 계약](../../contracts/navigation/CONTRACT.md)을 따른다. `NAVI_ROUTE`만 쓰고 경로를 바꾸지 않는다. 내비 변경 요청 하나를 한 작업으로 처리하는 조정기(`NavTaskCoordinator`)도 여기에 있다. 실행 조건 검사, 처리 중 BUSY, 첫 실패 중단, 연결 중지 후 미실행 동작 차단을 맡으며, SDK에 의존하지 않고 조건과 동작을 주입받는다. 아직 연결 경로에 연결하지 않았다 |
 | `main/java/com/example/pleos_pa/vehicle/` | 앱 전체 조회 슬롯, SDK 경계와 97개 속성의 호출 표, 실행 환경 판별 |
 | `main/java/com/example/pleos_pa/mcp/` | MCP 서버(`127.0.0.1:18766/mcp`, stateless Streamable HTTP). 두 카탈로그의 채택 도구, 입력 스키마와 인자 검사, 결과 글과 structuredContent. 내비 도구는 `NavigationDestinationTool`·`NavigationToolResult` |
-| `main/java/com/example/pleos_pa/contract/` | [차량 조회 계약](../../contracts/vehicle-read/CONTRACT.md)의 요청·응답 모델과 검증, SDK 실패 분류. 내비 카탈로그와 목적지 판정(`NavigationDestination`). SDK와 Android 컴포넌트에 의존하지 않는다 |
+| `main/java/com/example/pleos_pa/contract/` | [차량 조회 계약](../../contracts/vehicle-read/CONTRACT.md)의 요청·응답 모델과 검증, SDK 실패 분류. 내비 카탈로그와 목적지 판정(`NavigationDestination`), 고정 장소 목록과 장소 대조(`PlaceCatalog`, COM-21에서 도구에 연결). SDK와 Android 컴포넌트에 의존하지 않는다 |
 | `test/java/com/example/pleos_pa/mcp/` | 공용 `tool-list.json`·`tool-inputs.json`·`tool-results.json` 대조와, 실제 소켓 + SDK 대역으로 MCP 서버를 검사하는 JVM 테스트. 차량 기능 검증이 아니다 |
-| `test/java/com/example/pleos_pa/contract/` | 공용 fixture와 SDK 클래스 대조로 계약을 고정하는 JVM 테스트. SDK를 실행하지 않으므로 차량 기능 검증이 아니다 |
+| `test/java/com/example/pleos_pa/contract/` | 공용 fixture와 SDK 클래스 대조로 계약을 고정하는 JVM 테스트. 고정 장소 목록의 기록된 에뮬레이터 근거와 대조 사례도 검사한다. SDK를 실행하지 않으므로 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/{connection,vehicle}/` | SDK 대역으로 세션·조회기를 검사하는 JVM 테스트. 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/navigation/` | NaviHelper 대역으로 내비 조회 슬롯을, 모의 조건·동작으로 작업 상태 전이와 호출 순서를 검사하는 JVM 테스트. 내비 SDK와 실제 반영 검증이 아니다 |
 | `test/java/com/example/pleos_pa/` | 산술 예제 1개 |

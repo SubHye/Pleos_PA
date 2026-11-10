@@ -20,7 +20,7 @@ Linear Issue → Coding Agent(Codex, Claude Code) → 구현·테스트·검증�
 프로젝트 Wrapper만 사용한다. JDK 25, Android SDK API 37, Build Tools 36.0.0이 필요하다. SDK 경로는 `local.properties` 또는 `ANDROID_HOME`으로 지정하고 커밋하지 않는다. Unix에서는 `.\gradlew.bat` 대신 `bash ./gradlew`를 쓴다.
 
 - 구현 중, 커밋 전: `.\gradlew.bat :spotlessApply`
-- PR 제출 전: `.\gradlew.bat :spotlessCheck :app:assembleDebug :app:testDebugUnitTest :app:lintDebug :vehicle-sweep:test`
+- PR 제출 전: `.\gradlew.bat :spotlessCheck :app:assembleDebug :app:testDebugUnitTest :app:lintDebug :vehicle-sweep:test :nav-place-check:assembleDebug :nav-place-check:testDebugUnitTest`
 
 CI가 같은 검사를 실행한다. 실행하지 못한 검사, NO-SOURCE/skip, 모의 응답과 실제 SDK 결과를 구분해 보고한다. 빌드 성공을 차량 기능 완료로 보고하지 않는다.
 
@@ -43,6 +43,7 @@ CI가 같은 검사를 실행한다. 실행하지 못한 검사, NO-SOURCE/skip,
 - [app/src](app/src/AGENTS.md): Android 소스
 - [contracts/vehicle-read](contracts/vehicle-read/CONTRACT.md): 차량 조회 계약, 카탈로그, 공용 fixture
 - [tools/vehicle-sweep](tools/vehicle-sweep/README.md): 에뮬레이터에서 도구 전체를 실행해 카탈로그 판정 근거를 만드는 도구
+- [tools/nav-place-check](tools/nav-place-check/README.md): 에뮬레이터에서 고정 장소 목록을 목적지로 설정·재조회해 목록 근거를 만드는 도구. 내비를 바꾸므로 실행마다 승인받는다
 - [docs](docs/AGENTS.md): 문서
 - [docs/architecture](docs/architecture/AGENTS.md): C4 모델과 런타임 시나리오
 - [docs/decisions](docs/decisions/AGENTS.md): ADR

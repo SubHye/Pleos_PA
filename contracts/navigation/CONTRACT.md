@@ -2,7 +2,7 @@
 
 상태: **제안** (COM-24 PR에서 상대 개발자 합의 필요).
 
-이 문서는 규칙만 적는다. 도구·한도 값은 [catalog.json](catalog.json), 판정 사례는 [fixtures/](fixtures/)가 기준이다. 앱의 JVM 테스트가 이 파일들을 읽는다.
+이 문서는 규칙만 적는다. 도구·한도 값은 [catalog.json](catalog.json), 고정 장소는 [places.json](places.json), 판정 사례는 [fixtures/](fixtures/)가 기준이다. 앱의 JVM 테스트가 이 파일들을 읽는다.
 
 ## 근거의 구분
 
@@ -17,7 +17,7 @@
 ## 범위
 
 - 대상은 NaviHelper 3.0.5의 `getDestinationInfo()` → `onDestinationInfo(DestinationInfo)` 한 가지다. 권한은 `pleos.car.permission.NAVI_ROUTE`만 쓴다.
-- 경로 변경(`requestRoute` 등, `NAVI_ROUTE_SEARCH`), 지정 지점 Trip(`requestTrip`), 그 밖의 `get*Info`는 대상이 아니다. 변경 작업의 규칙은 COM-11이 정한다.
+- 경로 변경(`requestRoute` 등, `NAVI_ROUTE_SEARCH`), 지정 지점 Trip(`requestTrip`), 그 밖의 `get*Info`는 대상이 아니다. 변경 작업의 규칙은 COM-11이 정한다. 목적지 설정 도구 계약은 COM-21에서 정하며, 그 도구가 쓸 [고정 장소 목록](#고정-장소-목록)만 이 문서에 둔다.
 - 목적지 좌표는 앱 안에서 목적지 없음 판정에만 쓰고 결과로 보내지 않는다(NFR-05). 장소 일치 판단에 필요한 정보는 COM-4에서 정한다.
 - [ADR-0008](../../docs/decisions/0008-embedded-mcp-server.md)대로 MCP 서버에는 인증이 없다. 연결이 켜져 있는 동안 기기의 다른 앱도 이 도구로 현재 목적지 이름·주소와 남은 시간을 읽을 수 있다.
 
@@ -123,3 +123,61 @@
 - `isError`이면 확인하지 못한 값을 추정하지 말라고 알리고, 자동 재시도하지 않았다고 알린다.
 - `source`가 `simulation`이면 실제 값이 아니라고 알린다.
 - 목적지 값은 결과에만 들어가며 앱 로그에는 `requestId`, 상태 코드, 경과 시간만 남긴다.
+
+## 고정 장소 목록
+
+상태: **제안** (COM-52). 두 개발자 합의(2026-11-09)대로 1차 목적지는 에뮬레이터에서 검증한 [places.json](places.json)의 장소만 쓴다. 이 절은 목록과 대조 규칙만 정한다. 도구 등록·이름·입출력은 COM-21에서 정한다. 장소 검색 API로 바꾸는 일은 COM-53이다.
+
+**규칙**
+
+- **목록에 없는 장소는 목적지로 설정하지 않는다.** 대조 결과가 없음이면 SDK를 부르지 않고, 목록 전체를 대신 돌려주지 않는다(FR-APT-01, AT-06). COM-21의 도구 설명에도 같은 문장을 쓴다.
+- AI는 좌표를 만들거나 옮기지 않는다. 장소 값은 차량 앱이 목록에서 꺼낸다.
+- 목록에는 검증된 장소만 둔다. 각 항목은 `evidence.status`가 `sdk_emulator`이고 실행 기록이 2회 이상이며 모두 `PASS`다. JVM 테스트(`PlaceCatalogTest`)가 이를 강제한다.
+
+**항목**
+
+| 필드 | 뜻 |
+| --- | --- |
+| `key` | 후보 ID. 1차의 `set_destination` 입력이다(임시 이름) |
+| `displayName`, `aliases` | 대조 대상. 영문·한글 표기를 별칭으로 둔다 |
+| `address` | 순정 내비 장소 상세 화면의 도로명 주소. `RouteInfo.address`로 보낸다 |
+| `latitude`, `longitude` | 순정 내비 `getDestinationInfo()`가 준 좌표(`coordinateSource: navi_capture`) |
+| `poiId`, `poiSubId` | 순정 내비가 직접 준 값일 때만 넣는다. 외부 지도 서비스 ID는 넣지 않는다 |
+| `capture` | 좌표를 얻은 순정 내비 검색과 그때 읽은 이름·좌표·장소 ID |
+| `evidence.runs` | 실행 날짜, 빌드, 에뮬레이터 환경, 요청 장소 ID, 재조회 값, 취소 뒤 상태, 판정 |
+
+**`RouteInfo` 구성** (NaviHelper 3.0.5, Kotlin 이름 인자)
+
+| 인자 | 값 |
+| --- | --- |
+| `latitude`·`longitude`, `displayLatitude`·`displayLongitude` | 목록 좌표 |
+| `poiName` | `displayName` |
+| `address` | `address` |
+| `poiId` | 목록 값. 없으면 `""` |
+| `poiSubId` | `""`. 순정 내비가 `null`로 답해 넣을 값이 없다 |
+| `routeOption`, `poiProvider`, `isMobileRequest` | 기본값 |
+
+**대조 규칙** (`PlaceCatalog.find`, 사례는 [fixtures/place-cases.json](fixtures/place-cases.json))
+
+1. 질의와 표시명·별칭에서 모든 공백을 지우고 소문자로 바꾼다(`Locale.ROOT`).
+2. 정규화한 질의가 비면 없음이다.
+3. 질의가 표시명·별칭을 포함하거나 표시명·별칭이 질의를 포함하면 후보다. 유사도 검색은 하지 않는다.
+4. 후보 수에 따라 `NO_MATCH`, `SINGLE`, `MULTIPLE`이다(임시 이름). 후보는 목록 순서다.
+5. AI는 한 개면 설정하고, 여러 개면 사용자에게 묻고, 없음이면 설정하지 않고 알린다. 일정 문자열의 층·회의실 같은 군더더기는 AI가 덜어 장소 부분만 질의한다.
+6. 질의는 일정에서 나온 값일 수 있으므로 앱 로그·호출 기록에 원문을 남기지 않는다(NFR-05).
+
+**에뮬레이터 관찰** (`sdk_emulator`, 2026-11-10, 판독 앱 `tools/nav-place-check`)
+
+`verifiedOn`과 같은 환경이다. 실차와 다른 내비 버전으로 일반화하지 않는다.
+
+| 항목 | 관찰 |
+| --- | --- |
+| 좌표 | 4곳 × 2회 모두 재조회 좌표가 목록과 같다(차이 0). 장소 ID를 넣은 곳(서울역·코엑스)과 비운 곳(판교역·현대백화점 판교점) 모두 같다 |
+| 이름 | 장소 ID를 넣으면 순정 내비 이름("서울역 KTX"), 비우면 보낸 `poiName`("판교역")으로 읽힌다 |
+| 장소 ID | 넣은 ID가 그대로 읽히고, 비우면 빈 값이다 |
+| 주소 | 보낸 도로명이 아니라 동 수준("용산구 동자동")으로 읽힌다. 판정에 쓰지 않는다 |
+| `poiSubId` | 항상 `null` |
+| 화면 | 안내 중 순정 화면의 목적지 이름·남은 시간·거리가 SDK 값과 같다. 거리 값은 에뮬레이터 위치를 드러낼 수 있어 적지 않는다 |
+| 취소 | 매번 `cancelRoute` 뒤 목적지 없음 |
+
+확인하지 않은 것: 좌표와 장소 ID가 서로 다른 곳을 가리킬 때의 동작(COM-8에서 ID 우선 관찰), 실차, 다른 순정 내비 버전, 목록 장소의 순정 내비 장소 ID가 바뀌는 경우.

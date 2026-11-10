@@ -29,7 +29,7 @@ jobs:
       - name: Check formatting
         run: bash ./gradlew :spotlessCheck --no-daemon --console=plain
       - name: Build, unit test and lint
-        run: bash ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug :vehicle-sweep:test --no-daemon --console=plain
+        run: bash ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug :vehicle-sweep:test :nav-place-check:assembleDebug :nav-place-check:testDebugUnitTest --no-daemon --console=plain
 
   architecture:
     runs-on: ubuntu-latest
