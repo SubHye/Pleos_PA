@@ -18,8 +18,21 @@ interface NaviSdkListener {
 }
 
 /**
- * The only part of the navigation read path that touches NaviHelper, and the only part tests
- * replace. No route changes: only the current destination is read.
+ * The destination one `requestRoute` asks for. Every value comes from the fixed place list
+ * (`contracts/navigation/places.json`); nothing here is made up by a client.
+ */
+data class RouteRequest(
+    val latitude: Double,
+    val longitude: Double,
+    val name: String,
+    val address: String,
+    /** The stock navigation app's own place ID, or empty. */
+    val poiId: String,
+)
+
+/**
+ * The only part of the navigation path that touches NaviHelper, and the only part tests replace. It
+ * reads the current destination and sets a destination; no other route change is offered.
  */
 interface NaviSdk {
     /** Starts the service connection once and reports to [listener] from then on. */
@@ -31,6 +44,13 @@ interface NaviSdk {
      * `SecurityException` without `NAVI_ROUTE`; no callback follows then.
      */
     fun requestDestination(failed: (Exception) -> Unit)
+
+    /**
+     * Hands [route] to `requestRoute`. [returned] runs once the call came back: with null when it
+     * returned, which only means the request was passed on, or with what it threw. It does not run
+     * when the SDK was closed before the call could start.
+     */
+    fun requestRoute(route: RouteRequest, returned: (Exception?) -> Unit)
 
     /**
      * Stops issuing calls and releases the SDK. [closed] runs once no later SDK call can start;

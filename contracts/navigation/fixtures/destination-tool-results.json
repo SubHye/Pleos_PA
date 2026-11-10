@@ -1,0 +1,337 @@
+[
+  {
+    "id": "find_single",
+    "given": {
+      "kind": "places",
+      "query": "판교역",
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": false,
+      "text": "find_navigation_place 결과 SINGLE.\n후보 1개: 판교역 (경기도 성남시 분당구 분당내곡로 121) [candidateId pangyo_station].\n이 candidateId로 set_navigation_destination을 호출할 수 있습니다.",
+      "structuredContent": {
+        "ok": true,
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "status": "SINGLE",
+        "candidates": [
+          {
+            "candidateId": "pangyo_station",
+            "name": "판교역",
+            "address": "경기도 성남시 분당구 분당내곡로 121"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "find_multiple",
+    "given": {
+      "kind": "places",
+      "query": "판교",
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": false,
+      "text": "find_navigation_place 결과 MULTIPLE.\n후보 2개: 판교역 (경기도 성남시 분당구 분당내곡로 121) [candidateId pangyo_station]; 현대백화점 판교점 (경기도 성남시 분당구 판교역로146번길 20) [candidateId hyundai_pangyo].\n어느 장소인지 사용자에게 물어본 뒤 선택한 candidateId로 설정하세요. 임의로 고르지 마세요.",
+      "structuredContent": {
+        "ok": true,
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "status": "MULTIPLE",
+        "candidates": [
+          {
+            "candidateId": "pangyo_station",
+            "name": "판교역",
+            "address": "경기도 성남시 분당구 분당내곡로 121"
+          },
+          {
+            "candidateId": "hyundai_pangyo",
+            "name": "현대백화점 판교점",
+            "address": "경기도 성남시 분당구 판교역로146번길 20"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "find_no_match",
+    "given": {
+      "kind": "places",
+      "query": "부산역",
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": false,
+      "text": "find_navigation_place 결과 NO_MATCH.\n고정 장소 목록에 일치하는 장소가 없습니다. 목록에 없는 장소는 목적지로 설정하지 않습니다. 목적지를 설정하지 말고 사용자에게 알리세요.",
+      "structuredContent": {
+        "ok": true,
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "status": "NO_MATCH",
+        "candidates": []
+      }
+    }
+  },
+  {
+    "id": "set_applied_pleos_emulator",
+    "given": {
+      "kind": "set",
+      "status": "APPLIED",
+      "candidateId": "pangyo_station",
+      "source": "pleos_emulator",
+      "elapsedMs": 6800,
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": false,
+      "text": "set_navigation_destination 결과 APPLIED. 실행 환경 pleos_emulator, NaviHelper 3.0.5.\n목적지 판교역(경기도 성남시 분당구 분당내곡로 121) 설정이 순정 내비에 반영된 것을 재조회 좌표로 확인했습니다. 확인까지 6800ms.\n남은 시간과 도착 예상은 get_navigation_destination으로 조회하세요.",
+      "structuredContent": {
+        "ok": true,
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "source": "pleos_emulator",
+        "sdkVersion": "NaviHelper 3.0.5",
+        "status": "APPLIED",
+        "destination": {
+          "candidateId": "pangyo_station",
+          "name": "판교역",
+          "address": "경기도 성남시 분당구 분당내곡로 121"
+        },
+        "elapsedMs": 6800
+      }
+    }
+  },
+  {
+    "id": "set_already_set_pleos_emulator",
+    "given": {
+      "kind": "set",
+      "status": "ALREADY_SET",
+      "candidateId": "coex",
+      "source": "pleos_emulator",
+      "elapsedMs": 1010,
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": false,
+      "text": "set_navigation_destination 결과 ALREADY_SET. 실행 환경 pleos_emulator, NaviHelper 3.0.5.\n요청 전 조회에서 이미 목적지가 이 장소(코엑스)였습니다. 이번 호출로 바꾼 것은 없습니다.\n남은 시간과 도착 예상은 get_navigation_destination으로 조회하세요.",
+      "structuredContent": {
+        "ok": true,
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "source": "pleos_emulator",
+        "sdkVersion": "NaviHelper 3.0.5",
+        "status": "ALREADY_SET",
+        "destination": {
+          "candidateId": "coex",
+          "name": "코엑스",
+          "address": "서울특별시 강남구 영동대로 513"
+        },
+        "elapsedMs": 1010
+      }
+    }
+  },
+  {
+    "id": "set_applied_simulation",
+    "given": {
+      "kind": "set",
+      "status": "APPLIED",
+      "candidateId": "seoul_station",
+      "source": "simulation",
+      "elapsedMs": 2000,
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": false,
+      "text": "set_navigation_destination 결과 APPLIED. 실행 환경 simulation, NaviHelper 3.0.5.\n목적지 서울역(서울특별시 용산구 한강대로 405) 설정이 순정 내비에 반영된 것을 재조회 좌표로 확인했습니다. 확인까지 2000ms.\n남은 시간과 도착 예상은 get_navigation_destination으로 조회하세요.\n시뮬레이션 결과이며 실제 차량 값이 아닙니다.",
+      "structuredContent": {
+        "ok": true,
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "source": "simulation",
+        "sdkVersion": "NaviHelper 3.0.5",
+        "status": "APPLIED",
+        "destination": {
+          "candidateId": "seoul_station",
+          "name": "서울역",
+          "address": "서울특별시 용산구 한강대로 405"
+        },
+        "elapsedMs": 2000
+      }
+    }
+  },
+  {
+    "id": "not_set_unknown_candidate",
+    "given": {
+      "kind": "notSet",
+      "code": "UNKNOWN_CANDIDATE",
+      "sent": false,
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": true,
+      "text": "목적지를 설정하지 않았습니다 [UNKNOWN_CANDIDATE, android].\nfind_navigation_place가 돌려준 candidateId가 아닙니다. 목록에 없는 장소는 목적지로 설정하지 않습니다.\n순정 내비는 바뀌지 않았습니다. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "UNKNOWN_CANDIDATE",
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "sent": false
+      }
+    }
+  },
+  {
+    "id": "not_set_busy",
+    "given": {
+      "kind": "notSet",
+      "code": "BUSY",
+      "sent": false,
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": true,
+      "text": "목적지를 설정하지 않았습니다 [BUSY, android].\n다른 내비 변경 작업이 진행 중이라 이번 요청을 시작하지 않았습니다. 대기열에 넣지 않았습니다.\n순정 내비는 바뀌지 않았습니다. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "BUSY",
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "sent": false
+      }
+    }
+  },
+  {
+    "id": "not_set_baseline_unavailable",
+    "given": {
+      "kind": "notSet",
+      "code": "BASELINE_UNAVAILABLE",
+      "sent": false,
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": true,
+      "text": "목적지를 설정하지 않았습니다 [BASELINE_UNAVAILABLE, android].\n요청 전 현재 목적지를 확인하지 못했습니다.\n순정 내비는 바뀌지 않았습니다. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "BASELINE_UNAVAILABLE",
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "sent": false
+      }
+    }
+  },
+  {
+    "id": "not_set_navi_not_connected",
+    "given": {
+      "kind": "notSet",
+      "code": "NAVI_NOT_CONNECTED",
+      "sent": false,
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": true,
+      "text": "목적지를 설정하지 않았습니다 [NAVI_NOT_CONNECTED, android].\n차량 앱이 아직 내비 서비스에 연결되지 않았거나 연결에 실패했습니다.\n순정 내비는 바뀌지 않았습니다. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "NAVI_NOT_CONNECTED",
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "sent": false
+      }
+    }
+  },
+  {
+    "id": "not_set_app_not_ready",
+    "given": {
+      "kind": "notSet",
+      "code": "APP_NOT_READY",
+      "sent": false,
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": true,
+      "text": "목적지를 설정하지 않았습니다 [APP_NOT_READY, android].\n순정 내비는 바뀌지 않았습니다. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "APP_NOT_READY",
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "sent": false
+      }
+    }
+  },
+  {
+    "id": "not_set_connection_stopped_before_request",
+    "given": {
+      "kind": "notSet",
+      "code": "CONNECTION_STOPPED",
+      "sent": false,
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": true,
+      "text": "목적지를 설정하지 않았습니다 [CONNECTION_STOPPED, android].\n순정 내비는 바뀌지 않았습니다. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "CONNECTION_STOPPED",
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "sent": false
+      }
+    }
+  },
+  {
+    "id": "not_set_permission_denied",
+    "given": {
+      "kind": "notSet",
+      "code": "PERMISSION_DENIED",
+      "sent": false,
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": true,
+      "text": "목적지를 설정하지 않았습니다 [PERMISSION_DENIED, android].\n순정 내비는 바뀌지 않았습니다. 자동 재시도하지 않았으며, 필요하면 사용자가 새로 요청할 수 있습니다.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "PERMISSION_DENIED",
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "sent": false
+      }
+    }
+  },
+  {
+    "id": "outcome_unknown",
+    "given": {
+      "kind": "notSet",
+      "code": "OUTCOME_UNKNOWN",
+      "sent": true,
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": true,
+      "text": "목적지 설정 결과를 확인하지 못했습니다 [OUTCOME_UNKNOWN, android].\n요청은 순정 내비에 보냈지만 반영을 확인하지 못했습니다. 성공이나 실패로 단정하지 마세요.\n자동으로 다시 실행하지 않았습니다. 다시 호출하지 말고 get_navigation_destination으로 현재 목적지를 확인하세요.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "OUTCOME_UNKNOWN",
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "sent": true
+      }
+    }
+  },
+  {
+    "id": "connection_stopped_after_request",
+    "given": {
+      "kind": "notSet",
+      "code": "CONNECTION_STOPPED",
+      "sent": true,
+      "requestId": "00000000-0000-4000-8000-000000000021"
+    },
+    "expect": {
+      "isError": true,
+      "text": "목적지 설정 결과를 확인하지 못했습니다 [CONNECTION_STOPPED, android].\n요청은 순정 내비에 보냈지만 반영을 확인하지 못했습니다. 성공이나 실패로 단정하지 마세요.\n자동으로 다시 실행하지 않았습니다. 다시 호출하지 말고 get_navigation_destination으로 현재 목적지를 확인하세요.",
+      "structuredContent": {
+        "ok": false,
+        "origin": "android",
+        "code": "CONNECTION_STOPPED",
+        "requestId": "00000000-0000-4000-8000-000000000021",
+        "sent": true
+      }
+    }
+  }
+]

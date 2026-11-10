@@ -18,7 +18,7 @@ data class Place(
     val poiSubId: String,
 )
 
-/** Names are provisional until the destination tool contract is agreed (COM-21). */
+/** The `status` of `find_navigation_place`. */
 enum class PlaceMatchStatus {
     NO_MATCH,
     SINGLE,

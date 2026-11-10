@@ -1,0 +1,83 @@
+[
+  {
+    "id": "no_destination_then_applied",
+    "evidence": "mock",
+    "note": "COM-36 S1의 순서를 본뜬 사례. 요청 뒤 빈 응답이 이어지다 약 7초에 일치한다",
+    "place": "pangyo_station",
+    "baseline": { "name": "", "latitude": 0.0, "longitude": 0.0 },
+    "observations": [
+      { "atMs": 2000, "name": "", "latitude": 0.0, "longitude": 0.0 },
+      { "atMs": 4000, "name": "", "latitude": 0.0, "longitude": 0.0 },
+      { "atMs": 7000, "name": "판교역", "latitude": 37.39479166, "longitude": 127.11256944 }
+    ],
+    "expect": { "outcome": "APPLIED", "routeRequests": 1 }
+  },
+  {
+    "id": "replace_through_empty_destination",
+    "evidence": "mock",
+    "note": "COM-36 S2: 교체 중 약 5초는 빈 목적지다. 빈 응답과 이전 목적지를 실패로 보지 않는다",
+    "place": "coex",
+    "baseline": { "name": "판교역", "latitude": 37.39479166, "longitude": 127.11256944 },
+    "observations": [
+      { "atMs": 1000, "name": "판교역", "latitude": 37.39479166, "longitude": 127.11256944 },
+      { "atMs": 3000, "name": "", "latitude": 0.0, "longitude": 0.0 },
+      { "atMs": 5000, "name": "", "latitude": 0.0, "longitude": 0.0 },
+      { "atMs": 7000, "name": "코엑스", "latitude": 37.51027777, "longitude": 127.06156388 }
+    ],
+    "expect": { "outcome": "APPLIED", "routeRequests": 1 }
+  },
+  {
+    "id": "half_metre_off_is_a_match",
+    "evidence": "mock",
+    "note": "COM-36 S3에서 0.51m 다른 좌표가 돌아왔다. 허용 오차 안이면 일치다. 이름은 판정에 쓰지 않는다",
+    "place": "seoul_station",
+    "baseline": { "name": "", "latitude": 0.0, "longitude": 0.0 },
+    "observations": [
+      { "atMs": 7000, "name": "서울역 KTX", "latitude": 37.5548962, "longitude": 126.96985833 }
+    ],
+    "expect": { "outcome": "APPLIED", "routeRequests": 1 }
+  },
+  {
+    "id": "thirteen_metres_off_is_not_a_match",
+    "evidence": "mock",
+    "note": "이름이 같아도 좌표가 허용 오차 밖이면 일치가 아니다. 제한 시간까지 일치가 없으면 결과 불명이다",
+    "place": "seoul_station",
+    "baseline": { "name": "", "latitude": 0.0, "longitude": 0.0 },
+    "observations": [
+      { "atMs": 7000, "name": "서울역", "latitude": 37.55500866, "longitude": 126.96985833 }
+    ],
+    "expect": { "outcome": "NOT_DONE", "code": "OUTCOME_UNKNOWN", "sent": true, "routeRequests": 1 }
+  },
+  {
+    "id": "no_answer_until_the_limit",
+    "evidence": "mock",
+    "note": "무응답만으로 실패가 아니다. 결과 불명이며 다시 요청하지 않는다",
+    "place": "pangyo_station",
+    "baseline": { "name": "", "latitude": 0.0, "longitude": 0.0 },
+    "observations": [],
+    "expect": { "outcome": "NOT_DONE", "code": "OUTCOME_UNKNOWN", "sent": true, "routeRequests": 1 }
+  },
+  {
+    "id": "already_the_destination",
+    "evidence": "mock",
+    "note": "요청 전부터 같은 장소면 일치가 반영의 증거가 아니다. SDK를 부르지 않는다",
+    "place": "coex",
+    "baseline": { "name": "코엑스", "latitude": 37.51027777, "longitude": 127.06156388 },
+    "observations": [],
+    "expect": { "outcome": "ALREADY_SET", "routeRequests": 0 }
+  },
+  {
+    "id": "baseline_read_timed_out",
+    "evidence": "mock",
+    "note": "요청 전 목적지를 모르면 설정하지 않는다",
+    "place": "coex",
+    "baseline": { "failure": "TIMEOUT" },
+    "observations": [],
+    "expect": {
+      "outcome": "NOT_DONE",
+      "code": "BASELINE_UNAVAILABLE",
+      "sent": false,
+      "routeRequests": 0
+    }
+  }
+]

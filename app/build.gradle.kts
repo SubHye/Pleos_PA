@@ -12,10 +12,18 @@ abstract class CatalogAsset : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val navigationCatalog: RegularFileProperty
 
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val navigationPlaces: RegularFileProperty
+
     @get:OutputDirectory abstract val outputDir: DirectoryProperty
 
     @TaskAction
     fun copy() {
+        navigationPlaces
+            .get()
+            .asFile
+            .copyTo(outputDir.file("navigation-places.json").get().asFile, overwrite = true)
         catalog.get().asFile.copyTo(outputDir.file("catalog.json").get().asFile, overwrite = true)
         navigationCatalog
             .get()
@@ -29,6 +37,9 @@ val catalogAsset =
         catalog.set(rootProject.layout.projectDirectory.file("contracts/vehicle-read/catalog.json"))
         navigationCatalog.set(
             rootProject.layout.projectDirectory.file("contracts/navigation/catalog.json")
+        )
+        navigationPlaces.set(
+            rootProject.layout.projectDirectory.file("contracts/navigation/places.json")
         )
     }
 

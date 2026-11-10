@@ -13,8 +13,10 @@
     <uses-permission android:name="pleos.car.permission.CAR_SAFETY" />
     <uses-permission android:name="pleos.car.permission.CAR_SEATS" />
     <uses-permission android:name="pleos.car.permission.CAR_WINDOWS" />
-    <!-- Navigation reads only (get*Info). NAVI_ROUTE_SEARCH, which changes the route, is not requested. -->
+    <!-- Navigation read: the current destination (getDestinationInfo). -->
     <uses-permission android:name="pleos.car.permission.NAVI_ROUTE" />
+    <!-- Navigation change: requestRoute to a place of the fixed list only (set_navigation_destination). -->
+    <uses-permission android:name="pleos.car.permission.NAVI_ROUTE_SEARCH" />
     <!-- Loopback-only bridge socket for the local MCP connection. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Keeps the bridge alive while the screen is closed. -->
@@ -46,7 +48,7 @@
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Read-only loopback (127.0.0.1) MCP endpoint that answers local vehicle status and current navigation destination reads while the app screen is closed; user-stoppable from the notification and the screen." />
+                android:value="Loopback (127.0.0.1) MCP endpoint that answers local vehicle status and current navigation destination reads, and sets the navigation destination to a place of a fixed list on request, while the app screen is closed; user-stoppable from the notification and the screen." />
         </service>
     </application>
 

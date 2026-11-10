@@ -1,6 +1,6 @@
-# 내비 조회 계약
+# 내비 계약
 
-상태: **제안** (COM-24 PR에서 상대 개발자 합의 필요).
+상태: **제안**. 조회는 COM-24 PR, [목적지 설정](#목적지-설정)은 COM-21 PR에서 상대 개발자 합의가 필요하다.
 
 이 문서는 규칙만 적는다. 도구·한도 값은 [catalog.json](catalog.json), 고정 장소는 [places.json](places.json), 판정 사례는 [fixtures/](fixtures/)가 기준이다. 앱의 JVM 테스트가 이 파일들을 읽는다.
 
@@ -16,8 +16,9 @@
 
 ## 범위
 
-- 대상은 NaviHelper 3.0.5의 `getDestinationInfo()` → `onDestinationInfo(DestinationInfo)` 한 가지다. 권한은 `pleos.car.permission.NAVI_ROUTE`만 쓴다.
-- 경로 변경(`requestRoute` 등, `NAVI_ROUTE_SEARCH`), 지정 지점 Trip(`requestTrip`), 그 밖의 `get*Info`는 대상이 아니다. 변경 작업의 규칙은 COM-11이 정한다. 목적지 설정 도구 계약은 COM-21에서 정하며, 그 도구가 쓸 [고정 장소 목록](#고정-장소-목록)만 이 문서에 둔다.
+- 조회 대상은 NaviHelper 3.0.5의 `getDestinationInfo()` → `onDestinationInfo(DestinationInfo)` 한 가지다. 권한은 `pleos.car.permission.NAVI_ROUTE`다.
+- 변경 대상은 `requestRoute(RouteInfo)` 한 가지이며 [고정 장소 목록](#고정-장소-목록)의 장소만 보낸다([목적지 설정](#목적지-설정)). 권한은 `NAVI_ROUTE_SEARCH`다. 호출 코드가 앱에 있으므로 도구가 `rejected`가 아닌 한 Manifest에 선언한다(lint가 요구). 도구 공개 여부는 `adoption`이 따로 정한다.
+- 안내 취소(`cancelRoute`), 경유지, 경로 옵션, 재탐색, 지정 지점 Trip(`requestTrip`), 그 밖의 `get*Info`는 대상이 아니다. 변경 작업의 공통 규칙은 COM-11이 정한다.
 - 목적지 좌표는 앱 안에서 목적지 없음 판정에만 쓰고 결과로 보내지 않는다(NFR-05). 장소 일치 판단에 필요한 정보는 COM-4에서 정한다.
 - [ADR-0008](../../docs/decisions/0008-embedded-mcp-server.md)대로 MCP 서버에는 인증이 없다. 연결이 켜져 있는 동안 기기의 다른 앱도 이 도구로 현재 목적지 이름·주소와 남은 시간을 읽을 수 있다.
 
@@ -31,7 +32,7 @@
 | 상황 | 규칙 |
 | --- | --- |
 | 서비스 연결 | 연결 시작 때 `initialize(onConnected, onFailed)`를 부른다. `onConnected` 전과 `onFailed` 뒤의 조회는 SDK를 부르지 않고 `NAVI_NOT_CONNECTED`. 다시 연결하지 않는다. 연결 콜백 수신은 `sdk_emulator`(34ms) |
-| 동시 요청 | 내비 조회가 진행 중이면 `BUSY`. 차량 조회와 COM-11 변경 작업은 막지 않는다. 변경 작업 중에 읽은 값은 변경 전 목적지일 수 있다 |
+| 동시 요청 | 내비 조회가 진행 중이면 `BUSY`. 차량 조회와 목적지 설정 작업은 막지 않는다. 설정 작업 중에 읽은 값은 변경 전 목적지이거나 목적지 없음일 수 있다(교체 중 약 5초, COM-36 `sdk_emulator`). 설정 작업의 확인용 재조회 응답이 이 조회의 답이 될 수 있으며, 그 값도 그 시점의 현재 목적지다 |
 | timeout | `deadlineMs` 안에 콜백이 없으면 `TIMEOUT`. MCP 서버는 1초를 더 기다린 뒤 같은 코드로 끝낸다 |
 | 재시도 | 어느 계층도 자동 재시도하지 않는다 |
 | 늦은 응답 | 아래 절 |
@@ -124,13 +125,105 @@
 - `source`가 `simulation`이면 실제 값이 아니라고 알린다.
 - 목적지 값은 결과에만 들어가며 앱 로그에는 `requestId`, 상태 코드, 경과 시간만 남긴다.
 
+## 목적지 설정
+
+상태: **제안** (COM-21). 두 도구로 나눈다(COM-21 결정 기록, 방식 C). 둘 다 차량 앱 MCP 서버의 도구이며 Pleos SDK API가 아니다. 한도 값은 [catalog.json](catalog.json)의 `limits`다.
+
+| 도구 | 입력 | 하는 일 |
+| --- | --- | --- |
+| `find_navigation_place` | `query`(문자열, 필수) | [고정 장소 목록](#고정-장소-목록)에서 후보를 찾는다. SDK를 부르지 않고 내비를 바꾸지 않는다 |
+| `set_navigation_destination` | `candidateId`(문자열, 필수) | 후보 ID의 목록 값으로 `requestRoute`를 부르고, 재조회로 반영을 확인한 뒤 답한다 |
+
+두 도구는 함께 채택한다. 스키마 밖의 키, 빠진 값, 문자열이 아닌 값은 `Input validation error:`로 답하고 SDK를 부르지 않는다(FR-CON-02). 목록 사례는 [fixtures/tool-list.json](fixtures/tool-list.json), 결과 사례는 [fixtures/destination-tool-results.json](fixtures/destination-tool-results.json)이다.
+
+**힌트**: `find_navigation_place`는 조회 도구와 같다. `set_navigation_destination`은 `readOnlyHint: false`, `destructiveHint: true`(기존 안내를 대체), `idempotentHint: false`, `openWorldHint: false`다.
+
+### 사용자 재확인 없음
+
+사용자의 명시적 내비 요청은 실행 의사로 본다(요구사항 정의서 v1.5, FR-NAV-05 삭제). 도구는 별도 승인을 요구하지 않고 아래 실행 조건만 검사한다. 사용자가 목적지 변경을 요청했을 때만 부르라고 도구 설명에 적는다. [ADR-0008](../../docs/decisions/0008-embedded-mcp-server.md)대로 MCP 서버에는 인증이 없으므로, 연결이 켜져 있는 동안 기기의 다른 앱도 이 도구로 목록 안의 장소를 목적지로 설정할 수 있다.
+
+### 생명주기
+
+하나의 호출은 COM-11의 변경 작업 하나이고, 그 작업의 동작은 목적지 설정 하나다. `requestId`(UUID)는 MCP 서버가 만든다.
+
+1. `candidateId`를 목록에서 찾는다. 없으면 `UNKNOWN_CANDIDATE`로 끝낸다.
+2. 작업을 접수한다. 변경 작업이 진행 중이면 `BUSY`, 중지됐으면 `CONNECTION_STOPPED`다. 큐는 없다.
+3. 실행 조건을 순서대로 검사한다. 하나라도 걸리면 `requestRoute`를 부르지 않고 차단으로 끝낸다. 조건이 풀려도 자동으로 실행하지 않는다.
+4. `requestRoute`를 한 번 부른다. `RouteInfo`는 [고정 장소 목록](#고정-장소-목록)의 구성 표를 따른다.
+5. `confirmPollMs`마다 `getDestinationInfo()`를 보내고, 그동안 받은 모든 `onDestinationInfo`를 판정한다.
+6. 좌표가 일치하는 응답이 하나 오면 `APPLIED`, `confirmTimeoutMs` 안에 없으면 `OUTCOME_UNKNOWN`으로 끝낸다.
+
+어느 계층도 자동으로 다시 실행하지 않는다.
+
+**실행 조건**
+
+| 순서 | 조건 | 걸리면 |
+| --- | --- | --- |
+| 1 | 연결이 중지되지 않았다 | `CONNECTION_STOPPED` |
+| 2 | Pleos 에뮬레이터다 | `APP_NOT_READY` |
+| 3 | 내비 서비스에 연결됐다 | `NAVI_NOT_CONNECTED` |
+| 4 | 주행 규제 | **검사하지 않는다.** 아래 한계 |
+| 5 | 요청 전 목적지를 읽었다(`baselineDeadlineMs`, 조회 슬롯 사용) | `BASELINE_UNAVAILABLE`. 다른 조회가 진행 중일 때(`BUSY`)도 같다 |
+| 6 | 요청 전 목적지가 요청한 장소가 아니다 | `ALREADY_SET`. 오류가 아니며 바꾼 것이 없다 |
+
+### 반영 판정
+
+근거는 COM-36(`sdk_emulator`)이다. 이 순정 내비는 `onRoutingCompleted`·`onDestinationChanged`를 보내지 않고 `isRouting`은 안내 중에도 `false`다. `requestRoute`의 반환과 `onRouteStarted`는 요청한 지점인지를 증명하지 못한다. 그래서 재조회 좌표만 쓴다.
+
+- **일치**: 응답의 위도·경도가 각각 목록 값과 `matchToleranceDegrees` 안에 있다. 이름·주소는 쓰지 않는다. 순정 내비가 이름을 바꾸고 주소를 동 단위로 답하기 때문이다.
+- **반영됨**은 "요청 전 목적지는 이 장소가 아니었고, 요청 뒤 응답 하나가 이 장소다"이다. 그래서 요청 전 조회가 조건이다.
+- 빈 목적지, 다른 장소, 무응답은 어느 것도 실패의 근거가 아니다. 교체 중에는 약 5초 동안 빈 목적지가 온다. 제한 시간까지 일치가 없으면 **결과 불명**이며 실패로 단정하지 않는다.
+- 콜백에는 요청 식별자가 없고 다른 앱의 조회 응답도 온다. 응답은 그 시점의 현재 목적지를 담으므로, 누가 조회했든 일치 응답은 근거로 쓴다.
+- **잔여 위험:** 같은 시간에 다른 앱이나 사용자가 같은 장소를 설정하면 구분하지 못한다. 확인한 것은 목적지 좌표이며 안내가 계속되는지는 확인하지 않는다.
+
+판정 사례는 [fixtures/set-destination-cases.json](fixtures/set-destination-cases.json)이다. 사례의 근거 표시는 모두 `mock`이며 COM-36 관찰 순서를 본뜬 것이다.
+
+### 응답
+
+**`structuredContent`**
+
+| 결과 | 내용 |
+| --- | --- |
+| 장소 찾기 | `{ok:true, requestId, status, candidates}`. `status`는 `NO_MATCH`·`SINGLE`·`MULTIPLE`, `candidates`는 `{candidateId, name, address}`의 목록 순서 배열 |
+| 설정 확인됨 | `{ok:true, requestId, source, sdkVersion, status, destination, elapsedMs}`. `status`는 `APPLIED`·`ALREADY_SET`, `destination`은 `{candidateId, name, address}`(목록 값) |
+| 확인되지 않음 | `{ok:false, origin:"android", code, requestId, sent}` |
+
+- 좌표는 어느 결과에도 넣지 않는다(NFR-05).
+- `sent: false`는 `requestRoute`를 부르지 않았다는 뜻이다. 순정 내비는 그대로다.
+- `sent: true`는 요청을 SDK에 넘겼고 효과를 모른다는 뜻이다. 성공도 실패도 아니며, 취소나 복원을 뜻하지 않는다(FR-CON-04, FR-NAV-06). 글은 다시 호출하지 말고 `get_navigation_destination`으로 확인하라고 알린다.
+- `elapsedMs`는 도구가 요청을 받은 때부터 답할 때까지다.
+
+**설정 코드**
+
+| 코드 | `sent` | 뜻 |
+| --- | --- | --- |
+| `UNKNOWN_CANDIDATE` | false | 목록에 없는 후보 ID |
+| `BUSY` | false | 다른 변경 작업이 진행 중. 그 작업은 계속된다 |
+| `CONNECTION_STOPPED` | false | 접수 전 또는 조건 검사 중 중지 |
+| `APP_NOT_READY`, `NAVI_NOT_CONNECTED` | false | 조회와 같은 뜻 |
+| `BASELINE_UNAVAILABLE` | false | 요청 전 목적지를 읽지 못함 |
+| `PERMISSION_DENIED` | false | `requestRoute`가 `SecurityException`(원인 체인 포함) |
+| `OUTCOME_UNKNOWN` | true | 제한 시간 안에 일치 없음, 또는 `requestRoute`의 그 밖의 예외, 또는 응답 유실 |
+| `CONNECTION_STOPPED` | true | 요청을 넘긴 뒤 중지 |
+
+**중지**: 연결 중지는 변경 작업을 먼저 닫는다. 그 뒤로는 재조회도 보내지 않는다.
+
+**로그**: 앱은 `requestId`, 도구 라벨, 상태 코드, 작업 상태(접수·검사 중·실행 중·성공·실패·차단), 경과 시간만 남긴다. 질의 원문, 후보 ID, 장소 이름·주소, 좌표는 남기지 않는다(NFR-05, FR-DAT-05).
+
+### 한계
+
+- **주행 규제를 검사하지 않는다.** 규제가 켜져 있어도 목적지가 설정된다. FR-UI-04의 실행 차단은 미충족이며 AT-11은 수행하지 않았다. 검사를 끼울 자리(`DestinationSetter`의 `restriction`)만 있고, 규제 상태를 읽는 코드가 병합되면 연결한다.
+- 확인에는 관찰상 6.5~7.0초가 걸린다(COM-36). 종단간 5초 목표(요구사항 6.2)는 이 도구에서 미달일 수 있으며 측정값으로 기록한다.
+- 결과를 차량 화면이나 음성으로 알리지 않는다. 되돌리기는 없다(COM-44).
+- 실제 SDK로 재현하지 못한 경우는 JVM 테스트의 SDK 대역으로만 확인했다.
+
 ## 고정 장소 목록
 
-상태: **제안** (COM-52). 두 개발자 합의(2026-11-09)대로 1차 목적지는 에뮬레이터에서 검증한 [places.json](places.json)의 장소만 쓴다. 이 절은 목록과 대조 규칙만 정한다. 도구 등록·이름·입출력은 COM-21에서 정한다. 장소 검색 API로 바꾸는 일은 COM-53이다.
+상태: **제안** (COM-52). 두 개발자 합의(2026-11-09)대로 1차 목적지는 에뮬레이터에서 검증한 [places.json](places.json)의 장소만 쓴다. 이 절은 목록과 대조 규칙을 정한다. 도구는 [목적지 설정](#목적지-설정)이 정한다. 장소 검색 API로 바꾸는 일은 COM-53이다.
 
 **규칙**
 
-- **목록에 없는 장소는 목적지로 설정하지 않는다.** 대조 결과가 없음이면 SDK를 부르지 않고, 목록 전체를 대신 돌려주지 않는다(FR-APT-01, AT-06). COM-21의 도구 설명에도 같은 문장을 쓴다.
+- **목록에 없는 장소는 목적지로 설정하지 않는다.** 대조 결과가 없음이면 SDK를 부르지 않고, 목록 전체를 대신 돌려주지 않는다(FR-APT-01, AT-06). 두 도구의 설명에도 같은 문장을 쓴다.
 - AI는 좌표를 만들거나 옮기지 않는다. 장소 값은 차량 앱이 목록에서 꺼낸다.
 - 목록에는 검증된 장소만 둔다. 각 항목은 `evidence.status`가 `sdk_emulator`이고 실행 기록이 2회 이상이며 모두 `PASS`다. JVM 테스트(`PlaceCatalogTest`)가 이를 강제한다.
 
@@ -138,7 +231,7 @@
 
 | 필드 | 뜻 |
 | --- | --- |
-| `key` | 후보 ID. 1차의 `set_destination` 입력이다(임시 이름) |
+| `key` | 후보 ID. `set_navigation_destination`의 `candidateId`다 |
 | `displayName`, `aliases` | 대조 대상. 영문·한글 표기를 별칭으로 둔다 |
 | `address` | 순정 내비 장소 상세 화면의 도로명 주소. `RouteInfo.address`로 보낸다 |
 | `latitude`, `longitude` | 순정 내비 `getDestinationInfo()`가 준 좌표(`coordinateSource: navi_capture`) |
@@ -162,7 +255,7 @@
 1. 질의와 표시명·별칭에서 모든 공백을 지우고 소문자로 바꾼다(`Locale.ROOT`).
 2. 정규화한 질의가 비면 없음이다.
 3. 질의가 표시명·별칭을 포함하거나 표시명·별칭이 질의를 포함하면 후보다. 유사도 검색은 하지 않는다.
-4. 후보 수에 따라 `NO_MATCH`, `SINGLE`, `MULTIPLE`이다(임시 이름). 후보는 목록 순서다.
+4. 후보 수에 따라 `NO_MATCH`, `SINGLE`, `MULTIPLE`이다. 후보는 목록 순서다.
 5. AI는 한 개면 설정하고, 여러 개면 사용자에게 묻고, 없음이면 설정하지 않고 알린다. 일정 문자열의 층·회의실 같은 군더더기는 AI가 덜어 장소 부분만 질의한다.
 6. 질의는 일정에서 나온 값일 수 있으므로 앱 로그·호출 기록에 원문을 남기지 않는다(NFR-05).
 

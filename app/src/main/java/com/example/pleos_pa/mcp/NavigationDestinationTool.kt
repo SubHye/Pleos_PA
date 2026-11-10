@@ -7,6 +7,7 @@ import com.example.pleos_pa.contract.NavigationToolEntry
 import com.example.pleos_pa.navigation.DestinationRead
 import com.example.pleos_pa.navigation.DestinationReader
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
+import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import java.util.UUID
 import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -23,14 +24,23 @@ class NavigationDestinationTool(
     private val source: String?,
     private val events: BridgeEvents,
     private val clock: () -> Long,
-) {
+) : NavigationTool {
     /** Only adopted tools are offered. */
-    val entry: NavigationToolEntry? =
+    override val entry: NavigationToolEntry? =
         catalog.tool(NAME)?.takeIf { it.adoption == "adopted" && it.sdkCall == SDK_CALL }
+
+    override val inputSchema =
+        ToolSchema(
+            schema = StringArgument.JSON_SCHEMA_2020_12,
+            properties = JsonObject(emptyMap()),
+        )
 
     /** The tool takes no arguments; any key is refused before the SDK is asked. */
     fun refusal(arguments: JsonObject?): String? =
         arguments?.keys?.firstOrNull()?.let { "Unrecognized key: \"$it\"" }
+
+    override suspend fun call(tool: NavigationToolEntry, arguments: JsonObject?): CallToolResult =
+        refusal(arguments)?.let { NavigationToolResult.invalidInput(tool, it) } ?: call(tool)
 
     suspend fun call(tool: NavigationToolEntry): CallToolResult {
         val requestId = UUID.randomUUID().toString()
