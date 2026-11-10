@@ -1,9 +1,9 @@
 workspace "Pleos_PA" "Current app, first-phase target and separately identified reference implementation; only what the current system describes has been migrated." {
     model {
-        current = softwareSystem "Pleos_PA - current" "Android connection app whose embedded MCP server offers the adopted vehicle read tools over the Vehicle SDK (ADR-0008)." {
+        current = softwareSystem "Pleos_PA - current" "Android connection app whose embedded MCP server offers the adopted vehicle read tools over the Vehicle SDK and the adopted navigation tools over NaviHelper (ADR-0008)." {
             scaffold = container "Android app" "Connection control screen, Foreground Service, MCP server on loopback 127.0.0.1:18766/mcp (no authentication), read gateway and a Vehicle SDK boundary covering the catalog." "Kotlin / MCP Kotlin SDK / Ktor CIO / Vehicle SDK 2.3.2"
             sweep = container "vehicle-sweep" "Test support on the development PC: calls every offered tool and compares Virtual Console values to build catalog verification evidence." "Kotlin / JVM"
-            placeCheck = container "nav-place-check" "Test support APK, not part of the app: started from adb, sets each fixed place as the destination and reads it back to build place list evidence. Only it holds NAVI_ROUTE_SEARCH." "Kotlin / NaviHelper 3.0.5"
+            placeCheck = container "nav-place-check" "Test support APK, not part of the app: started from adb, sets each fixed place as the destination and reads it back to build place list evidence. The only component that calls cancelRoute." "Kotlin / NaviHelper 3.0.5"
         }
         client = softwareSystem "Local MCP-capable client" "Reference execution environment; exact AI product integration must be revalidated."
         vehicle = softwareSystem "Pleos Emulator Vehicle Service" "Reference SDK backend; not a live vehicle."
@@ -13,10 +13,10 @@ workspace "Pleos_PA" "Current app, first-phase target and separately identified 
             android = container "Reference Android app" "Foreground Service owns Bridge and Vehicle SDK adapter." "Kotlin / Vehicle SDK 2.3.2"
         }
         client -> mcp "Calls read tools" "MCP / stdio"
-        client -> scaffold "Calls read tools; verified with Codex CLI, other clients unverified" "MCP Streamable HTTP via adb forward tcp:18766"
+        client -> scaffold "Calls read tools (verified with Codex CLI, other clients unverified) and the destination tools (verified by direct MCP calls only, no AI client)" "MCP Streamable HTTP via adb forward tcp:18766"
         sweep -> scaffold "Calls every offered tool" "MCP Streamable HTTP via adb forward tcp:18766"
         scaffold -> vehicle "Queries catalog vehicle properties" "Vehicle SDK"
-        scaffold -> navi "Reads the current destination" "NaviHelper getDestinationInfo"
+        scaffold -> navi "Reads the current destination; sets a place of the fixed list as the destination and confirms it by reading back. No driving-restriction check yet" "NaviHelper getDestinationInfo, requestRoute"
         placeCheck -> navi "Sets each listed place, reads it back and cancels; each run approved" "NaviHelper requestRoute, getDestinationInfo, cancelRoute"
         mcp -> android "Reads via PC loopback and ADB forward" "HTTP POST /v2/vehicle-read :18765"
         android -> vehicle "Queries supported vehicle properties" "Vehicle SDK"

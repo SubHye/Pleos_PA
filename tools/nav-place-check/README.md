@@ -2,7 +2,7 @@
 
 Pleos 에뮬레이터에서 [고정 장소 목록](../../contracts/navigation/places.json)의 각 장소를 순정 내비 목적지로 설정하고 다시 읽어, 목록 값이 그대로 반영되는지 확인한다. 테스트 지원 도구이며 제품 앱에 들어가지 않는다.
 
-- 목적지를 바꾸는 권한(`NAVI_ROUTE_SEARCH`)은 이 도구에만 있다. 제품 앱은 `NAVI_ROUTE`(조회)만 쓴다.
+- 이 도구는 목록의 장소를 직접 설정하고 취소한다(`NAVI_ROUTE_SEARCH`). 제품 앱도 같은 권한으로 `set_navigation_destination`을 제공하지만 `cancelRoute`는 부르지 않으므로, 안내 취소에는 이 도구의 `cancel`을 쓴다.
 - 빌드할 때 `places.json`을 APK에 넣는다. 장소를 추가하면 다시 빌드하고 설치한다.
 - `CheckActivity`는 `android.permission.DUMP`를 가진 호출자(adb shell)만 실행할 수 있다.
 

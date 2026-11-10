@@ -27,7 +27,7 @@
       "kind": "read",
       "sdkCall": null,
       "permission": null,
-      "adoption": "undecided",
+      "adoption": "adopted",
       "adoptionNote": null
     },
     {
@@ -37,7 +37,7 @@
       "kind": "change",
       "sdkCall": "requestRoute",
       "permission": "NAVI_ROUTE_SEARCH",
-      "adoption": "undecided",
+      "adoption": "adopted",
       "adoptionNote": null
     }
   ]
