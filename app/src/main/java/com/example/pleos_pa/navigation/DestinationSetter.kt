@@ -93,6 +93,11 @@ class DestinationSetter(
         }
         // Without the destination before the request, a match afterwards would prove nothing.
         reader.read(baselineMillis) { read ->
+            // close() shuts admission synchronously; this reply may precede coordinator.close().
+            if (admissionClosed) {
+                done(CONNECTION_STOPPED)
+                return@read
+            }
             done(
                 when (read) {
                     is DestinationRead.Failed ->

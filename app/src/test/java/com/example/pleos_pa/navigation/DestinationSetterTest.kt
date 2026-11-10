@@ -293,6 +293,32 @@ class DestinationSetterTest {
     }
 
     @Test
+    fun aQueuedBaselineReplyCannotStartARouteAfterStop() {
+        val (reader, setter) = connected()
+        setter.request("coex")
+        sdk.answer(FakeNaviSdk.OTHER)
+        setter.close()
+        reader.closeAdmission()
+        scheduler.runAll()
+
+        assertEquals(
+            listOf<SetDestination>(
+                SetDestination.NotDone(
+                    DestinationSetter.CONNECTION_STOPPED,
+                    sent = false,
+                )
+            ),
+            outcomes,
+        )
+        assertEquals(NavTaskState.BLOCKED, states.last())
+        assertTrue(NavTaskState.EXECUTING !in states)
+        assertEquals(0, sdk.routes.size)
+        scheduler.advance(catalog.confirmTimeoutMs)
+        assertEquals(1, outcomes.size)
+        assertEquals(0, sdk.routes.size)
+    }
+
+    @Test
     fun aStopAfterTheRequestIsUnconfirmedAndNotACancellation() {
         val (reader, setter) = connected()
         setter.request("coex")
