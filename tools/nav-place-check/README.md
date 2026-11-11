@@ -4,7 +4,7 @@ Pleos 에뮬레이터에서 [고정 장소 목록](../../contracts/navigation/pl
 
 - 이 도구는 목록의 장소를 직접 설정하고 취소한다(`NAVI_ROUTE_SEARCH`). 제품 앱도 같은 권한으로 `set_navigation_destination`을 제공하지만 `cancelRoute`는 부르지 않으므로, 안내 취소에는 이 도구의 `cancel`을 쓴다.
 - 빌드할 때 `places.json`을 APK에 넣는다. 장소를 추가하면 다시 빌드하고 설치한다.
-- `CheckActivity`는 `android.permission.DUMP`를 가진 호출자(adb shell)만 실행할 수 있다.
+- `CheckActivity`와 `WaypointActivity`는 `android.permission.DUMP`를 가진 호출자(adb shell)만 실행할 수 있다.
 
 ## 안전
 
@@ -32,6 +32,28 @@ adb -s <serial> logcat -d -s PlaceCheck:I
 - 한 번 실행하면 한 동작만 하고 화면을 닫는다. 실행 중에 또 시작하면 `BUSY`로 끝낸다. 자동 재시도는 없다.
 - 결과는 `PlaceCheck` 태그의 한 줄 JSON이다. 예외는 종류만 남긴다.
 - `RouteInfo`는 [내비 계약](../../contracts/navigation/CONTRACT.md#고정-장소-목록)의 구성 규칙을 따른다.
+
+## 경유지 조사 (`WaypointActivity`)
+
+COM-47의 경유지 SDK 조사에 쓴 도구다. `CheckActivity`와 같은 모듈·권한·안전 규칙을 따르며, 제품 앱의 경유지 도구(COM-41)와 별개다. 여기서 얻은 관찰은 조사 근거이고 제품 앱의 검증 결과로 옮기지 않는다.
+
+```powershell
+adb -s <serial> shell am start --user 10 -W -n com.example.pleos_pa.placecheck/.WaypointActivity --es mode <mode> [옵션]
+adb -s <serial> logcat -d -s WaypointCheck:I
+```
+
+| `mode` | 옵션 | 하는 일 |
+| --- | --- | --- |
+| `get` | | `getWaypointInfo()`와 `getDestinationInfo()`만 부른다. 내비를 바꾸지 않는다 |
+| `add` | `--es place <key> --es index FIRST\|SECOND\|ALL` | 조회 → `addWaypoint` → 대기 → 재조회 |
+| `remove` | `--es index FIRST\|SECOND\|ALL` | 조회 → `removeWaypoint` → 대기 → 재조회 |
+| `via` | `--es dest <key> [--es wps "<key>:<INDEX>,..."]` | 조회 → `requestRouteWithWaypoints` → 대기 → 재조회. 경유지가 없으면 `wps`를 아예 빼라. 빈 문자열 인자는 adb shell에서 사라진다 |
+
+- `add`와 `via`는 `places.json`의 키만 받는다. 목록에 없는 장소는 보내지 않는다.
+- 대기 시간은 `--ei waitMs`(기본 8000)로 바꾼다. 한 번 실행하면 한 동작만 하고, 실행 중에 또 시작하면 `BUSY`로 끝낸다. 자동 재시도는 없다.
+- 결과는 `WaypointCheck` 태그의 한 줄 JSON이다. 호출 뒤에 도착한 `onWaypointChanged`·`onRouteCancelled` 등의 이벤트도 시각과 함께 남는다. 다시 읽은 경유지의 좌표는 0/0이고 `poiSubId`는 null이다.
+- `add`, `remove`, `via`는 내비 상태를 바꾼다. **실행할 때마다 사용자 승인을 먼저 받고**, 끝나면 `remove --es index ALL`과 `CheckActivity`의 `cancel`로 목적지와 경유지 없음 상태로 되돌린다.
+- 로그에는 좌표와 남은 거리·시간이 있으므로 위 `안전`의 로그 규칙을 그대로 적용한다.
 
 ## 새 장소 추가
 
