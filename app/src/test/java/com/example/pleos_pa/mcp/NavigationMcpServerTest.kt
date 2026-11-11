@@ -60,8 +60,6 @@ class NavigationMcpServerTest {
         object : BridgeEvents {
             override fun requestReceived() = Unit
 
-            override fun peerClosedDuringRead() = Unit
-
             override fun ownReplyRejected() = Unit
 
             override fun finished(

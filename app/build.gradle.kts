@@ -39,6 +39,7 @@ androidComponents {
 }
 
 android {
+    useLibrary("android.car", false)
     namespace = "com.example.pleos_pa"
     compileSdk {
         version = release(37)
@@ -52,9 +53,18 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["com5DiagnosticsEnabled"] = false
+        manifestPlaceholders["com5AppLabel"] = "@string/app_name"
     }
 
     buildTypes {
+        debug {
+            if (providers.gradleProperty("com5Diagnostic").orNull == "true") {
+                applicationIdSuffix = ".com5"
+                manifestPlaceholders["com5DiagnosticsEnabled"] = true
+                manifestPlaceholders["com5AppLabel"] = "@string/com22_app_name"
+            }
+        }
         release {
             optimization {
                 enable = true
@@ -91,4 +101,6 @@ dependencies {
     testImplementation(libs.ktor.client.cio)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.mcp.kotlin.sdk.client)
+    androidTestImplementation(libs.ktor.client.cio)
 }

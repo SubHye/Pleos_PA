@@ -1,7 +1,7 @@
 workspace "Pleos_PA" "Current app, first-phase target and separately identified reference implementation; only what the current system describes has been migrated." {
     model {
         current = softwareSystem "Pleos_PA - current" "Android connection app whose embedded MCP server offers the adopted vehicle read tools over the Vehicle SDK (ADR-0008)." {
-            scaffold = container "Android app" "Connection control screen, Foreground Service, MCP server on loopback 127.0.0.1:18766/mcp (no authentication), read gateway and a Vehicle SDK boundary covering the catalog." "Kotlin / MCP Kotlin SDK / Ktor CIO / Vehicle SDK 2.3.2"
+            scaffold = container "Android app" "Connection and bounded process-memory request history with display Car UX restrictions, Foreground Service, MCP server on loopback 127.0.0.1:18766/mcp (no authentication), read gateway and a Vehicle SDK boundary covering the catalog." "Kotlin / MCP Kotlin SDK / Ktor CIO / Vehicle SDK 2.3.2"
             sweep = container "vehicle-sweep" "Test support on the development PC: calls every offered tool and compares Virtual Console values to build catalog verification evidence." "Kotlin / JVM"
         }
         client = softwareSystem "Local MCP-capable client" "Reference execution environment; exact AI product integration must be revalidated."
