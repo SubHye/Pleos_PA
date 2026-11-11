@@ -34,6 +34,7 @@ import com.example.pleos_pa.navigation.CarNavigationGuard
 import com.example.pleos_pa.navigation.DestinationReader
 import com.example.pleos_pa.navigation.DestinationSetter
 import com.example.pleos_pa.navigation.PleosNaviSdk
+import com.example.pleos_pa.navigation.guardRestrictionCode
 import com.example.pleos_pa.ui.DriverHistory
 import com.example.pleos_pa.ui.HistoryPresentation
 import com.example.pleos_pa.vehicle.PleosVehicleSdk
@@ -174,7 +175,7 @@ class BridgeService : Service() {
                 navigationCatalog.confirmTimeoutMs,
                 navigationCatalog.confirmPollMs,
                 navigationCatalog.matchToleranceDegrees,
-                restriction = { driving?.blockCode() ?: DestinationSetter.DRIVING_STATE_UNKNOWN },
+                restriction = { guardRestrictionCode(driving?.let { it::blockCode }) },
             ) { requestId, state ->
                 // Only fixed fields reach the log, never a place.
                 Log.i(TAG, "requestId=$requestId navTask=$state")

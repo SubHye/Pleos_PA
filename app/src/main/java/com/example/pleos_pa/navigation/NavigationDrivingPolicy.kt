@@ -12,3 +12,10 @@ internal fun navigationRestrictionCode(
         !driverDisplayVerified -> DestinationSetter.DRIVING_STATE_UNKNOWN
         else -> null
     }
+
+/**
+ * A missing guard blocks. A present guard's `null` means allowed and is passed through unchanged;
+ * it must not be treated as a missing guard.
+ */
+internal fun guardRestrictionCode(blockCode: (() -> String?)?): String? =
+    if (blockCode == null) DestinationSetter.DRIVING_STATE_UNKNOWN else blockCode()
