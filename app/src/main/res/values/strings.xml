@@ -31,4 +31,5 @@
     <string name="history_latest">최근 조회: %1$s</string>
     <string name="history_row">%1$s · %2$s\n%3$s\n%4$s</string>
     <string name="history_details">%1$s\n%2$s\n%3$s\n기록 시작: %4$s\n%5$s\n출처: %6$s\n%7$s\n%8$s</string>
+    <string name="notification_failed">연결이 종료됐어요. 앱에서 상태를 확인하세요.</string>
 </resources>

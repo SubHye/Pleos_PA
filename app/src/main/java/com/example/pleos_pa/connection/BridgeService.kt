@@ -261,7 +261,9 @@ class BridgeService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(getString(R.string.notification_title))
-            .setContentText(statusText(this, status))
+            .setContentText(notificationText(this, status))
+            .setOnlyAlertOnce(true)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setContentIntent(open)
             .setOngoing(running)
             .addAction(action)
@@ -296,6 +298,13 @@ class BridgeService : Service() {
         fun stop(context: Context) {
             context.startService(stopIntent(context))
         }
+
+        /**
+         * Only connection state reaches notifications, never SDK/result text or arbitrary errors.
+         */
+        fun notificationText(context: Context, status: ConnectionStatus): String =
+            if (status is ConnectionStatus.Failed) context.getString(R.string.notification_failed)
+            else statusText(context, status)
 
         fun statusText(context: Context, status: ConnectionStatus): String =
             when (status) {

@@ -2,6 +2,7 @@ package com.example.pleos_pa.connection
 
 import android.Manifest
 import android.app.ActivityManager
+import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
@@ -216,6 +217,25 @@ class BridgeServiceRuntimeTest {
             await("posted stop action") {
                 notificationAction(context.getString(R.string.action_stop)) != null
             }
+            val posted =
+                manager.activeNotifications
+                    .single { it.packageName == context.packageName }
+                    .notification
+            assertEquals(
+                context.getString(R.string.notification_title),
+                posted.extras.getCharSequence(Notification.EXTRA_TITLE).toString(),
+            )
+            assertEquals(
+                context.getString(R.string.connection_connected),
+                posted.extras.getCharSequence(Notification.EXTRA_TEXT).toString(),
+            )
+            assertEquals(
+                context.getString(R.string.notification_failed),
+                BridgeService.notificationText(
+                    context,
+                    ConnectionStatus.Failed("private SDK result must not reach notification"),
+                ),
+            )
             val action = notificationAction(context.getString(R.string.action_stop))!!
             assertEquals(context.packageName, action.creatorPackage)
             assertEquals(context.applicationInfo.uid, action.creatorUid)
