@@ -9,7 +9,7 @@ Pleos Connect MCP: 평소 쓰는 AI와 연결된 외부 서비스를 Pleos 차�
 Android 앱에 연결 상태·요청 기록 화면, Car UX 제한 관찰, Foreground Service, MCP 서버(`127.0.0.1:18766/mcp`)가 있다. MCP 서버는 채택된 차량 조회 20개와 내비 조회·장소 찾기·목적지 설정 3개(총 23개)를 제공하고, 연결을 시작해야 열린다([ADR-0008](docs/decisions/0008-embedded-mcp-server.md)). Vehicle Adapter에는 카탈로그 97개 속성의 호출 표가 있고, 속성별 실행 결과는 카탈로그의 `verification`에 있다. `SMART_GLASS_CONFIG`는 공개 capability API가 없어 읽지 않고, `ETCS_VOICE_GUIDANCE_VOLUME`은 `CAR_TOLL`을 Manifest에서 빼서 `PERMISSION_DENIED`를 받는다.
 
 - COM-12 전에는 PC의 Node.js MCP 서버가 `127.0.0.1:18765`의 HTTP Bridge로 앱을 불렀다. 지금은 둘 다 없다.
-- 실제 AI 호출은 Codex로 확인했다(PR #15). Claude 계열은 아직 확인하지 않았다.
+- 실제 AI 호출은 Codex로 확인했다(PR #15). 내비 목적지 설정·조회의 종단간 실행도 Codex CLI로 확인했다(COM-3, [내비 계약](contracts/navigation/CONTRACT.md#외부-ai-종단간-관찰-sdk_emulator-2026-11-11-com-3)). Claude 계열은 MCP 연결과 도구 목록까지만 확인했다.
 - PC 없이 연결하는 경로(COM-15)는 없다.
 
 기존 [PoC](https://github.com/HyeeSeong/pleostest/tree/0d288c8aeab3b2fd08d09a257d894cbfeca793ca)에서 기능 단위로 선택 이전 중이다.
@@ -75,8 +75,8 @@ adb -s <기기 serial> forward --remove tcp:18766   # 끝나면
 
 | 클라이언트 | 등록 | 확인 |
 | --- | --- | --- |
-| Codex CLI / ChatGPT Desktop 로컬 Codex 호스트 | `~/.codex/config.toml`에 `[mcp_servers.pleos-pa-vehicle]`, `url = "http://127.0.0.1:18766/mcp"` | PR #15에서 Codex CLI 0.166.0으로 확인 |
-| Claude 계열 | URL(Streamable HTTP) 방식 등록이 되는지 확인하지 않았다 | 확인하지 않음 |
+| Codex CLI / ChatGPT Desktop 로컬 Codex 호스트 | `~/.codex/config.toml`에 `[mcp_servers.pleos-pa-vehicle]`, `url = "http://127.0.0.1:18766/mcp"` | PR #15에서 Codex CLI 0.166.0으로 확인. 비대화형 `codex exec`(승인 정책 `never`)는 `set_navigation_destination`을 클라이언트에서 거절하므로, 목적지 설정에는 `-c mcp_servers.pleos-pa-vehicle.default_tools_approval_mode=approve`가 필요했다(COM-3) |
+| Claude Code CLI | `claude -p --mcp-config <파일> --strict-mcp-config`, 파일 내용 `{"mcpServers":{"pleos-pa-vehicle":{"type":"http","url":"http://127.0.0.1:18766/mcp"}}}` | COM-3에서 2.1.302로 연결과 도구 23개 노출만 확인. 계정 크레딧 부족으로 도구 호출은 확인하지 못했다 |
 | ChatGPT 웹 커스텀 MCP 앱 | 공개 HTTPS가 필요하다. loopback 서버에 직접 닿지 못한다 | 대상 아님(COM-15에서 결정) |
 
 토큰이나 환경 변수는 필요 없다. COM-12 전의 stdio 등록(`node mcp/src/server.ts`)과 COM-10 모의 진입점(`serve-com10-mock.ts`)은 Node 서버와 함께 없어졌다. 클라이언트에 남은 설정은 지운다.
