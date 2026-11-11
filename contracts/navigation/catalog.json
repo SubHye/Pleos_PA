@@ -48,8 +48,8 @@
       "kind": "read",
       "sdkCall": "getWaypointInfo",
       "permission": "NAVI_ROUTE",
-      "adoption": "undecided",
-      "adoptionNote": "에뮬레이터 검증 전. 필수 권한은 구분하지 못했다: COM-47은 NAVI_ROUTE와 NAVI_ROUTE_SEARCH를 모두 선언한 앱으로만 실행했다."
+      "adoption": "adopted",
+      "adoptionNote": "필수 권한은 구분하지 못했다: 에뮬레이터 실행은 NAVI_ROUTE와 NAVI_ROUTE_SEARCH를 모두 선언한 앱으로만 했다(COM-47, COM-41)."
     },
     {
       "name": "add_navigation_waypoint",
@@ -58,8 +58,8 @@
       "kind": "change",
       "sdkCall": "addWaypoint",
       "permission": "NAVI_ROUTE_SEARCH",
-      "adoption": "undecided",
-      "adoptionNote": "에뮬레이터 검증 전. 필수 권한은 구분하지 못했다: COM-47은 NAVI_ROUTE와 NAVI_ROUTE_SEARCH를 모두 선언한 앱으로만 실행했다."
+      "adoption": "adopted",
+      "adoptionNote": "필수 권한은 구분하지 못했다: 에뮬레이터 실행은 NAVI_ROUTE와 NAVI_ROUTE_SEARCH를 모두 선언한 앱으로만 했다(COM-47, COM-41)."
     },
     {
       "name": "remove_navigation_waypoint",
@@ -68,8 +68,8 @@
       "kind": "change",
       "sdkCall": "removeWaypoint",
       "permission": "NAVI_ROUTE_SEARCH",
-      "adoption": "undecided",
-      "adoptionNote": "에뮬레이터 검증 전. 필수 권한은 구분하지 못했다: COM-47은 NAVI_ROUTE와 NAVI_ROUTE_SEARCH를 모두 선언한 앱으로만 실행했다. 두 번째 경유지 삭제는 COM-47에서 실행하지 않았다."
+      "adoption": "adopted",
+      "adoptionNote": "필수 권한은 구분하지 못했다: 에뮬레이터 실행은 NAVI_ROUTE와 NAVI_ROUTE_SEARCH를 모두 선언한 앱으로만 했다(COM-47, COM-41)."
     }
   ]
 }

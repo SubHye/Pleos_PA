@@ -239,7 +239,7 @@
 
 ## 경유지
 
-상태: **제안** (COM-41). 도구 셋을 카탈로그에 `undecided`로 넣었고, 제품 앱으로 에뮬레이터를 실행한 뒤 `adopted`로 올린다. 아래 관찰은 COM-47의 조사 도구(`tools/nav-place-check`의 `WaypointActivity`)로 얻은 것이며 제품 앱의 결과가 아니다. 한도 값은 [catalog.json](catalog.json)의 `limits`다.
+상태: **제안** (COM-41). 세 도구는 제품 앱의 MCP 서버를 에뮬레이터에서 직접 호출해 확인한 뒤 `adopted`로 올렸다([제품 앱 관찰](#제품-앱-관찰-sdk_emulator-2026-11-11)). 그 아래 관찰은 COM-47의 조사 도구(`tools/nav-place-check`의 `WaypointActivity`)로 얻은 것이며 제품 앱의 결과가 아니다. 한도 값은 [catalog.json](catalog.json)의 `limits`다.
 
 | 도구 | 입력 | 하는 일 |
 | --- | --- | --- |
@@ -337,9 +337,28 @@
 
 **중지**: 연결 중지는 변경 작업을 먼저 닫는다. 그 뒤로는 재조회도 보내지 않는다.
 
-### 에뮬레이터 관찰 (`sdk_emulator`, 2026-11-11, 조사 도구 `WaypointActivity`)
+### 제품 앱 관찰 (`sdk_emulator`, 2026-11-11)
 
-`verifiedOn`과 같은 환경이다. 제품 앱의 경유지 도구는 아직 에뮬레이터로 실행하지 않았다. 각 시나리오 1회 관찰이며 실차와 다른 내비 버전으로 일반화하지 않는다.
+`verifiedOn` 환경에서 제품 앱(debug, 세 도구 `adopted`)의 MCP 서버를 `adb forward`로 직접 호출했다. 장소는 서울역(목적지), 코엑스, 판교역, 현대백화점 판교점이다. 실차와 다른 내비 버전으로 일반화하지 않는다. 남은 거리·시간은 에뮬레이터 위치를 드러낼 수 있어 적지 않는다.
+
+| 항목 | 관찰 |
+| --- | --- |
+| 목록 | `tools/list` 26개. 세 도구가 fixture 순서대로 나온다 |
+| 기준 | 목적지 없음, `NO_WAYPOINTS`. 목적지 없을 때 코엑스 추가는 6ms에 `NO_DESTINATION`, `sent:false`이고 조회는 여전히 `NO_WAYPOINTS` |
+| 추가 | 서울역 안내 중 코엑스 → `APPLIED`(조회에 코엑스, `candidateId` `coex`). 이어서 판교역 → `APPLIED`(코엑스, 판교역 순서). 순정 화면 진행 막대에 경유 점 2개 |
+| 삭제 | 두 번째(판교역) → `APPLIED`, 코엑스만 남음. 판교역을 다시 추가한 뒤 첫 번째(코엑스) → `APPLIED`, 판교역만 남음. 두 번째 삭제는 COM-47에서 실행하지 않은 조합이다 |
+| 차단 | 같은 장소 추가 `ALREADY_WAYPOINT`, 세 번째 추가 `WAYPOINT_LIMIT`, 없는 장소 삭제 `WAYPOINT_NOT_FOUND`. 모두 `sent:false`이고 약 2초(요청 전 읽기 두 번)에 끝났으며 조회한 경유지는 그대로였다 |
+| 동시 요청 | 추가가 진행되는 동안 삭제를 부르면 0ms에 `BUSY`. 진행 중이던 추가는 `APPLIED`로 끝났다 |
+| 소요 시간 | 변경 8회의 `elapsedMs`는 9872~11040(대부분 약 10.0초). 요청 전 읽기 약 2초를 빼면 요청 뒤 반영 확인까지 약 8~9초. `confirmTimeoutMs` 15초 안이다 |
+| 읽은 값 | 코엑스는 `poiId`가 있고, 판교역·현대백화점 판교점은 `poiId`가 없다(`null`). 주소는 동 수준이다 |
+| 작업 상태 | 로그에 접수 → 검사 중 → 실행 중 → 성공이, 차단은 접수 → 검사 중 → 차단이 `requestId`와 함께 남는다. 로그에 후보 ID·장소 이름·주소·좌표는 없다 |
+| 복구 | 남은 경유지를 `remove_navigation_waypoint`로 지우고 `tools/nav-place-check`의 `cancel`로 안내를 취소했다. 목적지 없음과 `NO_WAYPOINTS`를 조회로 확인했다 |
+
+실제 SDK로 재현하지 않은 것: `OUTCOME_UNKNOWN`, `PERMISSION_DENIED`, `BASELINE_UNAVAILABLE`, `WAYPOINTS_UNAVAILABLE`, `NAVI_NOT_CONNECTED`, 작업 중 연결 중지, 목적지 설정과 경유지 변경 사이의 `BUSY`, 경유지 도착 이벤트, 주행 중 변경, 두 경유지가 같은 장소일 때의 `AMBIGUOUS_WAYPOINT`. 이들은 JVM 테스트의 SDK 대역으로만 확인했거나 확인하지 않았다. 외부 AI 클라이언트를 거친 종단간 실행도 하지 않았다(COM-27). `NAVI_ROUTE`와 `NAVI_ROUTE_SEARCH`는 두 권한을 모두 선언한 앱으로만 실행해 구분하지 못했다.
+
+### 조사 도구 관찰 (`sdk_emulator`, 2026-11-11, `WaypointActivity`)
+
+`verifiedOn`과 같은 환경이다. 제품 앱이 아니라 COM-47의 조사 도구로 얻은 값이다. 각 시나리오 1회 관찰이며 실차와 다른 내비 버전으로 일반화하지 않는다.
 
 | 항목 | 관찰 |
 | --- | --- |
@@ -352,12 +371,12 @@
 | 이벤트 | `onRouteCancelled`가 먼저 오고 약 6~7초 뒤 `onWaypointChanged`와 `onRouteEnded`. `onWaypointChanged`의 `index`는 항상 `FIRST` |
 | 화면 | 경로 카드의 시간·거리가 SDK 값과 같고 진행 막대에 경유 지점이 보임 |
 
-실행하지 않은 것: 두 번째 경유지 삭제, 경유지 도착 이벤트(`onWayPointArrived`), 주행 중 변경, 제품 앱(MCP)에서의 실행, 외부 AI 클라이언트를 거친 종단간 실행(COM-27), `NAVI_ROUTE`와 `NAVI_ROUTE_SEARCH`의 구분. 이들은 JVM 테스트의 SDK 대역으로만 확인했거나 확인하지 않았다.
+실행하지 않은 것: 두 번째 경유지 삭제(제품 앱으로는 위에서 확인), 경유지 도착 이벤트(`onWayPointArrived`), 주행 중 변경, 제품 앱(MCP)에서의 실행, 외부 AI 클라이언트를 거친 종단간 실행(COM-27), `NAVI_ROUTE`와 `NAVI_ROUTE_SEARCH`의 구분. 이들은 JVM 테스트의 SDK 대역으로만 확인했거나 확인하지 않았다.
 
 ### 한계
 
 - **주행 규제를 검사하지 않는다.** 규제가 켜져 있어도 경유지가 바뀐다. FR-UI-04의 실행 차단은 미충족이며 AT-11은 수행하지 않았다. 검사를 끼울 자리(`WaypointChanger`의 `restriction`)만 있다.
-- 한 번에 몇 초가 걸리는지는 제품 앱으로 재지 않았다. 추가·삭제 때 순정 내비가 경로를 다시 만들어 6~7초가 걸리는 것이 관찰됐으므로 5초 목표(요구사항 6.2)를 넘을 수 있다.
+- 변경 한 번에 약 10초가 걸린다(위 관찰). 순정 내비가 경로를 다시 만들기 때문이며 도구 시간만으로 종단간 5초 목표(요구사항 6.2)를 넘는다.
 - 경유지는 2개까지다. 이보다 많은 경유지는 `requestRouteWithWaypoints`로만 들어가며(COM-47에서 3개가 반영됨) 이 앱은 그 호출을 쓰지 않는다. 3개 이상일 때 세 번째 이후는 삭제할 수 없다(`WAYPOINT_POSITION_UNSUPPORTED`).
 - 결과를 차량 화면이나 음성으로 알리지 않는다. 되돌리기는 없다(COM-44).
 
