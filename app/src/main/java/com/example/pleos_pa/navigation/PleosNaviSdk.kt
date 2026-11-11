@@ -1,6 +1,7 @@
 package com.example.pleos_pa.navigation
 
 import ai.pleos.playground.navi.data.DestinationInfo
+import ai.pleos.playground.navi.data.RouteInfo
 import ai.pleos.playground.navi.helper.NaviHelper
 import ai.pleos.playground.navi.helper.listener.NaviHelperEventListener
 import android.content.Context
@@ -59,6 +60,33 @@ class PleosNaviSdk(
             } catch (e: Exception) {
                 failed(e)
             }
+        }
+    }
+
+    /** The `RouteInfo` of `contracts/navigation/CONTRACT.md`; everything else stays default. */
+    override fun requestRoute(route: RouteRequest, returned: (Exception?) -> Unit) {
+        executor.execute {
+            val current = helper
+            if (closing || current == null) return@execute
+            val failure =
+                try {
+                    current.requestRoute(
+                        RouteInfo(
+                            latitude = route.latitude,
+                            longitude = route.longitude,
+                            displayLatitude = route.latitude,
+                            displayLongitude = route.longitude,
+                            poiName = route.name,
+                            poiId = route.poiId,
+                            address = route.address,
+                            poiSubId = "",
+                        )
+                    )
+                    null
+                } catch (e: Exception) {
+                    e
+                }
+            returned(failure)
         }
     }
 

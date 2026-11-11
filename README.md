@@ -6,7 +6,7 @@ Pleos Connect MCP: 평소 쓰는 AI와 연결된 외부 서비스를 Pleos 차�
 
 ## 현재 상태
 
-Android 앱에 연결 상태·요청 기록 화면, Car UX 제한 관찰, Foreground Service, MCP 서버(`127.0.0.1:18766/mcp`)가 있다. MCP 서버는 실행 검증을 통과한 도구 20개를 제공하고, 연결을 시작해야 열린다([ADR-0008](docs/decisions/0008-embedded-mcp-server.md)). Vehicle Adapter에는 카탈로그 97개 속성의 호출 표가 있고, 속성별 실행 결과는 카탈로그의 `verification`에 있다. `SMART_GLASS_CONFIG`는 공개 capability API가 없어 읽지 않고, `ETCS_VOICE_GUIDANCE_VOLUME`은 `CAR_TOLL`을 Manifest에서 빼서 `PERMISSION_DENIED`를 받는다.
+Android 앱에 연결 상태·요청 기록 화면, Car UX 제한 관찰, Foreground Service, MCP 서버(`127.0.0.1:18766/mcp`)가 있다. MCP 서버는 채택된 차량 조회 20개와 내비 조회·장소 찾기·목적지 설정 3개(총 23개)를 제공하고, 연결을 시작해야 열린다([ADR-0008](docs/decisions/0008-embedded-mcp-server.md)). Vehicle Adapter에는 카탈로그 97개 속성의 호출 표가 있고, 속성별 실행 결과는 카탈로그의 `verification`에 있다. `SMART_GLASS_CONFIG`는 공개 capability API가 없어 읽지 않고, `ETCS_VOICE_GUIDANCE_VOLUME`은 `CAR_TOLL`을 Manifest에서 빼서 `PERMISSION_DENIED`를 받는다.
 
 - COM-12 전에는 PC의 Node.js MCP 서버가 `127.0.0.1:18765`의 HTTP Bridge로 앱을 불렀다. 지금은 둘 다 없다.
 - 실제 AI 호출은 Codex로 확인했다(PR #15). Claude 계열은 아직 확인하지 않았다.
@@ -29,12 +29,14 @@ Android 앱에 연결 상태·요청 기록 화면, Car UX 제한 관찰, Foregr
 | Emulator | `Pleos_Connect_v2.1.0`, API 34, 사용자 10, Vehicle Service 2.3.22 |
 
 ```powershell
-.\gradlew.bat :spotlessCheck :app:assembleDebug :app:testDebugUnitTest :app:lintDebug :vehicle-sweep:test
+.\gradlew.bat :spotlessCheck :app:assembleDebug :app:testDebugUnitTest :app:lintDebug :vehicle-sweep:test :nav-place-check:assembleDebug :nav-place-check:testDebugUnitTest
 ```
 
 PR과 main push에서 CI가 같은 검사와 Structurizr 모델 검증을 실행한다.
 
 ## 연결 제어
+
+내비 변경은 서비스가 최신 Car UX와 현재 사용자의 DRIVER/MAIN 표시 영역을 확인한 뒤 실행한다. 규제 활성·정보 상실·영역 미확인은 SDK 호출 전 차단하며, 사전 목적지 조회 뒤와 호출 직전에도 재검사한다. 규제 해제 시 자동 실행하지 않는다. 화면의 상세 기록 허용과 서비스의 변경 실행 조건은 별개다.
 
 MCP 서버는 사용자가 앱 화면에서 시작해야 열리고, 앱 실행이나 프로세스 재시작만으로는 열리지 않는다. 중지하면 서비스가 끝나고 재개 동작이 있는 알림이 남는다. 알림 권한을 거부하면 화면에서만 제어한다.
 

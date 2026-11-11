@@ -148,7 +148,7 @@ class NotificationPermissionRuntimeTest {
                 }
                 ready
             }
-            RuntimeMcpClient().use { assertEquals(21, it.toolNames().size) }
+            RuntimeMcpClient().use { assertEquals(23, it.toolNames().size) }
             awaitFocusedActivity(activity)
             onView(withText(context.getString(R.string.notifications_off)))
                 .inRoot(withDecorView(sameInstance(activity.window.decorView)))

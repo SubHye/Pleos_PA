@@ -23,11 +23,16 @@ import com.example.pleos_pa.R
 import com.example.pleos_pa.bridge.BridgeEvents
 import com.example.pleos_pa.bridge.ReaderBridgeGateway
 import com.example.pleos_pa.contract.NavigationCatalog
+import com.example.pleos_pa.contract.PlaceCatalog
 import com.example.pleos_pa.contract.VehicleReadCatalog
 import com.example.pleos_pa.mcp.EmbeddedMcpServer
 import com.example.pleos_pa.mcp.NavigationDestinationTool
+import com.example.pleos_pa.mcp.NavigationPlaceTool
+import com.example.pleos_pa.mcp.NavigationSetDestinationTool
 import com.example.pleos_pa.mcp.VehicleReadTool
+import com.example.pleos_pa.navigation.CarNavigationGuard
 import com.example.pleos_pa.navigation.DestinationReader
+import com.example.pleos_pa.navigation.DestinationSetter
 import com.example.pleos_pa.navigation.PleosNaviSdk
 import com.example.pleos_pa.ui.DriverHistory
 import com.example.pleos_pa.ui.HistoryPresentation
@@ -70,6 +75,9 @@ class BridgeService : Service() {
         NavigationCatalog.parse(
             assets.open(NavigationCatalog.ASSET).use { it.readBytes().decodeToString() }
         )
+    }
+    private val places by lazy {
+        PlaceCatalog.parse(assets.open(PLACES_ASSET).use { it.readBytes().decodeToString() })
     }
     private val controller by lazy {
         ConnectionController(::createSession, ::show, ::onEnded)
@@ -147,28 +155,60 @@ class BridgeService : Service() {
                 ),
             )
         val tool = VehicleReadTool(catalog, gateway, events, SystemClock::elapsedRealtime)
+        val naviSdk = PleosNaviSdk(this)
         val destinations =
-            DestinationReader(
-                PleosNaviSdk(this),
-                scheduler,
-                source,
-                navigationCatalog.staleHoldMs,
-            ) { connected ->
+            DestinationReader(naviSdk, scheduler, source, navigationCatalog.staleHoldMs) { connected
+                ->
                 Log.i(TAG, if (connected) "NAVI_CONNECTED" else "NAVI_CONNECT_FAILED")
             }
         // Outside the Pleos emulator every read is refused, so the SDK is not even connected.
         if (source != null) destinations.open()
-        val navigation =
-            NavigationDestinationTool(
-                navigationCatalog,
+        val driving =
+            if (source != null) CarNavigationGuard(this, main).also { it.start() } else null
+        val setter =
+            DestinationSetter(
+                naviSdk,
                 destinations,
-                source,
-                events,
-                SystemClock::elapsedRealtime,
+                scheduler,
+                navigationCatalog.baselineDeadlineMs,
+                navigationCatalog.confirmTimeoutMs,
+                navigationCatalog.confirmPollMs,
+                navigationCatalog.matchToleranceDegrees,
+                restriction = { driving?.blockCode() ?: DestinationSetter.DRIVING_STATE_UNKNOWN },
+            ) { requestId, state ->
+                // Only fixed fields reach the log, never a place.
+                Log.i(TAG, "requestId=$requestId navTask=$state")
+            }
+        val navigation =
+            listOf(
+                NavigationDestinationTool(
+                    navigationCatalog,
+                    destinations,
+                    source,
+                    events,
+                    SystemClock::elapsedRealtime,
+                ),
+                NavigationPlaceTool(
+                    navigationCatalog,
+                    places,
+                    events,
+                    SystemClock::elapsedRealtime,
+                ),
+                NavigationSetDestinationTool(
+                    navigationCatalog,
+                    places,
+                    setter,
+                    source,
+                    events,
+                    SystemClock::elapsedRealtime,
+                ),
             )
         return ConnectionSession(
             {
                 gateway.close()
+                // Before the read slot closes, so a change still being checked ends as blocked.
+                setter.close()
+                driving?.close()
                 destinations.closeAdmission()
             },
             EmbeddedMcpServer(catalog, tool, navigation),
@@ -278,6 +318,7 @@ class BridgeService : Service() {
         private const val NOTIFICATION_ID = 1
         private const val TERMINAL_NOTIFICATION_ID = 2
         private const val FOREGROUND_NOT_ALLOWED = "FOREGROUND_NOT_ALLOWED"
+        private const val PLACES_ASSET = "navigation-places.json"
 
         // Shared across sessions so a new bind waits for the previous session's bind.
         private val bindExecutor = Executors.newSingleThreadExecutor {

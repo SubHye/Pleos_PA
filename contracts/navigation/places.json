@@ -1,0 +1,221 @@
+{
+  "sdk": "NaviHelper 3.0.5",
+  "places": [
+    {
+      "key": "seoul_station",
+      "displayName": "서울역",
+      "aliases": ["서울역", "Seoul Station"],
+      "address": "서울특별시 용산구 한강대로 405",
+      "latitude": 37.55489166,
+      "longitude": 126.96985833,
+      "poiId": "36khq96e4p5dcm5nqhec",
+      "poiSubId": "",
+      "coordinateSource": "navi_capture",
+      "capture": {
+        "date": "2026-11-10",
+        "query": "서울역",
+        "name": "서울역 KTX",
+        "latitude": 37.55489166,
+        "longitude": 126.96985833,
+        "poiId": "36khq96e4p5dcm5nqhec"
+      },
+      "evidence": {
+        "status": "sdk_emulator",
+        "runs": [
+          {
+            "date": "2026-11-10T01:15:34.042Z",
+            "build": "nav-place-check debug (APK sha256 39D13E25DF37, base 5533a31 + COM-52 working tree)",
+            "environment": "Pleos_Connect_v2.1.0, API 34, user 10, Navi Service 3.0.4, 순정 내비 3.3.2-rc5-hotfix.3, NaviHelper 3.0.5",
+            "requestedPoiId": "36khq96e4p5dcm5nqhec",
+            "reread": {
+              "name": "서울역 KTX",
+              "address": "용산구 동자동",
+              "latitude": 37.55489166,
+              "longitude": 126.96985833,
+              "poiId": "36khq96e4p5dcm5nqhec"
+            },
+            "afterCancel": "NO_DESTINATION",
+            "verdict": "PASS"
+          },
+          {
+            "date": "2026-11-10T01:17:02.852Z",
+            "build": "nav-place-check debug (APK sha256 39D13E25DF37, base 5533a31 + COM-52 working tree)",
+            "environment": "Pleos_Connect_v2.1.0, API 34, user 10, Navi Service 3.0.4, 순정 내비 3.3.2-rc5-hotfix.3, NaviHelper 3.0.5",
+            "requestedPoiId": "36khq96e4p5dcm5nqhec",
+            "reread": {
+              "name": "서울역 KTX",
+              "address": "용산구 동자동",
+              "latitude": 37.55489166,
+              "longitude": 126.96985833,
+              "poiId": "36khq96e4p5dcm5nqhec"
+            },
+            "afterCancel": "NO_DESTINATION",
+            "verdict": "PASS"
+          }
+        ]
+      }
+    },
+    {
+      "key": "pangyo_station",
+      "displayName": "판교역",
+      "aliases": ["판교역", "Pangyo Station"],
+      "address": "경기도 성남시 분당구 분당내곡로 121",
+      "latitude": 37.39479166,
+      "longitude": 127.11256944,
+      "poiId": "",
+      "poiSubId": "",
+      "coordinateSource": "navi_capture",
+      "capture": {
+        "date": "2026-11-10",
+        "query": "판교역",
+        "name": "판교역 신분당선",
+        "latitude": 37.39479166,
+        "longitude": 127.11256944,
+        "poiId": "36khde36fed3cm5nqhe3"
+      },
+      "evidence": {
+        "status": "sdk_emulator",
+        "runs": [
+          {
+            "date": "2026-11-10T01:15:56.384Z",
+            "build": "nav-place-check debug (APK sha256 39D13E25DF37, base 5533a31 + COM-52 working tree)",
+            "environment": "Pleos_Connect_v2.1.0, API 34, user 10, Navi Service 3.0.4, 순정 내비 3.3.2-rc5-hotfix.3, NaviHelper 3.0.5",
+            "requestedPoiId": "",
+            "reread": {
+              "name": "판교역",
+              "address": "분당구 백현동",
+              "latitude": 37.39479166,
+              "longitude": 127.11256944,
+              "poiId": ""
+            },
+            "afterCancel": "NO_DESTINATION",
+            "verdict": "PASS"
+          },
+          {
+            "date": "2026-11-10T01:17:24.955Z",
+            "build": "nav-place-check debug (APK sha256 39D13E25DF37, base 5533a31 + COM-52 working tree)",
+            "environment": "Pleos_Connect_v2.1.0, API 34, user 10, Navi Service 3.0.4, 순정 내비 3.3.2-rc5-hotfix.3, NaviHelper 3.0.5",
+            "requestedPoiId": "",
+            "reread": {
+              "name": "판교역",
+              "address": "분당구 백현동",
+              "latitude": 37.39479166,
+              "longitude": 127.11256944,
+              "poiId": ""
+            },
+            "afterCancel": "NO_DESTINATION",
+            "verdict": "PASS"
+          }
+        ]
+      }
+    },
+    {
+      "key": "hyundai_pangyo",
+      "displayName": "현대백화점 판교점",
+      "aliases": ["현대백화점 판교점", "판교 현대백화점", "Hyundai Pangyo"],
+      "address": "경기도 성남시 분당구 판교역로146번길 20",
+      "latitude": 37.39192222,
+      "longitude": 127.11171666,
+      "poiId": "",
+      "poiSubId": "",
+      "coordinateSource": "navi_capture",
+      "capture": {
+        "date": "2026-11-10",
+        "query": "판교역",
+        "name": "현대백화점 판교점",
+        "latitude": 37.39192222,
+        "longitude": 127.11171666,
+        "poiId": "36khde3dk2mfcm5nqhe4"
+      },
+      "evidence": {
+        "status": "sdk_emulator",
+        "runs": [
+          {
+            "date": "2026-11-10T01:16:18.545Z",
+            "build": "nav-place-check debug (APK sha256 39D13E25DF37, base 5533a31 + COM-52 working tree)",
+            "environment": "Pleos_Connect_v2.1.0, API 34, user 10, Navi Service 3.0.4, 순정 내비 3.3.2-rc5-hotfix.3, NaviHelper 3.0.5",
+            "requestedPoiId": "",
+            "reread": {
+              "name": "현대백화점 판교점",
+              "address": "분당구 백현동",
+              "latitude": 37.39192222,
+              "longitude": 127.11171666,
+              "poiId": ""
+            },
+            "afterCancel": "NO_DESTINATION",
+            "verdict": "PASS"
+          },
+          {
+            "date": "2026-11-10T01:17:47.069Z",
+            "build": "nav-place-check debug (APK sha256 39D13E25DF37, base 5533a31 + COM-52 working tree)",
+            "environment": "Pleos_Connect_v2.1.0, API 34, user 10, Navi Service 3.0.4, 순정 내비 3.3.2-rc5-hotfix.3, NaviHelper 3.0.5",
+            "requestedPoiId": "",
+            "reread": {
+              "name": "현대백화점 판교점",
+              "address": "분당구 백현동",
+              "latitude": 37.39192222,
+              "longitude": 127.11171666,
+              "poiId": ""
+            },
+            "afterCancel": "NO_DESTINATION",
+            "verdict": "PASS"
+          }
+        ]
+      }
+    },
+    {
+      "key": "coex",
+      "displayName": "코엑스",
+      "aliases": ["코엑스", "COEX"],
+      "address": "서울특별시 강남구 영동대로 513",
+      "latitude": 37.51027777,
+      "longitude": 127.06156388,
+      "poiId": "36khp5gns575cm5nqhe4",
+      "poiSubId": "",
+      "coordinateSource": "navi_capture",
+      "capture": {
+        "date": "2026-11-10",
+        "query": "코엑스",
+        "name": "코엑스",
+        "latitude": 37.51027777,
+        "longitude": 127.06156388,
+        "poiId": "36khp5gns575cm5nqhe4"
+      },
+      "evidence": {
+        "status": "sdk_emulator",
+        "runs": [
+          {
+            "date": "2026-11-10T01:16:40.795Z",
+            "build": "nav-place-check debug (APK sha256 39D13E25DF37, base 5533a31 + COM-52 working tree)",
+            "environment": "Pleos_Connect_v2.1.0, API 34, user 10, Navi Service 3.0.4, 순정 내비 3.3.2-rc5-hotfix.3, NaviHelper 3.0.5",
+            "requestedPoiId": "36khp5gns575cm5nqhe4",
+            "reread": {
+              "name": "코엑스",
+              "address": "강남구 삼성동",
+              "latitude": 37.51027777,
+              "longitude": 127.06156388,
+              "poiId": "36khp5gns575cm5nqhe4"
+            },
+            "afterCancel": "NO_DESTINATION",
+            "verdict": "PASS"
+          },
+          {
+            "date": "2026-11-10T01:18:09.193Z",
+            "build": "nav-place-check debug (APK sha256 39D13E25DF37, base 5533a31 + COM-52 working tree)",
+            "environment": "Pleos_Connect_v2.1.0, API 34, user 10, Navi Service 3.0.4, 순정 내비 3.3.2-rc5-hotfix.3, NaviHelper 3.0.5",
+            "requestedPoiId": "36khp5gns575cm5nqhe4",
+            "reread": {
+              "name": "코엑스",
+              "address": "강남구 삼성동",
+              "latitude": 37.51027777,
+              "longitude": 127.06156388,
+              "poiId": "36khp5gns575cm5nqhe4"
+            },
+            "afterCancel": "NO_DESTINATION",
+            "verdict": "PASS"
+          }
+        ]
+      }
+    }
+  ]
+}
