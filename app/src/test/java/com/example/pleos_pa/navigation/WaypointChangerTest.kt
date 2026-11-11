@@ -24,6 +24,9 @@ class WaypointChangerTest {
     private val destinationOutcomes = mutableListOf<SetDestination>()
     private val coordinator = NavTaskCoordinator.shared { _, state -> states += state }
     private var restricted: String? = null
+    private var policyCalls = 0
+    private var blockFromCall = Int.MAX_VALUE
+    private var policyThrows = false
 
     private lateinit var destinations: DestinationReader
     private val waypoints =
@@ -60,7 +63,12 @@ class WaypointChangerTest {
             catalog.confirmPollMs,
             catalog.matchToleranceDegrees,
             catalog.maxWaypoints,
-            restriction = { restricted },
+            restriction = {
+                policyCalls++
+                if (policyThrows) throw IllegalStateException("policy")
+                if (policyCalls >= blockFromCall) DestinationSetter.DRIVING_RESTRICTED
+                else restricted
+            },
         )
 
     private fun place(key: String): Place = places.place(key)!!
@@ -390,6 +398,82 @@ class WaypointChangerTest {
         assertEquals(listOf<WaypointChange>(notDone("DRIVING_RESTRICTED", false)), outcomes)
         assertEquals(0, sdk.requests)
         assertEquals(0, sdk.waypointRequests)
+        assertEquals(0, sdk.addedWaypoints.size)
+    }
+
+    @Test
+    fun aRestrictionArrivingWhileTheReadsWaitPreventsTheSdkCall() {
+        add("coex")
+        scheduler.runAll()
+        sdk.answer(FakeNaviSdk.GUIDING)
+        scheduler.runAll()
+        restricted = DestinationSetter.DRIVING_RESTRICTED
+        sdk.answerWaypoints(emptyList())
+        scheduler.runAll()
+
+        assertEquals(
+            listOf<WaypointChange>(notDone(DestinationSetter.DRIVING_RESTRICTED, false)),
+            outcomes,
+        )
+        assertEquals(0, sdk.addedWaypoints.size)
+
+        // Lifting it runs nothing on its own.
+        restricted = null
+        scheduler.advance(catalog.confirmTimeoutMs)
+        assertEquals(0, sdk.addedWaypoints.size)
+    }
+
+    @Test
+    fun aRestrictionAfterCheckingButBeforeTheSdkCallIsNotSent() {
+        // Asked at the start, after the reads, and once more right before the call.
+        blockFromCall = 3
+        begin(emptyList()) { add("coex") }
+
+        assertEquals(
+            listOf<WaypointChange>(notDone(DestinationSetter.DRIVING_RESTRICTED, false)),
+            outcomes,
+        )
+        assertEquals(NavTaskState.FAILED, states.last())
+        assertEquals(0, sdk.addedWaypoints.size)
+    }
+
+    @Test
+    fun aPolicyReadFailureIsUnknownAndNotSent() {
+        policyThrows = true
+        add("coex")
+        scheduler.runAll()
+
+        assertEquals(
+            listOf<WaypointChange>(notDone(DestinationSetter.DRIVING_STATE_UNKNOWN, false)),
+            outcomes,
+        )
+        assertEquals(0, sdk.requests)
+        assertEquals(0, sdk.addedWaypoints.size)
+    }
+
+    @Test
+    fun missingPolicyIntegrationBlocksInsteadOfPermittingTheSdk() {
+        val bare =
+            WaypointChanger(
+                sdk,
+                destinations,
+                waypoints,
+                scheduler,
+                coordinator,
+                catalog.baselineDeadlineMs,
+                catalog.confirmTimeoutMs,
+                catalog.confirmPollMs,
+                catalog.matchToleranceDegrees,
+                catalog.maxWaypoints,
+            )
+        bare.add("r1", place("coex")) { outcomes += it }
+        scheduler.runAll()
+
+        assertEquals(
+            listOf<WaypointChange>(notDone(DestinationSetter.DRIVING_STATE_UNKNOWN, false)),
+            outcomes,
+        )
+        assertEquals(0, sdk.requests)
         assertEquals(0, sdk.addedWaypoints.size)
     }
 

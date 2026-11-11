@@ -50,6 +50,7 @@ androidComponents {
 }
 
 android {
+    useLibrary("android.car", false)
     namespace = "com.example.pleos_pa"
     compileSdk {
         version = release(37)
@@ -65,7 +66,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures { resValues = true }
+
     buildTypes {
+        debug {
+            if (providers.gradleProperty("com9GuardDiagnostic").orNull == "true") {
+                applicationIdSuffix = ".com9guard"
+                resValue("string", "app_name", "Pleos PA 규제 검수 (.com9guard)")
+            }
+        }
         release {
             optimization {
                 enable = true

@@ -32,6 +32,7 @@ import com.example.pleos_pa.mcp.NavigationSetDestinationTool
 import com.example.pleos_pa.mcp.NavigationWaypointChangeTool
 import com.example.pleos_pa.mcp.NavigationWaypointsTool
 import com.example.pleos_pa.mcp.VehicleReadTool
+import com.example.pleos_pa.navigation.CarNavigationGuard
 import com.example.pleos_pa.navigation.DestinationReader
 import com.example.pleos_pa.navigation.DestinationSetter
 import com.example.pleos_pa.navigation.NavTaskCoordinator
@@ -167,6 +168,8 @@ class BridgeService : Service() {
             }
         // Outside the Pleos emulator every read is refused, so the SDK is not even connected.
         if (source != null) destinations.open()
+        val driving =
+            if (source != null) CarNavigationGuard(this, main).also { it.start() } else null
         val setter =
             DestinationSetter(
                 naviSdk,
@@ -176,6 +179,7 @@ class BridgeService : Service() {
                 navigationCatalog.confirmTimeoutMs,
                 navigationCatalog.confirmPollMs,
                 navigationCatalog.matchToleranceDegrees,
+                restriction = { driving?.blockCode() ?: DestinationSetter.DRIVING_STATE_UNKNOWN },
                 shared = coordinator,
             )
         val changer =
@@ -190,6 +194,7 @@ class BridgeService : Service() {
                 navigationCatalog.confirmPollMs,
                 navigationCatalog.matchToleranceDegrees,
                 navigationCatalog.maxWaypoints,
+                restriction = { driving?.blockCode() ?: DestinationSetter.DRIVING_STATE_UNKNOWN },
             )
         val navigation =
             listOf(
@@ -245,6 +250,7 @@ class BridgeService : Service() {
                 // Before the read slot closes, so a change still being checked ends as blocked.
                 setter.close()
                 changer.close()
+                driving?.close()
                 destinations.closeAdmission()
             },
             EmbeddedMcpServer(catalog, tool, navigation),

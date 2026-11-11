@@ -339,6 +339,8 @@ object NavigationToolResult {
             "WAYPOINT_NOT_FOUND" to "현재 경유지에 없는 장소입니다.",
             "AMBIGUOUS_WAYPOINT" to "같은 장소가 경유지에 둘 이상 있어 어느 쪽을 지울지 알 수 없습니다.",
             "WAYPOINT_POSITION_UNSUPPORTED" to "이 앱이 지울 수 있는 위치(첫 번째·두 번째)에 있는 경유지가 아닙니다.",
+            "DRIVING_RESTRICTED" to "주행 제한이 활성화되어 경유지를 변경하지 않았습니다.",
+            "DRIVING_STATE_UNKNOWN" to "현재 주행 제한이나 운전자 표시 영역을 확인하지 못해 경유지를 변경하지 않았습니다.",
         )
 
     private fun candidate(place: Place) =
@@ -353,6 +355,8 @@ object NavigationToolResult {
                 "find_navigation_place가 돌려준 candidateId가 아닙니다. 목록에 없는 장소는 목적지로 설정하지 않습니다.",
             "BUSY" to "다른 내비 변경 작업이 진행 중이라 이번 요청을 시작하지 않았습니다. 대기열에 넣지 않았습니다.",
             "BASELINE_UNAVAILABLE" to "요청 전 현재 목적지를 확인하지 못했습니다.",
+            "DRIVING_RESTRICTED" to "주행 제한이 활성화되어 목적지를 변경하지 않았습니다.",
+            "DRIVING_STATE_UNKNOWN" to "현재 주행 제한이나 운전자 표시 영역을 확인하지 못해 목적지를 변경하지 않았습니다.",
         )
 
     /** Arguments outside the tool's schema: an error with no structuredContent. */

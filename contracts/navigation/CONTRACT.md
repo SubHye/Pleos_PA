@@ -163,7 +163,7 @@
 | 1 | 연결이 중지되지 않았다 | `CONNECTION_STOPPED` |
 | 2 | Pleos 에뮬레이터다 | `APP_NOT_READY` |
 | 3 | 내비 서비스에 연결됐다 | `NAVI_NOT_CONNECTED` |
-| 4 | 주행 규제 | **검사하지 않는다.** 아래 한계 |
+| 4 | 현재 공개 Car UX가 DO=false/flags=0이고 현재 사용자의 DRIVER/MAIN 영역이 기본 display0임을 확인 | `DRIVING_RESTRICTED` 또는 `DRIVING_STATE_UNKNOWN` |
 | 5 | 요청 전 목적지를 읽었다(`baselineDeadlineMs`, 조회 슬롯 사용) | `BASELINE_UNAVAILABLE`. 다른 조회가 진행 중일 때(`BUSY`)도 같다 |
 | 6 | 요청 전 목적지가 요청한 장소가 아니다 | `ALREADY_SET`. 오류가 아니며 바꾼 것이 없다 |
 
@@ -203,6 +203,8 @@
 | `CONNECTION_STOPPED` | false | 접수 전 또는 조건 검사 중 중지 |
 | `APP_NOT_READY`, `NAVI_NOT_CONNECTED` | false | 조회와 같은 뜻 |
 | `BASELINE_UNAVAILABLE` | false | 요청 전 목적지를 읽지 못함 |
+| `DRIVING_RESTRICTED` | false | DO 또는 활성 UX 제한이 있어 실행 전 차단 |
+| `DRIVING_STATE_UNKNOWN` | false | 최신 UX/운전자 표시 영역 확인 실패 또는 검사 미연결 |
 | `PERMISSION_DENIED` | false | `requestRoute`가 `SecurityException`(원인 체인 포함) |
 | `OUTCOME_UNKNOWN` | true | 제한 시간 안에 일치 없음, 또는 `requestRoute`의 그 밖의 예외, 또는 응답 유실 |
 | `CONNECTION_STOPPED` | true | 요청을 넘긴 뒤 중지 |
@@ -233,7 +235,7 @@
 
 ### 한계
 
-- **주행 규제를 검사하지 않는다.** 규제가 켜져 있어도 목적지가 설정된다. FR-UI-04의 실행 차단은 미충족이며 AT-11은 수행하지 않았다. 검사를 끼울 자리(`DestinationSetter`의 `restriction`)만 있고, 규제 상태를 읽는 코드가 병합되면 연결한다.
+- 주행 규제는 서비스 수명의 `CarNavigationGuard`가 실제 Car UX/occupant 매핑을 매번 새로 읽어 검사한다. DO 또는 하나라도 있는 제한은 차단하고, 초기 연결 중/정보 상실/권한·API 오류/운전자 MAIN 영역 미확인은 기본 차단한다. Activity가 가려져도 검사는 유지된다. 사전 조회 완료 뒤와 SDK 호출 직전에도 재검사하며, 해제 시 자동 재실행하지 않는다. 새 가드의 실제 Pleos 기기 검증은 아직 수행하지 않았으므로 과거 목적지 설정 실측을 이 변경의 AT-11 통과로 재사용하지 않는다.
 - 설정 한 번에 7.0~9.0초가 걸렸다(위 관찰). 도구 시간만으로 종단간 5초 목표(요구사항 6.2)를 넘는다.
 - 결과를 차량 화면이나 음성으로 알리지 않는다. 되돌리기는 없다(COM-44).
 
@@ -279,7 +281,7 @@
 | 1 | 연결이 중지되지 않았다 | `CONNECTION_STOPPED` |
 | 2 | Pleos 에뮬레이터다 | `APP_NOT_READY` |
 | 3 | 내비 서비스에 연결됐다 | `NAVI_NOT_CONNECTED` |
-| 4 | 주행 규제 | **검사하지 않는다.** 목적지 설정의 한계와 같다 |
+| 4 | 현재 공개 Car UX가 DO=false/flags=0이고 현재 사용자의 DRIVER/MAIN 영역이 기본 display0임을 확인. 목적지 설정과 같은 `CarNavigationGuard`를 쓴다 | `DRIVING_RESTRICTED` 또는 `DRIVING_STATE_UNKNOWN` |
 | 5 | 요청 전 목적지를 읽었다(`baselineDeadlineMs`) | `BASELINE_UNAVAILABLE` |
 | 6 | 안내 중인 목적지가 있다 | `NO_DESTINATION`. 순정 내비는 목적지가 없으면 경유지를 조용히 무시한다 |
 | 7 | 요청 전 경유지를 읽었다(`baselineDeadlineMs`) | `WAYPOINTS_UNAVAILABLE` |
@@ -329,6 +331,7 @@
 | `CONNECTION_STOPPED` | false | 접수 전 또는 조건 검사 중 중지 |
 | `APP_NOT_READY`, `NAVI_NOT_CONNECTED` | false | 조회와 같은 뜻 |
 | `BASELINE_UNAVAILABLE`, `WAYPOINTS_UNAVAILABLE` | false | 요청 전 목적지 또는 경유지를 읽지 못함 |
+| `DRIVING_RESTRICTED`, `DRIVING_STATE_UNKNOWN` | false | 목적지 설정과 같은 뜻. 규제 검사가 연결되지 않았으면 `DRIVING_STATE_UNKNOWN`으로 차단한다 |
 | `NO_DESTINATION`, `ALREADY_WAYPOINT`, `WAYPOINT_LIMIT` | false | 추가 조건에 걸림 |
 | `WAYPOINT_NOT_FOUND`, `AMBIGUOUS_WAYPOINT`, `WAYPOINT_POSITION_UNSUPPORTED` | false | 삭제 조건에 걸림 |
 | `PERMISSION_DENIED` | false | `addWaypoint`·`removeWaypoint`가 `SecurityException`(원인 체인 포함) |
@@ -339,7 +342,7 @@
 
 ### 제품 앱 관찰 (`sdk_emulator`, 2026-11-11)
 
-`verifiedOn` 환경에서 제품 앱(debug, 세 도구 `adopted`)의 MCP 서버를 `adb forward`로 직접 호출했다. 장소는 서울역(목적지), 코엑스, 판교역, 현대백화점 판교점이다. 실차와 다른 내비 버전으로 일반화하지 않는다. 남은 거리·시간은 에뮬레이터 위치를 드러낼 수 있어 적지 않는다.
+`verifiedOn` 환경에서 제품 앱(debug, 세 도구 `adopted`, 주행 규제 가드가 병합되기 전의 빌드)의 MCP 서버를 `adb forward`로 직접 호출했다. 장소는 서울역(목적지), 코엑스, 판교역, 현대백화점 판교점이다. 실차와 다른 내비 버전으로 일반화하지 않는다. 남은 거리·시간은 에뮬레이터 위치를 드러낼 수 있어 적지 않는다.
 
 | 항목 | 관찰 |
 | --- | --- |
@@ -375,7 +378,7 @@
 
 ### 한계
 
-- **주행 규제를 검사하지 않는다.** 규제가 켜져 있어도 경유지가 바뀐다. FR-UI-04의 실행 차단은 미충족이며 AT-11은 수행하지 않았다. 검사를 끼울 자리(`WaypointChanger`의 `restriction`)만 있다.
+- 주행 규제는 목적지 설정과 같은 `CarNavigationGuard`가 검사한다. 읽기 전, 읽기 뒤, SDK 호출 직전에 다시 묻고, 규제나 정보 상실은 차단하며 해제돼도 자동으로 다시 실행하지 않는다. 이 가드를 거친 경유지 변경의 에뮬레이터 검증과 AT-11은 아직 수행하지 않았다. 위 제품 앱 관찰은 가드가 병합되기 전의 빌드로 한 실행이다.
 - 변경 한 번에 약 10초가 걸린다(위 관찰). 순정 내비가 경로를 다시 만들기 때문이며 도구 시간만으로 종단간 5초 목표(요구사항 6.2)를 넘는다.
 - 경유지는 2개까지다. 이보다 많은 경유지는 `requestRouteWithWaypoints`로만 들어가며(COM-47에서 3개가 반영됨) 이 앱은 그 호출을 쓰지 않는다. 3개 이상일 때 세 번째 이후는 삭제할 수 없다(`WAYPOINT_POSITION_UNSUPPORTED`).
 - 결과를 차량 화면이나 음성으로 알리지 않는다. 되돌리기는 없다(COM-44).

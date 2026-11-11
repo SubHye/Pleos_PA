@@ -56,10 +56,11 @@ class WaypointChanger(
     private val toleranceDegrees: Double,
     private val maxWaypoints: Int,
     /**
-     * The driving-restriction check: a fixed block code, or null when the change may run. Nothing
-     * is wired to it yet, so a restriction does not stop a change (FR-UI-04 is open).
+     * A fresh driving-policy check: a fixed block code, or null when the change may run. Missing
+     * policy integration blocks admission; it never silently permits navigation. It is asked before
+     * the reads, after them, and right before the SDK call, as the destination change does.
      */
-    private val restriction: () -> String? = { null },
+    private val restriction: () -> String? = { DestinationSetter.DRIVING_STATE_UNKNOWN },
 ) {
     @Volatile private var admissionClosed = false
     private var running: Change? = null
@@ -94,7 +95,7 @@ class WaypointChanger(
             }
             val request = NavTaskRequest(requestId, listOf(change), change)
             val refusal =
-                when (coordinator.submit(request) { reply(outcomeOf(it)) }) {
+                when (coordinator.submit(request) { reply(outcomeOf(it, change.sent)) }) {
                     is NavAdmission.Accepted -> null
                     is NavAdmission.Busy -> BUSY
                     NavAdmission.Unavailable -> CONNECTION_STOPPED
@@ -114,6 +115,10 @@ class WaypointChanger(
         NavAction, NavConditions {
         override val name = kind.action
 
+        /** Whether the SDK call was made. */
+        var sent = false
+            private set
+
         private var destination: DestinationFields? = null
         private var before: List<WaypointFields> = emptyList()
         private var slot = WaypointSlot.FIRST
@@ -128,7 +133,7 @@ class WaypointChanger(
         private var cancelPoll: () -> Unit = {}
 
         override fun check(request: NavTaskRequest, done: (block: String?) -> Unit) {
-            val blocked = destinations.unavailable() ?: restriction()
+            val blocked = destinations.unavailable() ?: restrictionCode()
             if (blocked != null) {
                 done(blocked)
                 return
@@ -166,6 +171,12 @@ class WaypointChanger(
             waypoints.read(baselineMillis) { read ->
                 if (admissionClosed) {
                     done(CONNECTION_STOPPED)
+                    return@read
+                }
+                // A policy that turned restrictive while the reads waited blocks the change.
+                val currentBlock = restrictionCode()
+                if (currentBlock != null) {
+                    done(currentBlock)
                     return@read
                 }
                 when (read) {
@@ -212,6 +223,11 @@ class WaypointChanger(
         }
 
         override fun start(done: (failure: String?) -> Unit) {
+            val block = if (admissionClosed) CONNECTION_STOPPED else restrictionCode()
+            if (block != null) {
+                done(block)
+                return
+            }
             running = this
             fun finish(failure: String?) {
                 if (over) return
@@ -240,6 +256,7 @@ class WaypointChanger(
                     }
                 }
             }
+            sent = true
             if (kind == Kind.ADD) {
                 sdk.addWaypoint(
                     WaypointRequest(
@@ -296,7 +313,14 @@ class WaypointChanger(
         }
     }
 
-    private fun outcomeOf(result: NavTaskResult): WaypointChange =
+    private fun restrictionCode(): String? =
+        try {
+            restriction()
+        } catch (_: Exception) {
+            DestinationSetter.DRIVING_STATE_UNKNOWN
+        }
+
+    private fun outcomeOf(result: NavTaskResult, sent: Boolean): WaypointChange =
         when (result.state) {
             NavTaskState.SUCCEEDED -> WaypointChange.Applied
             NavTaskState.BLOCKED ->
@@ -305,8 +329,10 @@ class WaypointChanger(
                 when (result.code) {
                     // Refused by the SDK before anything was sent.
                     PERMISSION_DENIED -> WaypointChange.NotDone(PERMISSION_DENIED, sent = false)
-                    CONNECTION_STOPPED -> WaypointChange.NotDone(CONNECTION_STOPPED, sent = true)
-                    else -> WaypointChange.NotDone(OUTCOME_UNKNOWN, sent = true)
+                    CONNECTION_STOPPED -> WaypointChange.NotDone(CONNECTION_STOPPED, sent = sent)
+                    else ->
+                        if (!sent) WaypointChange.NotDone(result.code ?: CHECK_FAILED, sent = false)
+                        else WaypointChange.NotDone(OUTCOME_UNKNOWN, sent = true)
                 }
         }
 
