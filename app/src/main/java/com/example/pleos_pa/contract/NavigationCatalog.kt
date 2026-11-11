@@ -29,6 +29,10 @@ private constructor(
     /** How long a destination change waits for the destination read back to match. */
     val confirmTimeoutMs: Long,
     val confirmPollMs: Long,
+    /**
+     * How many waypoints the stock navigation app keeps; a further one is ignored without a word.
+     */
+    val maxWaypoints: Int,
     val matchToleranceDegrees: Double,
     val tools: List<NavigationToolEntry>,
 ) {
@@ -64,6 +68,7 @@ private constructor(
                 baselineDeadlineMs = limits.getLong("baselineDeadlineMs"),
                 confirmTimeoutMs = limits.getLong("confirmTimeoutMs"),
                 confirmPollMs = limits.getLong("confirmPollMs"),
+                maxWaypoints = limits.getInt("maxWaypoints"),
                 matchToleranceDegrees = limits.getDouble("matchToleranceDegrees"),
                 tools = tools,
             )

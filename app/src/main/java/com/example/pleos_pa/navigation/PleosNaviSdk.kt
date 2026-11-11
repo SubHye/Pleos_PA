@@ -1,11 +1,15 @@
 package com.example.pleos_pa.navigation
 
+import ai.pleos.playground.navi.constants.WaypointIndex
 import ai.pleos.playground.navi.data.DestinationInfo
+import ai.pleos.playground.navi.data.RequestWaypointInfo
 import ai.pleos.playground.navi.data.RouteInfo
+import ai.pleos.playground.navi.data.WaypointInfo
 import ai.pleos.playground.navi.helper.NaviHelper
 import ai.pleos.playground.navi.helper.listener.NaviHelperEventListener
 import android.content.Context
 import com.example.pleos_pa.contract.DestinationFields
+import com.example.pleos_pa.contract.WaypointFields
 import java.util.concurrent.Executors
 
 /**
@@ -35,6 +39,11 @@ class PleosNaviSdk(
                     override fun onDestinationInfo(destinationInfo: DestinationInfo) {
                         val at = wallClock()
                         listener.destination(fieldsOf(destinationInfo), at)
+                    }
+
+                    override fun onWayPointInfo(waypointInfoList: List<WaypointInfo>) {
+                        val at = wallClock()
+                        listener.waypoints(waypointInfoList.map(::waypointOf), at)
                     }
                 }
             helper = created
@@ -90,6 +99,63 @@ class PleosNaviSdk(
         }
     }
 
+    override fun requestWaypoints(failed: (Exception) -> Unit) {
+        executor.execute {
+            val current = helper
+            if (closing || current == null) return@execute
+            try {
+                current.getWaypointInfo()
+            } catch (e: Exception) {
+                failed(e)
+            }
+        }
+    }
+
+    /**
+     * `RequestWaypointInfo` as `contracts/navigation/CONTRACT.md` builds it; the rest stays
+     * default.
+     */
+    override fun addWaypoint(waypoint: WaypointRequest, returned: (Exception?) -> Unit) {
+        executor.execute {
+            val current = helper
+            if (closing || current == null) return@execute
+            val failure =
+                try {
+                    current.addWaypoint(
+                        RequestWaypointInfo(
+                            latitude = waypoint.latitude,
+                            longitude = waypoint.longitude,
+                            poiName = waypoint.name,
+                            waypointIndex = indexOf(waypoint.slot),
+                            poiId = waypoint.poiId,
+                            address = waypoint.address,
+                            poiSubId = "",
+                            poiProvider = "",
+                        )
+                    )
+                    null
+                } catch (e: Exception) {
+                    e
+                }
+            returned(failure)
+        }
+    }
+
+    override fun removeWaypoint(slot: WaypointSlot, returned: (Exception?) -> Unit) {
+        executor.execute {
+            val current = helper
+            if (closing || current == null) return@execute
+            val failure =
+                try {
+                    current.removeWaypoint(indexOf(slot))
+                    null
+                } catch (e: Exception) {
+                    e
+                }
+            returned(failure)
+        }
+    }
+
     override fun close(closed: () -> Unit) {
         closing = true
         // Queued behind every call already handed to the executor.
@@ -107,6 +173,20 @@ class PleosNaviSdk(
         }
         executor.shutdown()
     }
+
+    private fun indexOf(slot: WaypointSlot) =
+        when (slot) {
+            WaypointSlot.FIRST -> WaypointIndex.FIRST
+            WaypointSlot.SECOND -> WaypointIndex.SECOND
+        }
+
+    private fun waypointOf(info: WaypointInfo) =
+        // The stock app leaves some fields empty or null (COM-47), and a null must not end a read.
+        WaypointFields(
+            name = info.name.orEmpty(),
+            address = info.address.orEmpty(),
+            poiId = info.poiId.orEmpty(),
+        )
 
     private fun fieldsOf(info: DestinationInfo) =
         DestinationFields(

@@ -27,7 +27,9 @@
           "description": "찾을 장소 이름. 층·회의실 같은 말은 빼고 장소 부분만 넣습니다."
         }
       },
-      "required": ["query"],
+      "required": [
+        "query"
+      ],
       "$schema": "https://json-schema.org/draft/2020-12/schema"
     },
     "annotations": {
@@ -49,7 +51,73 @@
           "description": "find_navigation_place가 돌려준 candidateId. 다른 값은 받지 않습니다."
         }
       },
-      "required": ["candidateId"],
+      "required": [
+        "candidateId"
+      ],
+      "$schema": "https://json-schema.org/draft/2020-12/schema"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_navigation_waypoints",
+    "title": "내비 경유지 조회",
+    "description": "순정 내비에 설정된 경유지를 설정된 순서대로 조회합니다. 이름·주소·장소 ID를 돌려주고, 차량 앱의 고정 장소 목록에 있는 장소이면 candidateId도 돌려줍니다. candidateId가 있는 경유지는 remove_navigation_waypoint로 삭제할 수 있습니다. 좌표는 돌려주지 않습니다. status가 NO_WAYPOINTS이면 설정된 경유지가 없다는 뜻입니다. 호출할 때 한 번 읽으며 내비를 바꾸지 않습니다.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "$schema": "https://json-schema.org/draft/2020-12/schema"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "add_navigation_waypoint",
+    "title": "내비 경유지 추가",
+    "description": "find_navigation_place가 돌려준 candidateId 하나를 받아 순정 내비의 현재 경로에 경유지로 추가합니다. 안내 중인 목적지가 있어야 하고(없으면 NO_DESTINATION), 경유지는 최대 2개이며(WAYPOINT_LIMIT), 이미 경유지인 장소는 다시 추가하지 않습니다(ALREADY_WAYPOINT). 주소, 좌표, 장소 이름은 받지 않습니다. 목록에 없는 장소는 경유지로 쓰지 않습니다. 목적지와 기존 경유지는 그대로 둡니다. 차량 앱이 추가 뒤 경유지를 다시 읽어 확인했을 때만 status APPLIED로 답하며, 10초 안팎이 걸릴 수 있습니다. code가 OUTCOME_UNKNOWN이면 요청은 보냈지만 반영을 확인하지 못한 것이니 성공이나 실패로 단정하지 말고, 다시 호출하지 말고 get_navigation_waypoints로 확인하세요. 사용자가 경유지 추가를 요청했을 때만 호출하세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "candidateId": {
+          "type": "string",
+          "description": "find_navigation_place가 돌려준 candidateId. 다른 값은 받지 않습니다."
+        }
+      },
+      "required": [
+        "candidateId"
+      ],
+      "$schema": "https://json-schema.org/draft/2020-12/schema"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "remove_navigation_waypoint",
+    "title": "내비 경유지 삭제",
+    "description": "candidateId 하나를 받아 그 장소를 순정 내비의 현재 경유지에서 삭제합니다. find_navigation_place나 get_navigation_waypoints가 돌려준 candidateId를 씁니다. 경유지에 없는 장소는 삭제하지 않습니다(WAYPOINT_NOT_FOUND). 전체 삭제는 하지 않습니다. 목적지와 다른 경유지는 그대로 둡니다. 차량 앱이 삭제 뒤 경유지를 다시 읽어 확인했을 때만 status APPLIED로 답하며, 10초 안팎이 걸릴 수 있습니다. code가 OUTCOME_UNKNOWN이면 요청은 보냈지만 반영을 확인하지 못한 것이니 성공이나 실패로 단정하지 말고, 다시 호출하지 말고 get_navigation_waypoints로 확인하세요. 사용자가 경유지 삭제를 요청했을 때만 호출하세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "candidateId": {
+          "type": "string",
+          "description": "find_navigation_place가 돌려준 candidateId. 다른 값은 받지 않습니다."
+        }
+      },
+      "required": [
+        "candidateId"
+      ],
       "$schema": "https://json-schema.org/draft/2020-12/schema"
     },
     "annotations": {

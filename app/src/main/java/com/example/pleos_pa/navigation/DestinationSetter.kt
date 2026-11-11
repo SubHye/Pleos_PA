@@ -45,9 +45,14 @@ class DestinationSetter(
      * is wired to it yet, so a restriction does not stop a change (FR-UI-04 is open).
      */
     private val restriction: () -> String? = { null },
+    /**
+     * The coordinator shared with the other navigation changes, so that one change at a time runs
+     * across all of them. Without one, this setter makes its own and reports to [onState].
+     */
+    shared: NavTaskCoordinator? = null,
     onState: (requestId: String, state: NavTaskState) -> Unit = { _, _ -> },
 ) {
-    private val coordinator = NavTaskCoordinator(::check, onState)
+    private val coordinator = shared ?: NavTaskCoordinator(::check, onState)
     @Volatile private var admissionClosed = false
     private var running: Route? = null
 
@@ -58,7 +63,7 @@ class DestinationSetter(
                 reply(SetDestination.NotDone(CONNECTION_STOPPED, sent = false))
                 return@execute
             }
-            val request = NavTaskRequest(requestId, listOf(Route(place)))
+            val request = NavTaskRequest(requestId, listOf(Route(place)), ::check)
             val refusal =
                 when (coordinator.submit(request) { reply(outcomeOf(it)) }) {
                     is NavAdmission.Accepted -> null

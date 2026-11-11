@@ -1,6 +1,6 @@
 # 내비 계약
 
-상태: **제안**. 조회는 COM-24 PR, [목적지 설정](#목적지-설정)은 COM-21 PR에서 상대 개발자 합의가 필요하다.
+상태: **제안**. 조회는 COM-24 PR, [목적지 설정](#목적지-설정)은 COM-21 PR, [경유지](#경유지)는 COM-41 PR에서 상대 개발자 합의가 필요하다.
 
 이 문서는 규칙만 적는다. 도구·한도 값은 [catalog.json](catalog.json), 고정 장소는 [places.json](places.json), 판정 사례는 [fixtures/](fixtures/)가 기준이다. 앱의 JVM 테스트가 이 파일들을 읽는다.
 
@@ -18,7 +18,8 @@
 
 - 조회 대상은 NaviHelper 3.0.5의 `getDestinationInfo()` → `onDestinationInfo(DestinationInfo)` 한 가지다. 권한은 `pleos.car.permission.NAVI_ROUTE`다.
 - 변경 대상은 `requestRoute(RouteInfo)` 한 가지이며 [고정 장소 목록](#고정-장소-목록)의 장소만 보낸다([목적지 설정](#목적지-설정)). 권한은 `NAVI_ROUTE_SEARCH`다. 호출 코드가 앱에 있으므로 도구가 `rejected`가 아닌 한 Manifest에 선언한다(lint가 요구). 도구 공개 여부는 `adoption`이 따로 정한다.
-- 안내 취소(`cancelRoute`), 경유지, 경로 옵션, 재탐색, 지정 지점 Trip(`requestTrip`), 그 밖의 `get*Info`는 대상이 아니다. 변경 작업의 공통 규칙은 COM-11이 정한다.
+- 경유지 조회 `getWaypointInfo()` → `onWayPointInfo(List<WaypointInfo>)`, 추가 `addWaypoint(RequestWaypointInfo)`, 삭제 `removeWaypoint(WaypointIndex)`는 [경유지](#경유지)가 정한다. 추가·삭제는 고정 장소 목록의 장소만 쓴다. 권한은 `NAVI_ROUTE`와 `NAVI_ROUTE_SEARCH` 중 무엇인지 구분하지 못했다.
+- 안내 취소(`cancelRoute`), 경유지 전체 삭제와 일괄 설정(`requestRouteWithWaypoints`), 경로 옵션, 재탐색, 지정 지점 Trip(`requestTrip`), 그 밖의 `get*Info`는 대상이 아니다. 변경 작업의 공통 규칙은 COM-11이 정한다.
 - 목적지 좌표는 앱 안에서 목적지 없음 판정에만 쓰고 결과로 보내지 않는다(NFR-05). 장소 일치 판단에 필요한 정보는 COM-4에서 정한다.
 - [ADR-0008](../../docs/decisions/0008-embedded-mcp-server.md)대로 MCP 서버에는 인증이 없다. 연결이 켜져 있는 동안 기기의 다른 앱도 이 도구로 현재 목적지 이름·주소와 남은 시간을 읽을 수 있다.
 
@@ -234,6 +235,130 @@
 
 - **주행 규제를 검사하지 않는다.** 규제가 켜져 있어도 목적지가 설정된다. FR-UI-04의 실행 차단은 미충족이며 AT-11은 수행하지 않았다. 검사를 끼울 자리(`DestinationSetter`의 `restriction`)만 있고, 규제 상태를 읽는 코드가 병합되면 연결한다.
 - 설정 한 번에 7.0~9.0초가 걸렸다(위 관찰). 도구 시간만으로 종단간 5초 목표(요구사항 6.2)를 넘는다.
+- 결과를 차량 화면이나 음성으로 알리지 않는다. 되돌리기는 없다(COM-44).
+
+## 경유지
+
+상태: **제안** (COM-41). 도구 셋을 카탈로그에 `undecided`로 넣었고, 제품 앱으로 에뮬레이터를 실행한 뒤 `adopted`로 올린다. 아래 관찰은 COM-47의 조사 도구(`tools/nav-place-check`의 `WaypointActivity`)로 얻은 것이며 제품 앱의 결과가 아니다. 한도 값은 [catalog.json](catalog.json)의 `limits`다.
+
+| 도구 | 입력 | 하는 일 |
+| --- | --- | --- |
+| `get_navigation_waypoints` | 없음 | 현재 경유지를 설정된 순서대로 조회한다 (`getWaypointInfo`, `NAVI_ROUTE`) |
+| `add_navigation_waypoint` | `candidateId`(문자열, 필수) | 후보 ID의 목록 값을 경유지로 추가하고, 재조회로 반영을 확인한 뒤 답한다 (`addWaypoint`, `NAVI_ROUTE_SEARCH`) |
+| `remove_navigation_waypoint` | `candidateId`(문자열, 필수) | 그 장소를 경유지에서 삭제하고, 재조회로 반영을 확인한 뒤 답한다 (`removeWaypoint`, `NAVI_ROUTE_SEARCH`) |
+
+세 도구는 함께 채택한다. 스키마 밖의 키, 빠진 값, 문자열이 아닌 값은 `Input validation error:`로 답하고 SDK를 부르지 않는다. 경유지에 쓰는 장소도 [고정 장소 목록](#고정-장소-목록)의 장소뿐이다. 목록에 없는 장소는 경유지로 쓰지 않는다. 힌트는 목적지 설정과 같다. 경유지 API가 요구하는 권한(`NAVI_ROUTE`와 `NAVI_ROUTE_SEARCH` 중)은 구분하지 못했다. COM-47은 두 권한을 모두 선언한 앱으로만 실행했다. 카탈로그의 권한은 읽기와 변경의 분류를 따른 값이다.
+
+목록 사례는 [fixtures/tool-list.json](fixtures/tool-list.json)이다. 전체 삭제(`removeWaypoint(ALL)`)와 일괄 설정(`requestRouteWithWaypoints`)은 대상이 아니다. 후자는 기존 경유지를 덮어쓰고 재조회 좌표가 (0, 0)이라 기존 경유지를 되돌려 보낼 수 없다.
+
+### 읽기 값
+
+`onWayPointInfo(List<WaypointInfo>)`의 이름·주소·`poiId`만 쓴다. 순정 내비는 경유지 좌표를 (0, 0), `poiSubId`를 null로 답하므로 좌표로 대조할 수 없다(`sdk_emulator`, COM-47). 경유지는 `poiId`와 이름으로만 구분한다.
+
+- 목록의 장소가 경유지로 읽혔는지: `poiId`가 있는 장소는 `poiId`가 같을 때, 없는 장소는 보낸 이름과 같을 때다. 공백은 지우고 소문자로 바꿔 비교한다.
+- 두 번의 읽기가 같은 경유지를 보이는지: 둘 다 `poiId`가 있으면 `poiId`로, 아니면 이름으로 본다.
+- `onWayPointInfo`에도 요청 식별자가 없고, 같은 서비스에 등록된 모든 클라이언트가 받는다. 늦은 응답과 `PREVIOUS_RESPONSE_PENDING`은 목적지 조회와 같은 규칙이며 경유지 슬롯이 따로 있다. 슬롯은 목적지·차량 조회와 막지 않는다.
+
+### 생명주기
+
+하나의 호출은 COM-11의 변경 작업 하나이고, 그 작업의 동작은 경유지 추가 또는 삭제 하나다. 목적지 설정과 같은 조정기를 쓰므로 어느 변경이든 하나가 진행 중이면 다른 변경은 `BUSY`다. `requestId`(UUID)는 MCP 서버가 만든다.
+
+1. `candidateId`를 목록에서 찾는다. 없으면 `UNKNOWN_CANDIDATE`로 끝낸다.
+2. 작업을 접수한다. 변경 작업이 진행 중이면 `BUSY`, 중지됐으면 `CONNECTION_STOPPED`다. 큐는 없다.
+3. 실행 조건을 순서대로 검사한다. 하나라도 걸리면 SDK의 변경을 부르지 않고 차단으로 끝낸다. 조건이 풀려도 자동으로 실행하지 않는다.
+4. `addWaypoint` 또는 `removeWaypoint`를 한 번 부른다.
+5. `confirmPollMs`마다 `getWaypointInfo()`와 `getDestinationInfo()`를 보내고, 그동안 받은 모든 `onWayPointInfo`와 `onDestinationInfo`를 판정한다.
+6. 판정이 맞으면 `APPLIED`, `confirmTimeoutMs` 안에 맞지 않으면 `OUTCOME_UNKNOWN`으로 끝낸다.
+
+어느 계층도 자동으로 다시 실행하지 않는다.
+
+**실행 조건**
+
+| 순서 | 조건 | 걸리면 |
+| --- | --- | --- |
+| 1 | 연결이 중지되지 않았다 | `CONNECTION_STOPPED` |
+| 2 | Pleos 에뮬레이터다 | `APP_NOT_READY` |
+| 3 | 내비 서비스에 연결됐다 | `NAVI_NOT_CONNECTED` |
+| 4 | 주행 규제 | **검사하지 않는다.** 목적지 설정의 한계와 같다 |
+| 5 | 요청 전 목적지를 읽었다(`baselineDeadlineMs`) | `BASELINE_UNAVAILABLE` |
+| 6 | 안내 중인 목적지가 있다 | `NO_DESTINATION`. 순정 내비는 목적지가 없으면 경유지를 조용히 무시한다 |
+| 7 | 요청 전 경유지를 읽었다(`baselineDeadlineMs`) | `WAYPOINTS_UNAVAILABLE` |
+| 8a | 추가: 그 장소가 아직 경유지가 아니다 | `ALREADY_WAYPOINT`. SDK는 같은 장소의 중복 추가를 막지 않는다 |
+| 8b | 추가: 경유지가 `maxWaypoints`개 미만이다 | `WAYPOINT_LIMIT`. 세 번째는 오류 없이 무시된다 |
+| 9a | 삭제: 그 장소가 경유지에 있다 | `WAYPOINT_NOT_FOUND` |
+| 9b | 삭제: 그 장소가 경유지에 한 번만 나온다 | `AMBIGUOUS_WAYPOINT` |
+| 9c | 삭제: 그 장소가 첫 번째나 두 번째다 | `WAYPOINT_POSITION_UNSUPPORTED` |
+
+**보내는 값**
+
+- 추가: 목록 값으로 `RequestWaypointInfo`를 구성한다(`poiSubId`·`poiProvider`는 `""`). 위치는 끝에 붙인다: 경유지가 없으면 `FIRST`, 하나 있으면 `SECOND`. 이 두 경우만 관찰했다.
+- 삭제: 요청 직전에 읽은 목록에서 그 장소의 위치를 찾아 `FIRST` 또는 `SECOND`를 보낸다. 읽기와 호출 사이에 경유지가 바뀌면 확인이 맞지 않아 결과 불명이 된다.
+
+### 반영 판정
+
+순정 내비는 쓸 만한 완료 신호를 보내지 않는다. 추가·삭제 때 `onWaypointChanged`는 약 6~7초 늦게 오고 `index`가 요청과 무관하게 항상 `FIRST`다(`sdk_emulator`, COM-47). 그래서 재조회만 쓴다.
+
+- **추가됨**: 읽은 경유지가 요청 전보다 하나 많고, 그 장소가 들어 있고, 요청 전의 경유지가 모두 그대로 있다. 그리고 읽은 목적지의 좌표가 요청 전 목적지와 허용 오차 안에서 같다.
+- **삭제됨**: 읽은 경유지가 요청 전보다 하나 적고, 그 장소가 없고, 나머지 경유지가 모두 그대로 있다. 그리고 목적지가 그대로다.
+- 응답이 없거나 조건 일부만 맞는 것은 어느 쪽의 근거도 아니다. 제한 시간까지 맞지 않으면 **결과 불명**이며 실패로 단정하지 않는다.
+- 두 읽기는 서로 다른 콜백이라 최신 응답 하나씩을 모아 함께 본다. 목적지가 잠시 비어 있다가 돌아오면 돌아온 뒤에 판정한다.
+- **잔여 위험:** 같은 시간에 다른 앱이나 사용자가 경유지를 바꾸면 구분하지 못한다.
+
+### 응답
+
+**`structuredContent`**
+
+| 결과 | 내용 |
+| --- | --- |
+| 조회됨 | `{ok:true, requestId, source, sdkVersion, status, receivedAt, waypoints}`. `status`는 `NO_WAYPOINTS`·`HAS_WAYPOINTS`, `waypoints`는 `{order, name, address, poiId, candidateId}` 배열이다. `candidateId`는 고정 장소 목록의 장소일 때만 값이 있고, 순정 화면에서 직접 넣은 경유지는 `null`이다 |
+| 변경 확인됨 | `{ok:true, requestId, source, sdkVersion, status:"APPLIED", waypoint, elapsedMs}`. `waypoint`는 `{candidateId, name, address}`(목록 값) |
+| 확인되지 않음 | `{ok:false, origin:"android", code, requestId, sent}` |
+| 조회 실패 | 목적지 조회와 같은 `{ok:false, origin:"android", code, requestId}` |
+
+- 좌표는 어느 결과에도 넣지 않는다(NFR-05).
+- `sent: false`는 `addWaypoint`·`removeWaypoint`를 부르지 않았다는 뜻이다. 순정 내비는 그대로다.
+- `sent: true`는 요청을 SDK에 넘겼고 효과를 모른다는 뜻이다. 성공도 실패도 아니며, 취소나 복원을 뜻하지 않는다(FR-CON-04, FR-NAV-06). 글은 다시 호출하지 말고 `get_navigation_waypoints`로 확인하라고 알린다.
+- 경유지 값은 결과에만 들어가며 앱 로그에는 `requestId`, 도구 라벨, 상태 코드, 작업 상태, 경과 시간만 남긴다.
+
+**변경 코드** (조회 코드는 위 [MCP 도구와 응답](#mcp-도구와-응답)와 같다)
+
+| 코드 | `sent` | 뜻 |
+| --- | --- | --- |
+| `UNKNOWN_CANDIDATE` | false | 목록에 없는 후보 ID |
+| `BUSY` | false | 다른 변경 작업이 진행 중. 그 작업은 계속된다 |
+| `CONNECTION_STOPPED` | false | 접수 전 또는 조건 검사 중 중지 |
+| `APP_NOT_READY`, `NAVI_NOT_CONNECTED` | false | 조회와 같은 뜻 |
+| `BASELINE_UNAVAILABLE`, `WAYPOINTS_UNAVAILABLE` | false | 요청 전 목적지 또는 경유지를 읽지 못함 |
+| `NO_DESTINATION`, `ALREADY_WAYPOINT`, `WAYPOINT_LIMIT` | false | 추가 조건에 걸림 |
+| `WAYPOINT_NOT_FOUND`, `AMBIGUOUS_WAYPOINT`, `WAYPOINT_POSITION_UNSUPPORTED` | false | 삭제 조건에 걸림 |
+| `PERMISSION_DENIED` | false | `addWaypoint`·`removeWaypoint`가 `SecurityException`(원인 체인 포함) |
+| `OUTCOME_UNKNOWN` | true | 제한 시간 안에 판정이 맞지 않음, 또는 호출의 그 밖의 예외, 또는 응답 유실 |
+| `CONNECTION_STOPPED` | true | 요청을 넘긴 뒤 중지 |
+
+**중지**: 연결 중지는 변경 작업을 먼저 닫는다. 그 뒤로는 재조회도 보내지 않는다.
+
+### 에뮬레이터 관찰 (`sdk_emulator`, 2026-11-11, 조사 도구 `WaypointActivity`)
+
+`verifiedOn`과 같은 환경이다. 제품 앱의 경유지 도구는 아직 에뮬레이터로 실행하지 않았다. 각 시나리오 1회 관찰이며 실차와 다른 내비 버전으로 일반화하지 않는다.
+
+| 항목 | 관찰 |
+| --- | --- |
+| 목적지 없을 때 추가 | 오류·이벤트 없이 무시됨. 8초 뒤에도 0개 |
+| 추가 | 목적지 서울역에 코엑스 `FIRST`, 이어서 판교역 `SECOND` → 재조회 1개, 2개. 목적지 유지 |
+| 세 번째 추가 | 오류 없이 무시됨. 2개 그대로 |
+| 중복 추가 | 같은 장소(판교역)가 2개로 늘어남 |
+| 삭제 | `removeWaypoint(FIRST)` → 코엑스가 지워지고 판교역이 남음. `removeWaypoint(ALL)` → 0개, 목적지 유지 |
+| 읽은 값 | 경유지의 좌표는 (0, 0), `poiSubId`는 null. 장소 ID가 빈 장소는 이름만 남는다 |
+| 이벤트 | `onRouteCancelled`가 먼저 오고 약 6~7초 뒤 `onWaypointChanged`와 `onRouteEnded`. `onWaypointChanged`의 `index`는 항상 `FIRST` |
+| 화면 | 경로 카드의 시간·거리가 SDK 값과 같고 진행 막대에 경유 지점이 보임 |
+
+실행하지 않은 것: 두 번째 경유지 삭제, 경유지 도착 이벤트(`onWayPointArrived`), 주행 중 변경, 제품 앱(MCP)에서의 실행, 외부 AI 클라이언트를 거친 종단간 실행(COM-27), `NAVI_ROUTE`와 `NAVI_ROUTE_SEARCH`의 구분. 이들은 JVM 테스트의 SDK 대역으로만 확인했거나 확인하지 않았다.
+
+### 한계
+
+- **주행 규제를 검사하지 않는다.** 규제가 켜져 있어도 경유지가 바뀐다. FR-UI-04의 실행 차단은 미충족이며 AT-11은 수행하지 않았다. 검사를 끼울 자리(`WaypointChanger`의 `restriction`)만 있다.
+- 한 번에 몇 초가 걸리는지는 제품 앱으로 재지 않았다. 추가·삭제 때 순정 내비가 경로를 다시 만들어 6~7초가 걸리는 것이 관찰됐으므로 5초 목표(요구사항 6.2)를 넘을 수 있다.
+- 경유지는 2개까지다. 이보다 많은 경유지는 `requestRouteWithWaypoints`로만 들어가며(COM-47에서 3개가 반영됨) 이 앱은 그 호출을 쓰지 않는다. 3개 이상일 때 세 번째 이후는 삭제할 수 없다(`WAYPOINT_POSITION_UNSUPPORTED`).
 - 결과를 차량 화면이나 음성으로 알리지 않는다. 되돌리기는 없다(COM-44).
 
 ## 고정 장소 목록

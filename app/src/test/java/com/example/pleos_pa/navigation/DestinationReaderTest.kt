@@ -1,6 +1,7 @@
 package com.example.pleos_pa.navigation
 
 import com.example.pleos_pa.contract.DestinationFields
+import com.example.pleos_pa.contract.WaypointFields
 import com.example.pleos_pa.vehicle.ManualScheduler
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -39,12 +40,44 @@ internal class FakeNaviSdk : NaviSdk {
         returned(throwRoute.also { throwRoute = null })
     }
 
+    /** Every `requestWaypoints` call, and what the next one throws. */
+    @Volatile var waypointRequests = 0
+    var throwWaypoints: Exception? = null
+
+    override fun requestWaypoints(failed: (Exception) -> Unit) {
+        waypointRequests++
+        throwWaypoints?.let {
+            throwWaypoints = null
+            failed(it)
+        }
+    }
+
+    /** Every `addWaypoint` and `removeWaypoint` handed over, in order. */
+    val addedWaypoints = mutableListOf<WaypointRequest>()
+    val removedWaypoints = mutableListOf<WaypointSlot>()
+
+    /** What the next `addWaypoint` or `removeWaypoint` throws instead of returning. */
+    var throwWaypointChange: Exception? = null
+
+    override fun addWaypoint(waypoint: WaypointRequest, returned: (Exception?) -> Unit) {
+        addedWaypoints += waypoint
+        returned(throwWaypointChange.also { throwWaypointChange = null })
+    }
+
+    override fun removeWaypoint(slot: WaypointSlot, returned: (Exception?) -> Unit) {
+        removedWaypoints += slot
+        returned(throwWaypointChange.also { throwWaypointChange = null })
+    }
+
     override fun close(closed: () -> Unit) {
         this.closed++
         closed()
     }
 
     fun connect() = listener!!.connected()
+
+    fun answerWaypoints(waypoints: List<WaypointFields>, at: Long = RECEIVED) =
+        listener!!.waypoints(waypoints, at)
 
     fun failConnection() = listener!!.connectionFailed()
 

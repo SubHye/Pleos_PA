@@ -6,10 +6,14 @@ import com.example.pleos_pa.contract.ContractFixtures
 import com.example.pleos_pa.contract.DestinationFields
 import com.example.pleos_pa.contract.NavigationCatalog
 import com.example.pleos_pa.contract.NavigationFixtures
+import com.example.pleos_pa.contract.WaypointFields
 import com.example.pleos_pa.contract.jsonEquivalent
 import com.example.pleos_pa.navigation.DestinationReader
 import com.example.pleos_pa.navigation.DestinationSetter
 import com.example.pleos_pa.navigation.FakeNaviSdk
+import com.example.pleos_pa.navigation.NavTaskCoordinator
+import com.example.pleos_pa.navigation.WaypointChanger
+import com.example.pleos_pa.navigation.WaypointReader
 import com.example.pleos_pa.vehicle.FakeVehicleSdk
 import com.example.pleos_pa.vehicle.ReadScheduler
 import com.example.pleos_pa.vehicle.VehicleReader
@@ -79,10 +83,14 @@ class NavigationMcpServerTest {
     private val gateway = ReaderBridgeGateway(catalog, reader, scheduler, events)
     private val vehicleTool = VehicleReadTool(catalog, gateway, events) { scheduler.nowMillis() }
     private val navi = FakeNaviSdk()
-    private val destinations = DestinationReader(navi, scheduler, "simulation", 10_000L)
+    private lateinit var destinations: DestinationReader
+    private val waypoints = WaypointReader(navi, scheduler, 10_000L) { destinations.unavailable() }
     private var server: EmbeddedMcpServer? = null
 
     private fun serve(navigationCatalog: NavigationCatalog): Int {
+        destinations =
+            DestinationReader(navi, scheduler, "simulation", 10_000L, waypoints::delivered)
+        val coordinator = NavTaskCoordinator.shared()
         destinations.open()
         navi.connect()
         val setter =
@@ -94,6 +102,20 @@ class NavigationMcpServerTest {
                 navigationCatalog.confirmTimeoutMs,
                 POLL_MILLIS,
                 navigationCatalog.matchToleranceDegrees,
+                shared = coordinator,
+            )
+        val changer =
+            WaypointChanger(
+                navi,
+                destinations,
+                waypoints,
+                scheduler,
+                coordinator,
+                navigationCatalog.baselineDeadlineMs,
+                navigationCatalog.confirmTimeoutMs,
+                POLL_MILLIS,
+                navigationCatalog.matchToleranceDegrees,
+                navigationCatalog.maxWaypoints,
             )
         val places = NavigationFixtures.places
         val tools =
@@ -110,6 +132,30 @@ class NavigationMcpServerTest {
                     navigationCatalog,
                     places,
                     setter,
+                    "simulation",
+                    events,
+                    scheduler::nowMillis,
+                ),
+                NavigationWaypointsTool(
+                    navigationCatalog,
+                    places,
+                    waypoints,
+                    "simulation",
+                    events,
+                    scheduler::nowMillis,
+                ),
+                NavigationWaypointChangeTool.add(
+                    navigationCatalog,
+                    places,
+                    changer,
+                    "simulation",
+                    events,
+                    scheduler::nowMillis,
+                ),
+                NavigationWaypointChangeTool.remove(
+                    navigationCatalog,
+                    places,
+                    changer,
                     "simulation",
                     events,
                     scheduler::nowMillis,
@@ -149,9 +195,9 @@ class NavigationMcpServerTest {
         val client = client(serve(NavigationFixtures.catalogWith("adopted")))
         val tools = listed(withTimeout(5_000) { client.listTools() }.tools)
 
-        assertEquals(23, tools.length())
+        assertEquals(26, tools.length())
         val expected = JSONArray(NavigationFixtures.text("tool-list"))
-        assertEquals(3, expected.length())
+        assertEquals(6, expected.length())
         // The one known difference, as for the vehicle tools: no additionalProperties.
         for (index in 0 until expected.length()) {
             assertTrue(
@@ -336,6 +382,133 @@ class NavigationMcpServerTest {
             (result.content.single() as TextContent).text.startsWith("Input validation error:")
         )
         assertEquals(0, navi.requests)
+        client.close()
+    }
+
+    @Test
+    fun theWaypointToolsAreNotOfferedUntilAdopted() = runBlocking {
+        val client = client(serve(NavigationFixtures.catalogWith("undecided")))
+        val names = withTimeout(5_000) { client.listTools() }.tools.map { it.name }
+        assertTrue(names.none { "waypoint" in it })
+        for (name in
+            listOf(
+                "get_navigation_waypoints",
+                "add_navigation_waypoint",
+                "remove_navigation_waypoint",
+            )) {
+            val error = runCatching {
+                withTimeout(5_000) { client.callTool(name, mapOf("candidateId" to "coex")) }
+            }
+            assertTrue(name, error.isFailure)
+        }
+        assertEquals(0, navi.waypointRequests)
+        assertEquals(0, navi.addedWaypoints.size)
+        client.close()
+    }
+
+    @Test
+    fun aWaypointReadAnswersWithTheListedPlaceNamedByItsKey() = runBlocking {
+        val client = client(serve(NavigationFixtures.catalogWith("adopted")))
+        val coex = NavigationFixtures.places.place("coex")!!
+        val call =
+            async(Dispatchers.IO) {
+                withTimeout(5_000) { client.callTool("get_navigation_waypoints", emptyMap()) }
+            }
+        waitFor { navi.waypointRequests == 1 }
+        navi.answerWaypoints(
+            listOf(
+                WaypointFields("코엑스", "동", coex.poiId),
+                WaypointFields("시청", "서울 중구", "city-hall"),
+            )
+        )
+        val result = call.await()
+
+        assertEquals(null, result.isError)
+        val structured = JSONObject(result.structuredContent.toString())
+        assertEquals("HAS_WAYPOINTS", structured.getString("status"))
+        val list = structured.getJSONArray("waypoints")
+        assertEquals("coex", list.getJSONObject(0).getString("candidateId"))
+        assertTrue(list.getJSONObject(1).isNull("candidateId"))
+        assertTrue(!structured.toString().contains("latitude"))
+        waitFor { finished.isNotEmpty() }
+        assertEquals(listOf("navigation_waypoints:HAS_WAYPOINTS"), finished.toList())
+        client.close()
+    }
+
+    @Test
+    fun addingAWaypointAnswersOnlyAfterItIsReadBackWithTheDestinationUnchanged() = runBlocking {
+        val client = client(serve(NavigationFixtures.catalogWith("adopted")))
+        val coex = NavigationFixtures.places.place("coex")!!
+        val call =
+            async(Dispatchers.IO) {
+                withTimeout(10_000) {
+                    client.callTool("add_navigation_waypoint", mapOf("candidateId" to "coex"))
+                }
+            }
+        // The reads before the request: a destination, then no waypoints.
+        waitFor { navi.requests == 1 }
+        navi.answer(FakeNaviSdk.OTHER)
+        waitFor { navi.waypointRequests == 1 }
+        assertEquals(0, navi.addedWaypoints.size)
+        navi.answerWaypoints(emptyList())
+        waitFor { navi.addedWaypoints.size == 1 }
+        assertEquals(coex.latitude, navi.addedWaypoints.single().latitude, 0.0)
+
+        // A list without it is not an answer.
+        navi.answerWaypoints(emptyList())
+        navi.answer(FakeNaviSdk.OTHER)
+        waitFor { navi.waypointRequests >= 2 }
+        assertTrue(!call.isCompleted)
+        navi.answerWaypoints(listOf(WaypointFields("코엑스", "동", coex.poiId)))
+        navi.answer(FakeNaviSdk.OTHER)
+        val result = call.await()
+
+        assertEquals(null, result.isError)
+        val structured = JSONObject(result.structuredContent.toString())
+        assertEquals("APPLIED", structured.getString("status"))
+        assertEquals("coex", structured.getJSONObject("waypoint").getString("candidateId"))
+        assertTrue(!structured.toString().contains("latitude"))
+        waitFor { finished.isNotEmpty() }
+        assertEquals(listOf("navigation_add_waypoint:APPLIED"), finished.toList())
+        client.close()
+    }
+
+    @Test
+    fun anUnknownCandidateOrAWrongArgumentNeverReachesTheWaypointSdk() = runBlocking {
+        val client = client(serve(NavigationFixtures.catalogWith("adopted")))
+        for (name in listOf("add_navigation_waypoint", "remove_navigation_waypoint")) {
+            val unknown =
+                withTimeout(5_000) { client.callTool(name, mapOf("candidateId" to "busan")) }
+            assertEquals(name, true, unknown.isError)
+            val structured = JSONObject(unknown.structuredContent.toString())
+            assertEquals(name, "UNKNOWN_CANDIDATE", structured.getString("code"))
+            assertEquals(name, false, structured.getBoolean("sent"))
+
+            for (arguments in
+                listOf(
+                    emptyMap(),
+                    mapOf("candidateId" to 3),
+                    mapOf("candidateId" to "coex", "index" to "ALL"),
+                )) {
+                val refused = withTimeout(5_000) { client.callTool(name, arguments) }
+                assertEquals("$name $arguments", true, refused.isError)
+                assertEquals("$name $arguments", null, refused.structuredContent)
+                assertTrue(
+                    (refused.content.single() as TextContent)
+                        .text
+                        .startsWith("Input validation error:")
+                )
+            }
+        }
+        val extra =
+            withTimeout(5_000) {
+                client.callTool("get_navigation_waypoints", mapOf("candidateId" to "coex"))
+            }
+        assertEquals(true, extra.isError)
+        assertEquals(0, navi.requests)
+        assertEquals(0, navi.waypointRequests)
+        assertEquals(0, navi.addedWaypoints.size)
+        assertEquals(0, navi.removedWaypoints.size)
         client.close()
     }
 
