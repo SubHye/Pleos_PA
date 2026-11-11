@@ -97,9 +97,43 @@ class NotificationPermissionRuntimeTest {
                         )
                         .flatMap { root.findAccessibilityNodeInfosByViewId(it) }
                         .distinctBy { it.viewIdResourceName }
-                val button =
-                    candidates.firstOrNull { it.isVisibleToUser && it.isEnabled }
-                        ?: return@await false
+                val standard = candidates.firstOrNull { it.isVisibleToUser && it.isEnabled }
+                // Automotive permission UI uses a labelled list row and a sibling touch target.
+                // Keep the controller + distinct diagnostic label guard above; never use
+                // coordinates.
+                val carButton =
+                    if (
+                        standard == null &&
+                            context.packageManager.hasSystemFeature(
+                                PackageManager.FEATURE_AUTOMOTIVE
+                            )
+                    ) {
+                        val controllerContext = context.createPackageContext(controller, 0)
+                        val denyId =
+                            controllerContext.resources.getIdentifier(
+                                "grant_dialog_button_deny",
+                                "string",
+                                controller,
+                            )
+                        val denyLabels = buildSet {
+                            if (denyId != 0) add(controllerContext.getString(denyId))
+                            addAll(listOf("허용 안함", "허용 안 함", "Don't allow", "Don’t allow"))
+                        }
+                        root
+                            .findAccessibilityNodeInfosByViewId(
+                                "$controller:id/car_ui_list_item_title"
+                            )
+                            .filter { it.isVisibleToUser && it.text?.toString() in denyLabels }
+                            .flatMap { title ->
+                                title.parent
+                                    ?.findAccessibilityNodeInfosByViewId(
+                                        "$controller:id/car_ui_list_item_touch_interceptor"
+                                    )
+                                    .orEmpty()
+                            }
+                            .singleOrNull { it.isVisibleToUser && it.isEnabled && it.isClickable }
+                    } else null
+                val button = standard ?: carButton ?: return@await false
                 denied = button.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                 denied
             }
