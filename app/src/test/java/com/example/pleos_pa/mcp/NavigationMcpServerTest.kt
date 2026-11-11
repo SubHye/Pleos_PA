@@ -26,6 +26,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.builtins.ListSerializer
@@ -81,6 +82,7 @@ class NavigationMcpServerTest {
     private val navi = FakeNaviSdk()
     private val destinations = DestinationReader(navi, scheduler, "simulation", 10_000L)
     private var server: EmbeddedMcpServer? = null
+    @Volatile private var drivingBlock: String? = null
 
     private fun serve(navigationCatalog: NavigationCatalog): Int {
         destinations.open()
@@ -94,6 +96,7 @@ class NavigationMcpServerTest {
                 navigationCatalog.confirmTimeoutMs,
                 POLL_MILLIS,
                 navigationCatalog.matchToleranceDegrees,
+                restriction = { drivingBlock },
             )
         val places = NavigationFixtures.places
         val tools =
@@ -198,6 +201,28 @@ class NavigationMcpServerTest {
             ),
             finished.toList(),
         )
+        client.close()
+    }
+
+    @Test
+    fun mcpChangeIsRefusedBeforeSdkAndIsNotRetriedWhenRestrictionsLift() = runBlocking {
+        val client = client(serve(NavigationFixtures.catalogWith("adopted")))
+        for (code in
+            listOf(DestinationSetter.DRIVING_RESTRICTED, DestinationSetter.DRIVING_STATE_UNKNOWN)) {
+            drivingBlock = code
+            val result =
+                withTimeout(5_000) {
+                    client.callTool("set_navigation_destination", mapOf("candidateId" to "coex"))
+                }
+            val value = JSONObject(result.structuredContent.toString())
+            assertEquals(true, result.isError)
+            assertEquals(code, value.getString("code"))
+            assertEquals(false, value.getBoolean("sent"))
+        }
+        drivingBlock = null
+        delay(100)
+        assertEquals(0, navi.routes.size)
+        assertEquals(0, navi.requests)
         client.close()
     }
 

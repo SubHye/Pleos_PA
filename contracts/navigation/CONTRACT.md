@@ -162,7 +162,7 @@
 | 1 | 연결이 중지되지 않았다 | `CONNECTION_STOPPED` |
 | 2 | Pleos 에뮬레이터다 | `APP_NOT_READY` |
 | 3 | 내비 서비스에 연결됐다 | `NAVI_NOT_CONNECTED` |
-| 4 | 주행 규제 | **검사하지 않는다.** 아래 한계 |
+| 4 | 현재 공개 Car UX가 DO=false/flags=0이고 현재 사용자의 DRIVER/MAIN 영역이 기본 display0임을 확인 | `DRIVING_RESTRICTED` 또는 `DRIVING_STATE_UNKNOWN` |
 | 5 | 요청 전 목적지를 읽었다(`baselineDeadlineMs`, 조회 슬롯 사용) | `BASELINE_UNAVAILABLE`. 다른 조회가 진행 중일 때(`BUSY`)도 같다 |
 | 6 | 요청 전 목적지가 요청한 장소가 아니다 | `ALREADY_SET`. 오류가 아니며 바꾼 것이 없다 |
 
@@ -202,6 +202,8 @@
 | `CONNECTION_STOPPED` | false | 접수 전 또는 조건 검사 중 중지 |
 | `APP_NOT_READY`, `NAVI_NOT_CONNECTED` | false | 조회와 같은 뜻 |
 | `BASELINE_UNAVAILABLE` | false | 요청 전 목적지를 읽지 못함 |
+| `DRIVING_RESTRICTED` | false | DO 또는 활성 UX 제한이 있어 실행 전 차단 |
+| `DRIVING_STATE_UNKNOWN` | false | 최신 UX/운전자 표시 영역 확인 실패 또는 검사 미연결 |
 | `PERMISSION_DENIED` | false | `requestRoute`가 `SecurityException`(원인 체인 포함) |
 | `OUTCOME_UNKNOWN` | true | 제한 시간 안에 일치 없음, 또는 `requestRoute`의 그 밖의 예외, 또는 응답 유실 |
 | `CONNECTION_STOPPED` | true | 요청을 넘긴 뒤 중지 |
@@ -232,7 +234,7 @@
 
 ### 한계
 
-- **주행 규제를 검사하지 않는다.** 규제가 켜져 있어도 목적지가 설정된다. FR-UI-04의 실행 차단은 미충족이며 AT-11은 수행하지 않았다. 검사를 끼울 자리(`DestinationSetter`의 `restriction`)만 있고, 규제 상태를 읽는 코드가 병합되면 연결한다.
+- 주행 규제는 서비스 수명의 `CarNavigationGuard`가 실제 Car UX/occupant 매핑을 매번 새로 읽어 검사한다. DO 또는 하나라도 있는 제한은 차단하고, 초기 연결 중/정보 상실/권한·API 오류/운전자 MAIN 영역 미확인은 기본 차단한다. Activity가 가려져도 검사는 유지된다. 사전 조회 완료 뒤와 SDK 호출 직전에도 재검사하며, 해제 시 자동 재실행하지 않는다. 새 가드의 실제 Pleos 기기 검증은 아직 수행하지 않았으므로 과거 목적지 설정 실측을 이 변경의 AT-11 통과로 재사용하지 않는다.
 - 설정 한 번에 7.0~9.0초가 걸렸다(위 관찰). 도구 시간만으로 종단간 5초 목표(요구사항 6.2)를 넘는다.
 - 결과를 차량 화면이나 음성으로 알리지 않는다. 되돌리기는 없다(COM-44).
 

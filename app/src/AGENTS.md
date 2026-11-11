@@ -8,7 +8,7 @@
 | `main/java/com/example/pleos_pa/MainActivity.kt` | 연결 시작·중지·재개와 상태를 보여 주는 최소 화면 |
 | `main/java/com/example/pleos_pa/connection/` | Foreground Service, 알림, 세션과 명령 순서, 메모리 상태 |
 | `main/java/com/example/pleos_pa/bridge/` | 조회기로 넘기는 게이트웨이와 그 응답 형식. COM-12 전의 HTTP Bridge에서 남은 앱 안 경계다 |
-| `main/java/com/example/pleos_pa/navigation/` | 내비 조회 슬롯(`DestinationReader`)과 NaviHelper 경계(`NaviSdk`, `PleosNaviSdk`). [내비 계약](../../contracts/navigation/CONTRACT.md)을 따른다. SDK 호출은 `getDestinationInfo`와 `requestRoute` 둘뿐이다. 내비 변경 요청 하나를 한 작업으로 처리하는 조정기(`NavTaskCoordinator`)는 실행 조건 검사, 처리 중 BUSY, 첫 실패 중단, 연결 중지 후 미실행 동작 차단을 맡으며, SDK에 의존하지 않고 조건과 동작을 주입받는다. 목적지 설정(`DestinationSetter`)이 그 조정기로 요청 전 조회 → `requestRoute` → 재조회 좌표 확인을 한 작업으로 처리한다. 주행 규제 검사는 끼울 자리만 있고 연결하지 않았다 |
+| `main/java/com/example/pleos_pa/navigation/` | 내비 조회 슬롯(`DestinationReader`)과 NaviHelper 경계(`NaviSdk`, `PleosNaviSdk`). [내비 계약](../../contracts/navigation/CONTRACT.md)을 따른다. SDK 호출은 `getDestinationInfo`와 `requestRoute` 둘뿐이다. 내비 변경 요청 하나를 한 작업으로 처리하는 조정기(`NavTaskCoordinator`)는 실행 조건 검사, 처리 중 BUSY, 첫 실패 중단, 연결 중지 후 미실행 동작 차단을 맡으며, SDK에 의존하지 않고 조건과 동작을 주입받는다. 목적지 설정(`DestinationSetter`)이 그 조정기로 요청 전 조회 → `requestRoute` → 재조회 좌표 확인을 한 작업으로 처리한다. 서비스 소유 `CarNavigationGuard`가 최신 공개 Car UX와 DRIVER/MAIN 매핑을 실행 전 확인하며 `NavigationDrivingPolicy`가 규제/정보 상실을 기본 차단한다. 사전 조회 대기 뒤와 SDK 호출 직전 재검사한다. 실제 가드의 Pleos 검수는 별도다 |
 | `main/java/com/example/pleos_pa/vehicle/` | 앱 전체 조회 슬롯, SDK 경계와 97개 속성의 호출 표, 실행 환경 판별 |
 | `main/java/com/example/pleos_pa/mcp/` | MCP 서버(`127.0.0.1:18766/mcp`, stateless Streamable HTTP). 두 카탈로그의 채택 도구, 입력 스키마와 인자 검사, 결과 글과 structuredContent. 내비 도구는 `NavigationTool` 구현 셋(`NavigationDestinationTool` 조회, `NavigationPlaceTool` 장소 찾기, `NavigationSetDestinationTool` 목적지 설정)과 `NavigationToolResult`다. 카탈로그에서 `adopted`인 도구만 올린다 |
 | `main/java/com/example/pleos_pa/contract/` | [차량 조회 계약](../../contracts/vehicle-read/CONTRACT.md)의 요청·응답 모델과 검증, SDK 실패 분류. 내비 카탈로그와 목적지 판정(`NavigationDestination`), 고정 장소 목록과 장소 대조(`PlaceCatalog`), 재조회 좌표 일치 판정(`DestinationMatch`). SDK와 Android 컴포넌트에 의존하지 않는다 |
@@ -17,6 +17,6 @@
 | `test/java/com/example/pleos_pa/{connection,vehicle}/` | SDK 대역으로 세션·조회기를 검사하는 JVM 테스트. 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/navigation/` | NaviHelper 대역으로 내비 조회 슬롯과 목적지 설정 작업(공용 `set-destination-cases.json` 포함)을, 모의 조건·동작으로 작업 상태 전이와 호출 순서를 검사하는 JVM 테스트. 내비 SDK와 실제 반영 검증이 아니다 |
 | `test/java/com/example/pleos_pa/` | 산술 예제 1개 |
-| `androidTest/java/com/example/pleos_pa/` | 기기 테스트. 현재 예제 1개이며 CI 범위 밖이다 |
+| `androidTest/java/com/example/pleos_pa/` | 기기 테스트. 예제와 별도 `.com9guard` 패키지의 실제 Car 실행 정책 읽기 검사가 있다. 후자는 내비 SDK/차량 변경을 호출하지 않고 `expectedDrivingPolicy`에 지정한 실제 P/D 정책을 비교한다. 실제 Pleos 실행과 CI 모의 검증을 구분한다 |
 
 기능을 추가하면 이 표에 실제 위치를 함께 갱신한다. SDK 접근은 Android Adapter에 둔다 ([ADR-0008](../../docs/decisions/0008-embedded-mcp-server.md)).
