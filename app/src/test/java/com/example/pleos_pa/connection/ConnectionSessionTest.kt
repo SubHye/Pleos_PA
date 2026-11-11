@@ -61,7 +61,7 @@ class ConnectionSessionTest {
         assertEquals(listOf<ConnectionStatus>(ConnectionStatus.Starting), reported)
 
         finishBind()
-        assertEquals(ConnectionStatus.Connected(), reported.last())
+        assertEquals(ConnectionStatus.Connected, reported.last())
         assertTrue(ended.isEmpty())
     }
 
@@ -100,7 +100,7 @@ class ConnectionSessionTest {
         finishBind()
         release()
 
-        assertTrue(ConnectionStatus.Connected() !in reported)
+        assertTrue(ConnectionStatus.Connected !in reported)
         assertEquals(listOf<ConnectionStatus>(ConnectionStatus.Stopped), ended)
         assertTrue("bind1" !in steps)
     }
@@ -142,42 +142,6 @@ class ConnectionSessionTest {
         assertEquals(1, steps.count { it == "reader1" })
         release()
         assertEquals(1, ended.size)
-    }
-
-    @Test
-    fun aLostPeerMarksTheConnectionUntilTheNextRequest() {
-        controller.start()
-        finishBind()
-
-        controller.peerClosedDuringRead()
-        assertEquals(ConnectionStatus.Connected(interrupted = true), reported.last())
-
-        controller.requestReceived()
-        assertEquals(ConnectionStatus.Connected(), reported.last())
-    }
-
-    @Test
-    fun aRequestOnAHealthyConnectionReportsNothing() {
-        controller.start()
-        finishBind()
-        val before = reported.size
-
-        controller.requestReceived()
-        assertEquals(before, reported.size)
-    }
-
-    @Test
-    fun aLostPeerChangesNothingBeforeConnectingOrDuringTeardown() {
-        controller.start()
-        controller.peerClosedDuringRead()
-        assertEquals(listOf<ConnectionStatus>(ConnectionStatus.Starting), reported)
-
-        finishBind()
-        controller.stop()
-        val before = reported.size
-        controller.peerClosedDuringRead()
-        controller.requestReceived()
-        assertEquals(before, reported.size)
     }
 
     @Test

@@ -1,0 +1,93 @@
+[
+  {
+    "id": "korean_exact",
+    "evidence": "mock",
+    "note": "표시명 그대로",
+    "query": "서울역",
+    "expect": { "status": "SINGLE", "keys": ["seoul_station"] }
+  },
+  {
+    "id": "english_alias",
+    "evidence": "mock",
+    "note": "영문 별칭",
+    "query": "Seoul Station",
+    "expect": { "status": "SINGLE", "keys": ["seoul_station"] }
+  },
+  {
+    "id": "english_spacing_and_case",
+    "evidence": "mock",
+    "note": "공백·대소문자가 달라도 같은 장소",
+    "query": "  seoul  STATION ",
+    "expect": { "status": "SINGLE", "keys": ["seoul_station"] }
+  },
+  {
+    "id": "english_upper",
+    "evidence": "mock",
+    "note": "영문 대문자 별칭",
+    "query": "COEX",
+    "expect": { "status": "SINGLE", "keys": ["coex"] }
+  },
+  {
+    "id": "english_lower",
+    "evidence": "mock",
+    "note": "영문 소문자",
+    "query": "coex",
+    "expect": { "status": "SINGLE", "keys": ["coex"] }
+  },
+  {
+    "id": "korean_alias",
+    "evidence": "mock",
+    "note": "한글 표기",
+    "query": "코엑스",
+    "expect": { "status": "SINGLE", "keys": ["coex"] }
+  },
+  {
+    "id": "word_order_alias",
+    "evidence": "mock",
+    "note": "어순이 다른 별칭",
+    "query": "판교 현대백화점",
+    "expect": { "status": "SINGLE", "keys": ["hyundai_pangyo"] }
+  },
+  {
+    "id": "query_contains_alias",
+    "evidence": "mock",
+    "note": "질의가 별칭을 포함한다. 군더더기는 AI가 덜어내는 것이 원칙이다",
+    "query": "서울역 3번 출구",
+    "expect": { "status": "SINGLE", "keys": ["seoul_station"] }
+  },
+  {
+    "id": "korean_ambiguous",
+    "evidence": "mock",
+    "note": "두 장소가 '판교'를 포함한다. 목록 순서로 낸다",
+    "query": "판교",
+    "expect": { "status": "MULTIPLE", "keys": ["pangyo_station", "hyundai_pangyo"] }
+  },
+  {
+    "id": "english_ambiguous",
+    "evidence": "mock",
+    "note": "영문으로도 여러 개",
+    "query": "Pangyo",
+    "expect": { "status": "MULTIPLE", "keys": ["pangyo_station", "hyundai_pangyo"] }
+  },
+  {
+    "id": "not_listed",
+    "evidence": "mock",
+    "note": "목록에 없는 장소. 목록 전체를 대신 돌려주지 않는다",
+    "query": "부산역",
+    "expect": { "status": "NO_MATCH", "keys": [] }
+  },
+  {
+    "id": "empty",
+    "evidence": "mock",
+    "note": "빈 질의는 모든 장소에 포함되므로 없음으로 본다",
+    "query": "",
+    "expect": { "status": "NO_MATCH", "keys": [] }
+  },
+  {
+    "id": "blank",
+    "evidence": "mock",
+    "note": "공백만 있는 질의",
+    "query": "   ",
+    "expect": { "status": "NO_MATCH", "keys": [] }
+  }
+]

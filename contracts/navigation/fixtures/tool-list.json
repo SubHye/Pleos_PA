@@ -14,5 +14,49 @@
       "idempotentHint": false,
       "openWorldHint": false
     }
+  },
+  {
+    "name": "find_navigation_place",
+    "title": "목적지로 쓸 장소 찾기",
+    "description": "목적지로 쓸 장소를 차량 앱의 고정 장소 목록에서 찾습니다. query에는 장소 이름만 넣으세요. 일정에 적힌 층·회의실·출구 같은 말은 빼고 장소 부분만 넣습니다. status가 SINGLE이면 후보가 한 개, MULTIPLE이면 여러 개, NO_MATCH이면 없음입니다. 여러 개면 임의로 고르지 말고 사용자에게 물어보세요. 목록에 없는 장소는 목적지로 설정하지 않습니다. 없음이면 목적지를 설정하지 말고 사용자에게 알리세요. 목록 전체는 돌려주지 않습니다. 좌표는 돌려주지 않으며 내비를 바꾸지 않습니다.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "찾을 장소 이름. 층·회의실 같은 말은 빼고 장소 부분만 넣습니다."
+        }
+      },
+      "required": ["query"],
+      "$schema": "https://json-schema.org/draft/2020-12/schema"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "set_navigation_destination",
+    "title": "내비 목적지 설정",
+    "description": "find_navigation_place가 돌려준 candidateId 하나를 받아 순정 내비의 목적지로 설정하고 안내를 시작합니다. 지금 안내 중인 목적지가 있으면 대체합니다. 주소, 좌표, 장소 이름은 받지 않습니다. 목록에 없는 장소는 목적지로 설정하지 않습니다. 차량 앱이 설정 뒤 현재 목적지를 다시 읽어 좌표가 일치할 때만 status APPLIED로 답하며, 10초 안팎이 걸릴 수 있습니다. ALREADY_SET은 이미 그 장소가 목적지라 바꾸지 않았다는 뜻입니다. code가 OUTCOME_UNKNOWN이면 요청은 보냈지만 반영을 확인하지 못한 것이니 성공이나 실패로 단정하지 말고, 다시 호출하지 말고 get_navigation_destination으로 확인하세요. 사용자가 목적지 변경을 요청했을 때만 호출하세요.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "candidateId": {
+          "type": "string",
+          "description": "find_navigation_place가 돌려준 candidateId. 다른 값은 받지 않습니다."
+        }
+      },
+      "required": ["candidateId"],
+      "$schema": "https://json-schema.org/draft/2020-12/schema"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
   }
 ]

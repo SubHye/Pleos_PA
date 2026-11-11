@@ -2,13 +2,18 @@ package com.example.pleos_pa.contract
 
 import org.json.JSONObject
 
-/** One navigation tool. Only `adopted` tools are offered to MCP clients. */
+/**
+ * One navigation tool. Only `adopted` tools are offered to MCP clients. [kind] is `read` or
+ * `change`; a change tool alters the stock navigation app. [sdkCall] and [permission] are null for
+ * a tool that never reaches the SDK.
+ */
 data class NavigationToolEntry(
     val name: String,
     val title: String,
     val description: String,
-    val sdkCall: String,
-    val permission: String,
+    val kind: String,
+    val sdkCall: String?,
+    val permission: String?,
     val adoption: String,
 )
 
@@ -19,12 +24,20 @@ private constructor(
     val verifiedOn: String?,
     val deadlineMs: Long,
     val staleHoldMs: Long,
+    /** What the read before a destination change may spend. */
+    val baselineDeadlineMs: Long,
+    /** How long a destination change waits for the destination read back to match. */
+    val confirmTimeoutMs: Long,
+    val confirmPollMs: Long,
+    val matchToleranceDegrees: Double,
     val tools: List<NavigationToolEntry>,
 ) {
     fun tool(name: String): NavigationToolEntry? = tools.firstOrNull { it.name == name }
 
     companion object {
         const val ASSET = "navigation-catalog.json"
+        const val KIND_READ = "read"
+        const val KIND_CHANGE = "change"
 
         fun parse(text: String): NavigationCatalog {
             val root = JSONObject(text)
@@ -37,18 +50,26 @@ private constructor(
                         name = tool.getString("name"),
                         title = tool.getString("title"),
                         description = tool.getString("description"),
-                        sdkCall = tool.getString("sdkCall"),
-                        permission = tool.getString("permission"),
+                        kind = tool.getString("kind"),
+                        sdkCall = tool.stringOrNull("sdkCall"),
+                        permission = tool.stringOrNull("permission"),
                         adoption = tool.getString("adoption"),
                     )
                 }
             return NavigationCatalog(
                 sdk = root.getString("sdk"),
-                verifiedOn = if (root.isNull("verifiedOn")) null else root.getString("verifiedOn"),
+                verifiedOn = root.stringOrNull("verifiedOn"),
                 deadlineMs = limits.getLong("deadlineMs"),
                 staleHoldMs = limits.getLong("staleHoldMs"),
+                baselineDeadlineMs = limits.getLong("baselineDeadlineMs"),
+                confirmTimeoutMs = limits.getLong("confirmTimeoutMs"),
+                confirmPollMs = limits.getLong("confirmPollMs"),
+                matchToleranceDegrees = limits.getDouble("matchToleranceDegrees"),
                 tools = tools,
             )
         }
+
+        private fun JSONObject.stringOrNull(name: String): String? =
+            if (isNull(name)) null else getString(name)
     }
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Test support only. The product app never requests NAVI_ROUTE_SEARCH. -->
+    <uses-permission android:name="pleos.car.permission.NAVI_ROUTE" />
+    <uses-permission android:name="pleos.car.permission.NAVI_ROUTE_SEARCH" />
+
+    <application
+        android:allowBackup="false"
+        android:label="nav-place-check"
+        android:theme="@android:style/Theme.DeviceDefault">
+        <!-- Exported so `adb shell am start` can reach it; DUMP keeps other apps out (shell holds it). -->
+        <activity
+            android:name=".CheckActivity"
+            android:exported="true"
+            android:permission="android.permission.DUMP" />
+    </application>
+
+</manifest>

@@ -12,10 +12,18 @@ abstract class CatalogAsset : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val navigationCatalog: RegularFileProperty
 
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val navigationPlaces: RegularFileProperty
+
     @get:OutputDirectory abstract val outputDir: DirectoryProperty
 
     @TaskAction
     fun copy() {
+        navigationPlaces
+            .get()
+            .asFile
+            .copyTo(outputDir.file("navigation-places.json").get().asFile, overwrite = true)
         catalog.get().asFile.copyTo(outputDir.file("catalog.json").get().asFile, overwrite = true)
         navigationCatalog
             .get()
@@ -30,6 +38,9 @@ val catalogAsset =
         navigationCatalog.set(
             rootProject.layout.projectDirectory.file("contracts/navigation/catalog.json")
         )
+        navigationPlaces.set(
+            rootProject.layout.projectDirectory.file("contracts/navigation/places.json")
+        )
     }
 
 androidComponents {
@@ -39,6 +50,7 @@ androidComponents {
 }
 
 android {
+    useLibrary("android.car", false)
     namespace = "com.example.pleos_pa"
     compileSdk {
         version = release(37)
@@ -52,9 +64,29 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["com5DiagnosticsEnabled"] = false
+        manifestPlaceholders["com5AppLabel"] = "@string/app_name"
     }
 
+    buildFeatures { resValues = true }
+
     buildTypes {
+        debug {
+            val com5Diagnostic = providers.gradleProperty("com5Diagnostic").orNull == "true"
+            val com9GuardDiagnostic =
+                providers.gradleProperty("com9GuardDiagnostic").orNull == "true"
+            require(!(com5Diagnostic && com9GuardDiagnostic)) {
+                "Choose either com5Diagnostic or com9GuardDiagnostic, not both"
+            }
+            if (com5Diagnostic) {
+                applicationIdSuffix = ".com5"
+                manifestPlaceholders["com5DiagnosticsEnabled"] = true
+                manifestPlaceholders["com5AppLabel"] = "@string/com22_app_name"
+            } else if (com9GuardDiagnostic) {
+                applicationIdSuffix = ".com9guard"
+                resValue("string", "app_name", "Pleos PA 규제 검수 (.com9guard)")
+            }
+        }
         release {
             optimization {
                 enable = true
@@ -91,4 +123,6 @@ dependencies {
     testImplementation(libs.ktor.client.cio)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.mcp.kotlin.sdk.client)
+    androidTestImplementation(libs.ktor.client.cio)
 }

@@ -4,6 +4,8 @@ import com.example.pleos_pa.bridge.BridgeEvents
 import com.example.pleos_pa.bridge.ReaderBridgeGateway
 import com.example.pleos_pa.contract.ContractFixtures
 import com.example.pleos_pa.contract.jsonEquivalent
+import com.example.pleos_pa.ui.HistoryPresentation
+import com.example.pleos_pa.ui.RequestHistory
 import com.example.pleos_pa.vehicle.FakeVehicleSdk
 import com.example.pleos_pa.vehicle.PropertyCapability
 import com.example.pleos_pa.vehicle.ReadScheduler
@@ -63,14 +65,9 @@ class EmbeddedMcpServerTest {
     private val sdk = FakeVehicleSdk()
     private val reader = VehicleReader(catalog, sdk, scheduler, "pleos_emulator")
     private val finished = CopyOnWriteArrayList<String>()
-    private val peersLost = CopyOnWriteArrayList<Unit>()
     private val events =
         object : BridgeEvents {
             override fun requestReceived() = Unit
-
-            override fun peerClosedDuringRead() {
-                peersLost += Unit
-            }
 
             override fun ownReplyRejected() = Unit
 
@@ -83,7 +80,15 @@ class EmbeddedMcpServerTest {
                 finished += result
             }
         }
-    private val gateway = ReaderBridgeGateway(catalog, reader, scheduler, events)
+    private val history = RequestHistory()
+    private val gateway =
+        ReaderBridgeGateway(
+            catalog,
+            reader,
+            scheduler,
+            events,
+            HistoryPresentation(history, { catalog.tools.getValue(it).name }),
+        )
     private val tool = VehicleReadTool(catalog, gateway, events) { scheduler.nowMillis() }
     private val server = EmbeddedMcpServer(catalog, tool, port = 0)
     private var port = -1
@@ -217,6 +222,40 @@ class EmbeddedMcpServerTest {
     }
 
     @Test
+    fun aCompletedMcpReadEntersTheUiHistory() = runBlocking {
+        val client = connectedClient()
+        try {
+            val call = async(Dispatchers.IO) { client.callTool("get_energy_level", emptyMap()) }
+            answerEnergy(battery = 80, fuel = 62)
+            val response = withTimeout(5_000) { call.await() }.structuredContent!!
+            val row = history.snapshot().single()
+            assertEquals(response.getValue("requestId").jsonPrimitive.content, row.requestId)
+            assertEquals("get_energy_level", row.tool)
+            assertEquals("COMPLETE", row.state)
+            assertEquals("pleos_emulator", row.source)
+            assertTrue(row.details.contains("EV_BATTERY_PERCENT: OK · 80"))
+        } finally {
+            client.close()
+        }
+    }
+
+    @Test
+    fun clearingUiHistoryDuringMcpReadDoesNotResurrectTheReply() = runBlocking {
+        val client = connectedClient()
+        try {
+            val call = async(Dispatchers.IO) { client.callTool("get_energy_level", emptyMap()) }
+            waitFor { sdk.calls.size == 1 }
+            assertEquals(1, history.snapshot().size)
+            history.clear()
+            answerEnergy(battery = 80, fuel = 62)
+            assertEquals(null, withTimeout(5_000) { call.await() }.isError)
+            assertTrue(history.snapshot().isEmpty())
+        } finally {
+            client.close()
+        }
+    }
+
+    @Test
     fun aSecondCallDuringAReadIsBusyWithoutQueueing() = runBlocking {
         val client = connectedClient()
         val first = async(Dispatchers.IO) { client.callTool("get_energy_level", emptyMap()) }
@@ -257,7 +296,6 @@ class EmbeddedMcpServerTest {
         val client = connectedClient()
         val busy = withTimeout(5_000) { client.callTool("get_energy_level", emptyMap()) }
         assertEquals(JsonPrimitive("BUSY"), busy.structuredContent!!["code"])
-        assertEquals(emptyList<Unit>(), peersLost)
 
         // Once the SDK answers, the abandoned read ends and the slot is free again.
         answerEnergy(battery = 80, fuel = 62)

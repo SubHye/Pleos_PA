@@ -12,6 +12,9 @@ internal object NavigationFixtures {
     val catalogText: String = File(root, "catalog.json").readText()
     val catalog: NavigationCatalog = NavigationCatalog.parse(catalogText)
 
+    val placesText: String = File(root, "places.json").readText()
+    val places: PlaceCatalog = PlaceCatalog.parse(placesText)
+
     /** The catalog with every tool set to [adoption], for tests of what is offered. */
     fun catalogWith(adoption: String): NavigationCatalog {
         val root = JSONObject(catalogText)

@@ -28,6 +28,17 @@ internal class FakeNaviSdk : NaviSdk {
         }
     }
 
+    /** Every `requestRoute` handed over, in order. */
+    val routes = mutableListOf<RouteRequest>()
+
+    /** What the next [requestRoute] throws instead of returning. */
+    var throwRoute: Exception? = null
+
+    override fun requestRoute(route: RouteRequest, returned: (Exception?) -> Unit) {
+        routes += route
+        returned(throwRoute.also { throwRoute = null })
+    }
+
     override fun close(closed: () -> Unit) {
         this.closed++
         closed()
@@ -240,6 +251,56 @@ class DestinationReaderTest {
 
         assertTrue(replies.isEmpty())
         assertEquals(1, sdk.requests)
+    }
+
+    @Test
+    fun aWatcherSeesEveryCallbackUntilItStops() {
+        val reader = connected()
+        val seen = mutableListOf<DestinationFields>()
+        val stop = reader.watch { seen += it }
+        sdk.answer(FakeNaviSdk.OTHER)
+        scheduler.runAll()
+        reader.readNow()
+        sdk.answer()
+        scheduler.runAll()
+
+        // The read in progress still gets its answer.
+        assertEquals(listOf(FakeNaviSdk.OTHER, FakeNaviSdk.GUIDING), seen)
+        assertEquals(1, replies.size)
+
+        stop()
+        sdk.answer()
+        scheduler.runAll()
+        assertEquals(2, seen.size)
+    }
+
+    @Test
+    fun aProbeAsksTheSdkWithoutTakingTheSlotOrLeavingAHold() {
+        val reader = connected()
+        reader.probe()
+        assertEquals(1, sdk.requests)
+
+        // Unanswered, it blocks nothing.
+        scheduler.advance(BUDGET + STALE_HOLD)
+        reader.readNow()
+        assertEquals(2, sdk.requests)
+        assertTrue(replies.isEmpty())
+    }
+
+    @Test
+    fun aProbeIsNotSentBeforeTheConnectionOrAfterAStop() {
+        val unconnected = reader()
+        unconnected.open()
+        unconnected.probe()
+        assertEquals(DestinationReader.NAVI_NOT_CONNECTED, unconnected.unavailable())
+
+        val reader = connected()
+        assertEquals(null, reader.unavailable())
+        reader.closeAdmission()
+        reader.probe()
+
+        assertEquals(DestinationReader.CONNECTION_STOPPED, reader.unavailable())
+        assertEquals(0, sdk.requests)
     }
 
     @Test

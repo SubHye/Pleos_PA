@@ -48,6 +48,7 @@ class DestinationReader(
     // The read whose SDK call timed out unanswered, and the timer that lifts the hold.
     private var stale: Pending? = null
     private var cancelHold: () -> Unit = {}
+    private var watcher: ((DestinationFields) -> Unit)? = null
 
     /** Connects the SDK. Once per reader; the session calls it when the connection starts. */
     fun open() {
@@ -76,6 +77,39 @@ class DestinationReader(
         scheduler.execute { admit(budgetMillis, reply) }
     }
 
+    /**
+     * Why nothing can be asked of the SDK right now, or null. Scheduler thread only. A destination
+     * change checks this before it starts.
+     */
+    fun unavailable(): String? =
+        when {
+            closed || admissionClosed -> CONNECTION_STOPPED
+            source == null -> APP_NOT_READY
+            connection != Connection.READY -> NAVI_NOT_CONNECTED
+            else -> null
+        }
+
+    /**
+     * Shows [observer] every destination callback from now on, before the slot handles it, until
+     * the returned function is called. Scheduler thread only; one observer at a time. A callback
+     * holds the destination current when it was sent, whoever asked for it, so an observer may
+     * judge its content but not which request it answers.
+     */
+    fun watch(observer: (DestinationFields) -> Unit): () -> Unit {
+        watcher = observer
+        return { if (watcher === observer) watcher = null }
+    }
+
+    /**
+     * Asks the SDK for the current destination without taking the read slot: no reply, no deadline
+     * and no hold. The answer reaches [watch]'s observer, and a read in progress may take it as its
+     * own, which is the destination current at that moment either way. It also ends a hold, as any
+     * callback does. Scheduler thread only.
+     */
+    fun probe() {
+        if (unavailable() == null) sdk.requestDestination {}
+    }
+
     /** The first step of a stop: reads that arrive from now on end with [CONNECTION_STOPPED]. */
     fun closeAdmission() {
         admissionClosed = true
@@ -89,6 +123,7 @@ class DestinationReader(
             pending?.let { finish(it, DestinationRead.Failed(CONNECTION_STOPPED)) }
             cancelHold()
             stale = null
+            watcher = null
             sdk.close(released)
         }
     }
@@ -126,6 +161,7 @@ class DestinationReader(
 
     private fun delivered(snapshot: DestinationFields, receivedAtMillis: Long) {
         if (closed) return
+        watcher?.invoke(snapshot)
         val current = pending
         when {
             current != null -> finish(current, DestinationRead.Received(snapshot, receivedAtMillis))
