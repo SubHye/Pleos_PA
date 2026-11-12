@@ -12,3 +12,11 @@ internal fun navigationRestrictionCode(
         !driverDisplayVerified -> DestinationSetter.DRIVING_STATE_UNKNOWN
         else -> null
     }
+
+/**
+ * The block code for one change request. A missing guard blocks; a present guard answers for
+ * itself, and its null means the change may run. Do not write this as `guard?.invoke() ?: UNKNOWN`:
+ * that turns the guard's "may run" into a block.
+ */
+internal fun drivingBlockCode(guard: (() -> String?)?): String? =
+    if (guard == null) DestinationSetter.DRIVING_STATE_UNKNOWN else guard()

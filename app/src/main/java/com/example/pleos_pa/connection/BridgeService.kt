@@ -39,6 +39,7 @@ import com.example.pleos_pa.navigation.NavTaskCoordinator
 import com.example.pleos_pa.navigation.PleosNaviSdk
 import com.example.pleos_pa.navigation.WaypointChanger
 import com.example.pleos_pa.navigation.WaypointReader
+import com.example.pleos_pa.navigation.drivingBlockCode
 import com.example.pleos_pa.vehicle.PleosVehicleSdk
 import com.example.pleos_pa.vehicle.ReadScheduler
 import com.example.pleos_pa.vehicle.VehicleReader
@@ -179,7 +180,7 @@ class BridgeService : Service() {
                 navigationCatalog.confirmTimeoutMs,
                 navigationCatalog.confirmPollMs,
                 navigationCatalog.matchToleranceDegrees,
-                restriction = { driving?.blockCode() ?: DestinationSetter.DRIVING_STATE_UNKNOWN },
+                restriction = { drivingBlockCode(driving?.let { it::blockCode }) },
                 shared = coordinator,
             )
         val changer =
@@ -194,7 +195,7 @@ class BridgeService : Service() {
                 navigationCatalog.confirmPollMs,
                 navigationCatalog.matchToleranceDegrees,
                 navigationCatalog.maxWaypoints,
-                restriction = { driving?.blockCode() ?: DestinationSetter.DRIVING_STATE_UNKNOWN },
+                restriction = { drivingBlockCode(driving?.let { it::blockCode }) },
             )
         val navigation =
             listOf(

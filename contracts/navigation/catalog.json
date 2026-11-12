@@ -5,7 +5,7 @@
     "deadlineMs": 10000,
     "staleHoldMs": 10000,
     "baselineDeadlineMs": 3000,
-    "confirmTimeoutMs": 15000,
+    "confirmTimeoutMs": 30000,
     "confirmPollMs": 1000,
     "maxWaypoints": 2,
     "matchToleranceDegrees": 0.00001

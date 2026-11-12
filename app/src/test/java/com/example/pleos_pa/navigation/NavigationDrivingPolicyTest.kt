@@ -35,4 +35,22 @@ class NavigationDrivingPolicyTest {
     fun onlyCurrentUnrestrictedDriverPolicyPermitsHandoff() {
         assertNull(navigationRestrictionCode(false, 0, true))
     }
+
+    @Test
+    fun aMissingGuardBlocksButAGuardThatPermitsDoesNotBecomeABlock() {
+        assertEquals(DestinationSetter.DRIVING_STATE_UNKNOWN, drivingBlockCode(null))
+        assertNull(drivingBlockCode { null })
+    }
+
+    @Test
+    fun aPresentGuardsBlockCodeIsPassedThroughUnchanged() {
+        assertEquals(
+            DestinationSetter.DRIVING_RESTRICTED,
+            drivingBlockCode { DestinationSetter.DRIVING_RESTRICTED },
+        )
+        assertEquals(
+            DestinationSetter.DRIVING_STATE_UNKNOWN,
+            drivingBlockCode { DestinationSetter.DRIVING_STATE_UNKNOWN },
+        )
+    }
 }
