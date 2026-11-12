@@ -357,7 +357,7 @@
 | 작업 상태 | 로그에 접수 → 검사 중 → 실행 중 → 성공이, 차단은 접수 → 검사 중 → 차단이 `requestId`와 함께 남는다. 로그에 후보 ID·장소 이름·주소·좌표는 없다 |
 | 복구 | 남은 경유지를 `remove_navigation_waypoint`로 지우고 `tools/nav-place-check`의 `cancel`로 안내를 취소했다. 목적지 없음과 `NO_WAYPOINTS`를 조회로 확인했다 |
 
-실제 SDK로 재현하지 않은 것: `OUTCOME_UNKNOWN`, `PERMISSION_DENIED`, `BASELINE_UNAVAILABLE`, `WAYPOINTS_UNAVAILABLE`, `NAVI_NOT_CONNECTED`, 작업 중 연결 중지, 목적지 설정과 경유지 변경 사이의 `BUSY`, 경유지 도착 이벤트, 주행 중 변경, 두 경유지가 같은 장소일 때의 `AMBIGUOUS_WAYPOINT`. 이들은 JVM 테스트의 SDK 대역으로만 확인했거나 확인하지 않았다. 외부 AI 클라이언트를 거친 종단간 실행도 하지 않았다(COM-27). `NAVI_ROUTE`와 `NAVI_ROUTE_SEARCH`는 두 권한을 모두 선언한 앱으로만 실행해 구분하지 못했다.
+실제 SDK로 재현하지 않은 것(이 실행 기준): `OUTCOME_UNKNOWN`(2026-11-12에 1회 관찰, 아래 "가드 수정 후 관찰"), `PERMISSION_DENIED`, `BASELINE_UNAVAILABLE`, `WAYPOINTS_UNAVAILABLE`, `NAVI_NOT_CONNECTED`, 작업 중 연결 중지, 목적지 설정과 경유지 변경 사이의 `BUSY`(2026-11-12에 확인, 아래 "가드 수정 후 관찰"), 경유지 도착 이벤트, 주행 중 변경, 두 경유지가 같은 장소일 때의 `AMBIGUOUS_WAYPOINT`. 이들은 JVM 테스트의 SDK 대역으로만 확인했거나 확인하지 않았다. 외부 AI 클라이언트를 거친 종단간 실행도 하지 않았다(COM-27). `NAVI_ROUTE`와 `NAVI_ROUTE_SEARCH`는 두 권한을 모두 선언한 앱으로만 실행해 구분하지 못했다.
 
 ### 가드 수정 후 관찰 (`sdk_emulator`, 2026-11-12)
 
@@ -369,10 +369,12 @@
 | 고친 뒤 기준 | 목적지 없을 때 코엑스 추가 → `NO_DESTINATION`, `sent:false` |
 | 첫 실행 | 서울역 목적지 `APPLIED`(11.0초). 이어서 코엑스 추가가 `OUTCOME_UNKNOWN`(`sent:true`, 17.0초)으로 끝났다. 응답 1초 뒤 조회는 `NO_WAYPOINTS`였고 응답 약 19초 뒤 조회에 코엑스가 있었다. 순정 내비가 당시 확인 제한 시간 15초보다 늦게 반영한 것이며, 앱은 단정하지 않고 `OUTCOME_UNKNOWN`으로 답했다. 이어서 복구용 코엑스 삭제는 `APPLIED`(13.1초) |
 | 반복 측정 | 목적지 서울역 `APPLIED`(9.1초) 뒤 코엑스 추가 → 판교역 추가 → 판교역 삭제 → 코엑스 삭제를 3회. 12회 모두 `APPLIED`, `elapsedMs` 8965~11022. `OUTCOME_UNKNOWN` 없음 |
-| 확인 제한 시간 | 위 관찰로 `confirmTimeoutMs`를 15초에서 30초로 올렸다(정상 범위 약 9~11초의 약 3배, 15초를 넘긴 1회를 포함). 느린 1회의 원인은 확정하지 못했다(Cold boot 직후 첫 경유지 변경이었다). 30초로 바꾼 빌드는 에뮬레이터에서 다시 실행하지 않았다 |
+| 확인 제한 시간 | 위 관찰로 `confirmTimeoutMs`를 15초에서 30초로 올렸다(정상 범위 약 9~11초의 약 3배, 15초를 넘긴 1회를 포함). 느린 1회의 원인은 확정하지 못했다(Cold boot 직후 첫 경유지 변경이었다) |
+| 30초 빌드 | 목적지 서울역 `APPLIED`(9.0초), 코엑스·판교역 추가 `APPLIED`(각 10.0초). 이어서 같은 장소 추가 `ALREADY_WAYPOINT`, 세 번째 추가 `WAYPOINT_LIMIT`, 없는 장소 삭제 `WAYPOINT_NOT_FOUND`. 셋 다 `sent:false`, 약 2.0초이고 조회한 경유지는 그대로였다 |
+| 동시 요청 | 판교역 삭제가 실행 중일 때 경유지 추가 → 2ms에 `BUSY`. 코엑스 삭제가 실행 중일 때 `set_navigation_destination` → 1ms에 `BUSY`(목적지 설정과 경유지 변경이 조정기 하나를 쓴다). 두 삭제는 모두 `APPLIED`(각 약 10.0초) |
 | 복구 | 매 실행 끝에 남은 경유지를 지우고 `tools/nav-place-check`의 `cancel`로 안내를 취소했다. 목적지 없음과 `NO_WAYPOINTS`를 조회로 확인했다 |
 
-가드 수정 뒤 다시 실행하지 않은 것: 차단 3종(`ALREADY_WAYPOINT`, `WAYPOINT_LIMIT`, `WAYPOINT_NOT_FOUND`), 동시 요청 `BUSY`, 주행 중 차단(`DRIVING_RESTRICTED`), AT-11. 가드 병합 전 빌드에서의 결과는 위 "제품 앱 관찰"이다.
+가드 수정 뒤에도 실행하지 않은 것: 주행 중 차단(`DRIVING_RESTRICTED`), AT-11, 30초 확인 시간 안에서 늦게 반영되는 경우(이번 30초 빌드 실행에서는 `OUTCOME_UNKNOWN`이 나오지 않았다).
 
 ### 조사 도구 관찰 (`sdk_emulator`, 2026-11-11, `WaypointActivity`)
 
