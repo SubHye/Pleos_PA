@@ -9,6 +9,7 @@
 | `main/java/com/example/pleos_pa/ui/` | 메모리 요청 기록, 검증된 조회 결과 표시, 현재 화면의 Car UX 관찰과 만료 정책, 선택적인 읽기 전용 플랫폼 관찰 메타데이터. `NavTaskHistory`는 COM-11 상태를 기록으로 전달하는 표시 어댑터이며 실제 내비 실행 경로에는 아직 연결되지 않았다 |
 | `debug/java/com/example/pleos_pa/ui/` | 모의 화면, .com5 전용 공용 기록 재시작 probe와 실제 Car UX 점검 화면. 모의 화면/재시작 probe는 SDK·MCP 서버를 사용하지 않는다. 실제 점검 화면은 공개 Car UX 조회와 기존 실제 서비스 제어만 사용하고 값 주입/변경은 하지 않는다 |
 | `main/java/com/example/pleos_pa/connection/` | Foreground Service, 알림, 세션과 명령 순서, 메모리 상태 |
+| `debug/java/com/example/pleos_pa/relay/` | COM-55 실험 브랜치 전용. debug 빌드에서만 중계 서버로 먼저 연결하는 WebSocket 클라이언트, 내비 도구를 넣지 않은 두 번째 MCP 엔드포인트와의 합성, adb로 주소·토큰을 받는 수신기. `main`의 `connection/EndpointHook`은 기본이 그대로 통과이며 debug 수신기만 바꾼다. 제품 기능이 아니다 |
 | `main/java/com/example/pleos_pa/bridge/` | 조회기로 넘기는 게이트웨이와 그 응답 형식. COM-12 전의 HTTP Bridge에서 남은 앱 안 경계다 |
 | `main/java/com/example/pleos_pa/navigation/` | 내비 조회 슬롯(`DestinationReader`)과 NaviHelper 경계(`NaviSdk`, `PleosNaviSdk`). [내비 계약](../../contracts/navigation/CONTRACT.md)을 따른다. SDK 호출은 `getDestinationInfo`와 `requestRoute` 둘뿐이다. 내비 변경 요청 하나를 한 작업으로 처리하는 조정기(`NavTaskCoordinator`)는 실행 조건 검사, 처리 중 BUSY, 첫 실패 중단, 연결 중지 후 미실행 동작 차단을 맡으며, SDK에 의존하지 않고 조건과 동작을 주입받는다. 목적지 설정(`DestinationSetter`)이 그 조정기로 요청 전 조회 → `requestRoute` → 재조회 좌표 확인을 한 작업으로 처리한다. 서비스 소유 `CarNavigationGuard`가 최신 공개 Car UX와 DRIVER/MAIN 매핑을 실행 전 확인하며 `NavigationDrivingPolicy`가 규제/정보 상실을 기본 차단한다. 사전 조회 대기 뒤와 SDK 호출 직전 재검사한다. 실제 가드의 Pleos 검수는 별도다 |
 | `main/java/com/example/pleos_pa/vehicle/` | 앱 전체 조회 슬롯, SDK 경계와 97개 속성의 호출 표, 실행 환경 판별 |
@@ -18,6 +19,7 @@
 | `test/java/com/example/pleos_pa/contract/` | 공용 fixture·고정 장소 목록·SDK 클래스 대조로 계약을 고정하는 JVM 테스트. SDK를 실행하지 않으므로 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/{connection,vehicle,ui}/` | SDK 대역으로 세션·조회기·기록 표시 모델을 검사하는 JVM 테스트. 차량 기능 검증이 아니다 |
 | `test/java/com/example/pleos_pa/navigation/` | NaviHelper 대역으로 내비 조회 슬롯·목적지 설정·규제 실행 경계를, 모의 조건·동작으로 작업 상태 전이와 호출 순서를 검사하는 JVM 테스트. 내비 SDK와 실제 반영 검증이 아니다 |
+| `testDebug/java/com/example/pleos_pa/relay/` | 실제 중계 서버 모듈·실제 MCP 엔드포인트·SDK 대역으로 중계 사슬과 차 쪽 내비 제외를 검사하는 JVM 테스트. 차량 기능과 Android 네트워크 검증이 아니다 |
 | `test/java/com/example/pleos_pa/` | 산술 예제 1개 |
 | `androidTest/java/com/example/pleos_pa/` | 기기 테스트. 모의 UX/값의 실제 위젯 검사와 실제 서비스·MCP tools/call→공용 기록·알림 권한/중지 검사. 별도 .com5 패키지에서 실행한다. 일반 Android APP_NOT_READY와 실제 Pleos SDK 결과를 구분한다. 별도 `.com9guard`의 CarNavigationGuardRuntimeTest는 내비 SDK 없이 공개 Car 정책과 운전자 MAIN 매핑만 읽는다 |
 

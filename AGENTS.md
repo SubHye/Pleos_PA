@@ -44,6 +44,7 @@ CI가 같은 검사를 실행한다. 실행하지 못한 검사, NO-SOURCE/skip,
 - [contracts/vehicle-read](contracts/vehicle-read/CONTRACT.md): 차량 조회 계약, 카탈로그, 공용 fixture
 - [tools/vehicle-sweep](tools/vehicle-sweep/README.md): 에뮬레이터에서 도구 전체를 실행해 카탈로그 판정 근거를 만드는 도구
 - [tools/nav-place-check](tools/nav-place-check/README.md): 에뮬레이터에서 고정 장소 목록을 목적지로 설정·재조회해 목록 근거를 만드는 도구. 내비를 바꾸므로 실행마다 승인받는다
+- [tools/relay-experiment](tools/relay-experiment/README.md): COM-55 실험 브랜치에만 있는 중계 서버. 제품 기능이 아니며 main에 병합하지 않는다. 터널을 켜면 네트워크 공개이므로 실행마다 승인받는다
 - [docs](docs/AGENTS.md): 문서
 - [docs/architecture](docs/architecture/AGENTS.md): C4 모델과 런타임 시나리오
 - [docs/decisions](docs/decisions/AGENTS.md): ADR

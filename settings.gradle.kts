@@ -38,3 +38,7 @@ project(":vehicle-sweep").projectDir = file("tools/vehicle-sweep")
 include(":nav-place-check")
 
 project(":nav-place-check").projectDir = file("tools/nav-place-check")
+
+include(":relay-experiment")
+
+project(":relay-experiment").projectDir = file("tools/relay-experiment")

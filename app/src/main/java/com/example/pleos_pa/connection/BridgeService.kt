@@ -211,7 +211,7 @@ class BridgeService : Service() {
                 driving?.close()
                 destinations.closeAdmission()
             },
-            EmbeddedMcpServer(catalog, tool, navigation),
+            EndpointHook.decorate(EmbeddedMcpServer(catalog, tool, navigation), catalog, tool),
             { released ->
                 reader.close { destinations.close { main.post(released) } }
             },

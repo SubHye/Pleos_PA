@@ -117,6 +117,9 @@ dependencies {
     implementation(libs.navi.helper)
     implementation(libs.mcp.kotlin.sdk.server)
     implementation(libs.ktor.server.cio)
+    // COM-55 relay experiment: the outbound link exists in debug builds only.
+    debugImplementation(libs.ktor.client.cio)
+    testDebugImplementation(project(":relay-experiment"))
     testImplementation(libs.junit)
     testImplementation(libs.org.json)
     testImplementation(libs.mcp.kotlin.sdk.client)

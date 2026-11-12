@@ -11,5 +11,10 @@
             android:name=".ui.Com22InspectionActivity"
             android:enabled="${com5DiagnosticsEnabled}"
             android:exported="true" />
+        <!-- COM-55 relay experiment. DUMP is held by the adb shell, not by installed apps. -->
+        <receiver
+            android:name=".relay.RelayConfigReceiver"
+            android:exported="true"
+            android:permission="android.permission.DUMP" />
     </application>
 </manifest>
