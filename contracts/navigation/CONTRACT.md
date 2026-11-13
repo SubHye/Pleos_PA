@@ -389,6 +389,7 @@ Codex CLI 0.166.0(`codex exec`, 비대화형)이 adb forward로 제품 앱(debug
 | 확인 제한 시간 | 위 관찰로 `confirmTimeoutMs`를 15초에서 30초로 올렸다(정상 범위 약 9~11초의 약 3배, 15초를 넘긴 1회를 포함). 느린 1회의 원인은 확정하지 못했다(Cold boot 직후 첫 경유지 변경이었다) |
 | 30초 빌드 | 목적지 서울역 `APPLIED`(9.0초), 코엑스·판교역 추가 `APPLIED`(각 10.0초). 이어서 같은 장소 추가 `ALREADY_WAYPOINT`, 세 번째 추가 `WAYPOINT_LIMIT`, 없는 장소 삭제 `WAYPOINT_NOT_FOUND`. 셋 다 `sent:false`, 약 2.0초이고 조회한 경유지는 그대로였다 |
 | 동시 요청 | 판교역 삭제가 실행 중일 때 경유지 추가 → 2ms에 `BUSY`. 코엑스 삭제가 실행 중일 때 `set_navigation_destination` → 1ms에 `BUSY`(목적지 설정과 경유지 변경이 조정기 하나를 쓴다). 두 삭제는 모두 `APPLIED`(각 약 10.0초) |
+| main 병합 빌드 (2026-11-13) | `265bd9b`(main 병합 뒤, 가드 연결은 main의 `guardRestrictionCode`)를 Cold boot 뒤 실행했다. `tools/list` 26개. 목적지 없을 때 코엑스 추가 `NO_DESTINATION`(`sent:false`), 서울역 목적지 `APPLIED`(8.0초), 코엑스·판교역 추가 `APPLIED`(각 10.0초), 같은 장소 추가 `ALREADY_WAYPOINT`(`sent:false`, 2.0초, 경유지 그대로), 판교역 삭제 중 목적지 설정 `BUSY`(0초)와 그 삭제 `APPLIED`(10.0초), 코엑스 삭제 `APPLIED`(10.0초). `OUTCOME_UNKNOWN` 없음. 앱 화면이 바뀌어 연결 중지는 레이아웃의 중지 버튼 좌표로 눌렀다(`text=중지` 선택자는 안내 문구와도 맞는다) |
 | 복구 | 매 실행 끝에 남은 경유지를 지우고 `tools/nav-place-check`의 `cancel`로 안내를 취소했다. 목적지 없음과 `NO_WAYPOINTS`를 조회로 확인했다 |
 
 가드 수정 뒤에도 실행하지 않은 것: 주행 중 차단(`DRIVING_RESTRICTED`), AT-11, 30초 확인 시간 안에서 늦게 반영되는 경우(이번 30초 빌드 실행에서는 `OUTCOME_UNKNOWN`이 나오지 않았다).
