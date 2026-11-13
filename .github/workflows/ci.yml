@@ -29,7 +29,113 @@ jobs:
       - name: Check formatting
         run: bash ./gradlew :spotlessCheck --no-daemon --console=plain
       - name: Build, unit test and lint
-        run: bash ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug :vehicle-sweep:test :nav-place-check:assembleDebug :nav-place-check:testDebugUnitTest --no-daemon --console=plain
+        run: bash ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest :app:lintDebug :vehicle-sweep:test :nav-place-check:assembleDebug :nav-place-check:testDebugUnitTest --no-daemon --console=plain
+
+  android-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: android-actions/setup-android@v4
+      - name: Install SDK and generic API 34 image
+        run: sdkmanager "platforms;android-37.0" "build-tools;36.0.0" "emulator" "system-images;android-34;google_apis;x86_64"
+      - name: Build diagnostic APKs before emulator startup
+        id: com5_build
+        run: bash ./gradlew -Pcom5Diagnostic=true :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon --console=plain
+      - name: Boot isolated Android emulator
+        id: com5_boot
+        run: |
+          sudo chmod a+rw /dev/kvm
+          "$ANDROID_HOME/emulator/emulator" -accel-check
+          avdmanager create avd --name com5-ui-api34 --package "system-images;android-34;google_apis;x86_64" --device pixel_2 <<< no
+          python3 - <<'PYCONFIG'
+          from pathlib import Path
+          p = Path.home() / ".android/avd/com5-ui-api34.avd/config.ini"
+          lines = p.read_text().splitlines()
+          key = "disk.dataPartition.size="
+          found = any(line.startswith(key) for line in lines)
+          lines = [key + "2G" if line.startswith(key) else line for line in lines]
+          if not found:
+              lines.append(key + "2G")
+          p.write_text("\n".join(lines) + "\n")
+          PYCONFIG
+          "$ANDROID_HOME/emulator/emulator" @com5-ui-api34 -port 5554 -no-window -no-audio -no-boot-anim -no-snapshot -no-metrics -gpu swiftshader_indirect > "$RUNNER_TEMP/com5-emulator.log" 2>&1 &
+          python3 scripts/check-com5-device.py --serial emulator-5554 --wait-for-boot --emulator-pid "$!" || {
+            tail -80 "$RUNNER_TEMP/com5-emulator.log"
+            exit 1
+          }
+          adb -s emulator-5554 shell svc power stayon true
+          adb -s emulator-5554 shell input keyevent KEYCODE_WAKEUP
+          adb -s emulator-5554 shell wm dismiss-keyguard
+      - name: Run Android widget tests with synthetic UX
+        run: bash ./gradlew -Pcom5Diagnostic=true -Pandroid.testInstrumentationRunnerArguments.class=com.example.pleos_pa.ui.DriverUiTest :app:connectedDebugAndroidTest --no-daemon --console=plain
+      - name: Capture synthetic journal metrics
+        if: ${{ !cancelled() && steps.com5_boot.conclusion == 'success' }}
+        run: |
+          adb -s emulator-5554 logcat -d -s COM5_METRICS:I '*:S' > "$RUNNER_TEMP/com5-ui-metrics.txt"
+      - name: Prepare diagnostic APKs for independent checks
+        id: com5_probe_install
+        if: ${{ !cancelled() && steps.com5_build.conclusion == 'success' && steps.com5_boot.conclusion == 'success' }}
+        run: |
+          adb -s emulator-5554 shell pm path com.example.pleos_pa.com5 > "$RUNNER_TEMP/com5-post-test-install.txt" || true
+          adb -s emulator-5554 push app/build/outputs/apk/debug/app-debug.apk /data/local/tmp/com5-app.apk
+          install_result=$(adb -s emulator-5554 shell timeout 60 pm install -r -t /data/local/tmp/com5-app.apk)
+          printf '%s\n' "$install_result"
+          python3 -c 'import sys; sys.exit(0 if "Success" in sys.stdin.read().splitlines() else 1)' <<< "$install_result"
+          adb -s emulator-5554 push app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk /data/local/tmp/com5-tests.apk
+          install_result=$(adb -s emulator-5554 shell timeout 60 pm install -r -t /data/local/tmp/com5-tests.apk)
+          printf '%s\n' "$install_result"
+          python3 -c 'import sys; sys.exit(0 if "Success" in sys.stdin.read().splitlines() else 1)' <<< "$install_result"
+      - name: Verify actual production service and posted Stop action
+        if: ${{ !cancelled() && steps.com5_probe_install.conclusion == 'success' }}
+        run: python3 scripts/check-com5-device.py --serial emulator-5554 --service-check --output "$RUNNER_TEMP/com22-service-instrumentation.json"
+      - name: Verify real MCP tools/call reaches shared history without bypassing UI restrictions
+        if: ${{ !cancelled() && steps.com5_probe_install.conclusion == 'success' }}
+        run: python3 scripts/check-com5-device.py --serial emulator-5554 --history-check --output "$RUNNER_TEMP/com25-history-instrumentation.json"
+      - name: Verify first permission request and denial with actual Android dialog
+        if: ${{ !cancelled() && steps.com5_probe_install.conclusion == 'success' }}
+        run: python3 scripts/check-com5-device.py --serial emulator-5554 --permission-check --output "$RUNNER_TEMP/com22-permission-denial.json"
+      - name: Capture production service and permission diagnostics
+        if: ${{ !cancelled() && steps.com5_boot.conclusion == 'success' }}
+        run: |
+          adb -s emulator-5554 logcat -d -s COM22_SERVICE:I '*:S' > "$RUNNER_TEMP/com22-service-results.txt"
+          adb -s emulator-5554 logcat -d -s COM22_PERMISSION:I '*:S' > "$RUNNER_TEMP/com22-permission-results.txt"
+          adb -s emulator-5554 logcat -d -s COM25_RUNTIME:I '*:S' > "$RUNNER_TEMP/com25-history-results.txt"
+      - name: Verify shared journal across actual process restart
+        if: ${{ !cancelled() && steps.com5_probe_install.conclusion == 'success' }}
+        run: |
+          python3 scripts/check-com5-device.py --serial emulator-5554 --output "$RUNNER_TEMP/com5-process-restart.json" || {
+            adb -s emulator-5554 logcat -d -s COM5_STATE:I AndroidRuntime:E '*:S' > "$RUNNER_TEMP/com5-probe-error.txt"
+            exit 1
+          }
+      - name: Reject fabricated platform evidence on generic Android
+        if: ${{ !cancelled() && steps.com5_probe_install.conclusion == 'success' }}
+        run: python3 scripts/check-com5-device.py --serial emulator-5554 --inspect-non-automotive --output "$RUNNER_TEMP/com22-unavailable-platform.json"
+      - name: Keep UI and process evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: com5-android-ui-evidence
+          retention-days: 14
+          path: |
+            app/build/reports/androidTests/
+            app/build/outputs/androidTest-results/
+            ${{ runner.temp }}/com5-process-restart.json
+            ${{ runner.temp }}/com5-ui-metrics.txt
+            ${{ runner.temp }}/com22-service-results.txt
+            ${{ runner.temp }}/com22-service-instrumentation.json
+            ${{ runner.temp }}/com22-permission-denial.json
+            ${{ runner.temp }}/com22-permission-results.txt
+            ${{ runner.temp }}/com25-history-instrumentation.json
+            ${{ runner.temp }}/com25-history-results.txt
+            ${{ runner.temp }}/com22-unavailable-platform.json
+            ${{ runner.temp }}/com5-post-test-install.txt
+            ${{ runner.temp }}/com5-probe-error.txt
+            ${{ runner.temp }}/com5-emulator.log
 
   architecture:
     runs-on: ubuntu-latest

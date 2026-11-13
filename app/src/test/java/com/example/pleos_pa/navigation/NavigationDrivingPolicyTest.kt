@@ -37,20 +37,17 @@ class NavigationDrivingPolicyTest {
     }
 
     @Test
-    fun aMissingGuardBlocksButAGuardThatPermitsDoesNotBecomeABlock() {
-        assertEquals(DestinationSetter.DRIVING_STATE_UNKNOWN, drivingBlockCode(null))
-        assertNull(drivingBlockCode { null })
-    }
-
-    @Test
-    fun aPresentGuardsBlockCodeIsPassedThroughUnchanged() {
+    fun missingGuardBlocksButAllowedGuardStaysAllowed() {
+        assertEquals(DestinationSetter.DRIVING_STATE_UNKNOWN, guardRestrictionCode(null))
+        // Regression: `driving?.blockCode() ?: UNKNOWN` turned an allowed guard into UNKNOWN.
+        assertNull(guardRestrictionCode { null })
         assertEquals(
             DestinationSetter.DRIVING_RESTRICTED,
-            drivingBlockCode { DestinationSetter.DRIVING_RESTRICTED },
+            guardRestrictionCode { DestinationSetter.DRIVING_RESTRICTED },
         )
         assertEquals(
             DestinationSetter.DRIVING_STATE_UNKNOWN,
-            drivingBlockCode { DestinationSetter.DRIVING_STATE_UNKNOWN },
+            guardRestrictionCode { DestinationSetter.DRIVING_STATE_UNKNOWN },
         )
     }
 }

@@ -55,13 +55,13 @@ internal class FakeVehicleSdk : VehicleSdk {
         complete: (PropertyCapability) -> Unit,
         failed: (Exception) -> Unit,
     ) {
-        calls += "capability:$property"
         throwNext?.let {
             throwNext = null
             throw it
         }
         capabilityDone = complete
         capabilityFailed = failed
+        calls += "capability:$property"
     }
 
     override fun read(
@@ -71,10 +71,10 @@ internal class FakeVehicleSdk : VehicleSdk {
         complete: (Any?, Long) -> Unit,
         failed: (Exception, Long) -> Unit,
     ) {
-        calls += "read:$property:$area"
         reads += "${property.lowercase()}:$area"
         readDone = complete
         readFailed = failed
+        calls += "read:$property:$area"
     }
 
     override fun close(closed: () -> Unit) {

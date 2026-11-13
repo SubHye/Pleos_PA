@@ -64,13 +64,25 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["com5DiagnosticsEnabled"] = false
+        manifestPlaceholders["com5AppLabel"] = "@string/app_name"
     }
 
     buildFeatures { resValues = true }
 
     buildTypes {
         debug {
-            if (providers.gradleProperty("com9GuardDiagnostic").orNull == "true") {
+            val com5Diagnostic = providers.gradleProperty("com5Diagnostic").orNull == "true"
+            val com9GuardDiagnostic =
+                providers.gradleProperty("com9GuardDiagnostic").orNull == "true"
+            require(!(com5Diagnostic && com9GuardDiagnostic)) {
+                "Choose either com5Diagnostic or com9GuardDiagnostic, not both"
+            }
+            if (com5Diagnostic) {
+                applicationIdSuffix = ".com5"
+                manifestPlaceholders["com5DiagnosticsEnabled"] = true
+                manifestPlaceholders["com5AppLabel"] = "@string/com22_app_name"
+            } else if (com9GuardDiagnostic) {
                 applicationIdSuffix = ".com9guard"
                 resValue("string", "app_name", "Pleos PA 규제 검수 (.com9guard)")
             }
@@ -111,4 +123,6 @@ dependencies {
     testImplementation(libs.ktor.client.cio)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.mcp.kotlin.sdk.client)
+    androidTestImplementation(libs.ktor.client.cio)
 }

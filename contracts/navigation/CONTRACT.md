@@ -231,13 +231,30 @@
 | 앱 유지 | `requestRoute` 때 순정 내비가 앞으로 뜬다. 요청 2분 20초쯤 뒤에도 MCP 서버가 답했고 프로세스는 동결되지 않았다(Foreground Service). COM-36의 백그라운드 샘플 앱 동결은 재현되지 않았다 |
 | 복구 | 끝에 `tools/nav-place-check`의 `cancel`로 안내를 취소했고 목적지 없음을 확인했다 |
 
-실제 SDK로 재현하지 않은 것: `OUTCOME_UNKNOWN`, `PERMISSION_DENIED`, `BASELINE_UNAVAILABLE`, `NAVI_NOT_CONNECTED`, 작업 중 연결 중지, `onError`, 좌표가 허용 오차 안에서 다르게 돌아오는 경우. 이들은 JVM 테스트의 SDK 대역으로만 확인했다. 외부 AI 클라이언트를 거친 종단간 실행도 하지 않았다(COM-27).
+실제 SDK로 재현하지 않은 것: `OUTCOME_UNKNOWN`, `PERMISSION_DENIED`, `BASELINE_UNAVAILABLE`, `NAVI_NOT_CONNECTED`, 작업 중 연결 중지, `onError`, 좌표가 허용 오차 안에서 다르게 돌아오는 경우. 이들은 JVM 테스트의 SDK 대역으로만 확인했다. 외부 AI 클라이언트를 거친 종단간 실행은 아래 절에 있다.
+
+### 외부 AI 종단간 관찰 (`sdk_emulator`, 2026-11-11, COM-3)
+
+Codex CLI 0.166.0(`codex exec`, 비대화형)이 adb forward로 제품 앱(debug)의 MCP 서버에 연결해, 자연어 요청 하나마다 새 대화로 실행했다. 빌드는 main 81ee5b1과 가드 연결 수정 a7f147a(PR #25)다. 실행별 기록과 시간은 COM-3 PR에 있다. 남은 거리·시간은 적지 않는다.
+
+| 항목 | 관찰 |
+| --- | --- |
+| 가드 연결 결함 | 81ee5b1에서는 기어 P에서도 설정이 `DRIVING_STATE_UNKNOWN`으로 막혔다. 같은 환경의 `.com9guard` 가드 판정은 허용이었다. `BridgeService`가 허용(`null`)을 차단으로 바꾸던 연결을 a7f147a에서 고쳤다 |
+| 설정 | a7f147a, P: 목적지 없음 → 판교역, 판교역 → 코엑스, 코엑스 → 현대백화점 판교점 모두 `APPLIED`. AI는 `find_navigation_place` → `set_navigation_destination` → `get_navigation_destination` 순서로 불렀고, 답한 목적지·남은 시간·거리가 순정 화면과 같다. 도착 시각은 화면과 1분 차이가 났다(반올림, [시간](#시간)) |
+| 조회 | 안내 중 2회 `COMPLETE`, 목적지 없음 2회 `NO_DESTINATION`. 목적지 없음일 때 AI는 값을 만들지 않았다 |
+| 모호·목록 밖·이미 설정 | "판교"는 `MULTIPLE`이고 AI가 둘 중 하나를 물은 뒤 설정했다. "부산역"은 `NO_MATCH`이고 설정하지 않았다. 현재 목적지를 다시 요청하면 `ALREADY_SET`이고 `requestRoute` 로그가 없다 |
+| 주행 규제 | 기어 D(Car UX DO=true): 설정은 2ms에 `DRIVING_RESTRICTED`, `requestRoute` 없음, 내비 불변. 같은 상태에서 조회는 `COMPLETE`. 알림 패널의 "중지"로 연결을 끊었다 |
+| 연결 중지 뒤 | Codex가 시작할 때 서버가 꺼져 있으면 도구 목록에 도구가 없다. AI는 내비 값을 확인할 수 없다고 답했고 값을 만들지 않았다. 연결이 중지됐다는 원인은 말하지 못했다 |
+| AI 쪽 관찰 | "판교로 가자."만으로는 내비 도구를 쓰지 않고 이동 수단을 물었다. Codex의 MCP 승인 정책이 `never`이면 `set_navigation_destination`(`destructiveHint: true`)이 클라이언트에서 거절되어 서버에 닿지 않는다. 이 서버만 `default_tools_approval_mode=approve`로 실행했다. Codex의 Computer Use 플러그인이 켜져 있으면, 연결이 끊긴 뒤 데스크톱 화면을 읽으려 했다 |
+| 소요 시간 | 요청부터 최종 답변까지 설정 22.9·25.5초, 조회 7.8~12.4초. 모두 5초를 넘는다. 설정 도구 한 번에 7.1~9.0초다 |
+
+확인하지 않은 것: 차량 앱 화면에 내비 변경 결과를 표시하는 것(연결되지 않음), Claude 계열 클라이언트(CLI 계정 크레딧 부족으로 BLOCKED), ChatGPT·Codex 앱 화면에서의 입력, release 빌드, `OUTCOME_UNKNOWN`·`TIMEOUT`.
 
 ### 한계
 
-- 주행 규제는 서비스 수명의 `CarNavigationGuard`가 실제 Car UX/occupant 매핑을 매번 새로 읽어 검사한다. DO 또는 하나라도 있는 제한은 차단하고, 초기 연결 중/정보 상실/권한·API 오류/운전자 MAIN 영역 미확인은 기본 차단한다. Activity가 가려져도 검사는 유지된다. 사전 조회 완료 뒤와 SDK 호출 직전에도 재검사하며, 해제 시 자동 재실행하지 않는다. 가드가 통과(`null`)를 돌려주면 서비스는 그 값을 그대로 쓰고, 가드가 없을 때만 `DRIVING_STATE_UNKNOWN`으로 막는다(`drivingBlockCode`). 처음 연결한 코드는 가드의 통과를 "가드 없음"으로 바꿔 모든 변경을 막았고, 2026-11-12 에뮬레이터에서 발견해 고쳤다(경유지 절의 "가드 수정 후 관찰"). 고친 뒤 에뮬레이터 주차 상태에서 목적지 설정이 통과했다(2회 `APPLIED`). 주행 중 차단과 실제 Pleos 기기 검증은 아직 수행하지 않았으므로 과거 목적지 설정 실측을 이 변경의 AT-11 통과로 재사용하지 않는다.
+- 주행 규제는 서비스 수명의 `CarNavigationGuard`가 실제 Car UX/occupant 매핑을 매번 새로 읽어 검사한다. DO 또는 하나라도 있는 제한은 차단하고, 초기 연결 중/정보 상실/권한·API 오류/운전자 MAIN 영역 미확인은 기본 차단한다. Activity가 가려져도 검사는 유지된다. 사전 조회 완료 뒤와 SDK 호출 직전에도 재검사하며, 해제 시 자동 재실행하지 않는다. 에뮬레이터의 P 허용·D 차단은 위 외부 AI 관찰(a7f147a)에서 확인했다. 실차는 확인하지 않았다. 경유지 추가·삭제도 같은 가드를 같은 연결(`guardRestrictionCode`)로 쓴다(경유지 절의 "가드 수정 후 관찰").
 - 설정 한 번에 7.0~9.0초가 걸렸다(위 관찰). 도구 시간만으로 종단간 5초 목표(요구사항 6.2)를 넘는다.
-- 결과를 차량 화면이나 음성으로 알리지 않는다. 되돌리기는 없다(COM-44).
+- 결과를 차량 화면이나 음성으로 알리지 않는다. 요청 기록 화면에도 내비 변경 결과가 나오지 않는다(COM-25). 되돌리기는 없다(COM-44).
 
 ## 경유지
 
@@ -365,7 +382,7 @@
 
 | 항목 | 관찰 |
 | --- | --- |
-| 가드 연결 결함 | 병합한 그대로의 빌드는 목적지 없을 때 경유지 추가에 `NO_DESTINATION` 대신 `DRIVING_STATE_UNKNOWN`(`sent:false`, 8ms)을 돌려줬다. 임시 진단 로그로 가드 자체는 통과(`null`)를 돌려줬음을 확인했다. 원인은 서비스의 `driving?.blockCode() ?: DRIVING_STATE_UNKNOWN`이 통과를 "가드 없음"으로 바꾼 것이며, 목적지 설정과 경유지 변경 모두 항상 막혔다. `drivingBlockCode`로 고쳤고 JVM 테스트를 더했다. 진단 로그는 커밋하지 않았다 |
+| 가드 연결 결함 | 병합한 그대로의 빌드는 목적지 없을 때 경유지 추가에 `NO_DESTINATION` 대신 `DRIVING_STATE_UNKNOWN`(`sent:false`, 8ms)을 돌려줬다. 임시 진단 로그로 가드 자체는 통과(`null`)를 돌려줬음을 확인했다. 원인은 서비스의 `driving?.blockCode() ?: DRIVING_STATE_UNKNOWN`이 통과를 "가드 없음"으로 바꾼 것이며, 목적지 설정과 경유지 변경 모두 항상 막혔다. 이 브랜치에서 고쳤고, main에서도 같은 결함이 같은 방식으로 고쳐졌다(`a7f147a`, COM-22). 병합 뒤에는 main의 `guardRestrictionCode`를 쓴다. 진단 로그는 커밋하지 않았다 |
 | 고친 뒤 기준 | 목적지 없을 때 코엑스 추가 → `NO_DESTINATION`, `sent:false` |
 | 첫 실행 | 서울역 목적지 `APPLIED`(11.0초). 이어서 코엑스 추가가 `OUTCOME_UNKNOWN`(`sent:true`, 17.0초)으로 끝났다. 응답 1초 뒤 조회는 `NO_WAYPOINTS`였고 응답 약 19초 뒤 조회에 코엑스가 있었다. 순정 내비가 당시 확인 제한 시간 15초보다 늦게 반영한 것이며, 앱은 단정하지 않고 `OUTCOME_UNKNOWN`으로 답했다. 이어서 복구용 코엑스 삭제는 `APPLIED`(13.1초) |
 | 반복 측정 | 목적지 서울역 `APPLIED`(9.1초) 뒤 코엑스 추가 → 판교역 추가 → 판교역 삭제 → 코엑스 삭제를 3회. 12회 모두 `APPLIED`, `elapsedMs` 8965~11022. `OUTCOME_UNKNOWN` 없음 |

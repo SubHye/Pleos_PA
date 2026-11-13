@@ -1,7 +1,7 @@
 workspace "Pleos_PA" "Current app, first-phase target and separately identified reference implementation; only what the current system describes has been migrated." {
     model {
-        current = softwareSystem "Pleos_PA - current" "Android connection app whose embedded MCP server offers the adopted vehicle read tools over the Vehicle SDK and the adopted navigation tools over NaviHelper (ADR-0008)." {
-            scaffold = container "Android app" "Connection control screen, Foreground Service, MCP server on loopback 127.0.0.1:18766/mcp (no authentication), read gateway and a Vehicle SDK boundary covering the catalog." "Kotlin / MCP Kotlin SDK / Ktor CIO / Vehicle SDK 2.3.2"
+        current = softwareSystem "Pleos_PA - current" "Android connection app whose embedded MCP server offers adopted vehicle read tools and navigation tools over the Vehicle SDK and NaviHelper (ADR-0008)." {
+            scaffold = container "Android app" "Connection and bounded process-memory vehicle request history with display Car UX restrictions; Foreground Service owns the MCP server on loopback 127.0.0.1:18766/mcp (no authentication), SDK adapters and the fresh Car UX guard before navigation changes." "Kotlin / MCP Kotlin SDK / Ktor CIO / Vehicle SDK 2.3.2"
             sweep = container "vehicle-sweep" "Test support on the development PC: calls every offered tool and compares Virtual Console values to build catalog verification evidence." "Kotlin / JVM"
             placeCheck = container "nav-place-check" "Test support APK, not part of the app: started from adb, sets each fixed place as the destination and reads it back to build place list evidence. The only component that calls cancelRoute." "Kotlin / NaviHelper 3.0.5"
         }
@@ -16,7 +16,7 @@ workspace "Pleos_PA" "Current app, first-phase target and separately identified 
         client -> scaffold "Calls read tools (verified with Codex CLI, other clients unverified) and the destination tools (verified by direct MCP calls only, no AI client)" "MCP Streamable HTTP via adb forward tcp:18766"
         sweep -> scaffold "Calls every offered tool" "MCP Streamable HTTP via adb forward tcp:18766"
         scaffold -> vehicle "Queries catalog vehicle properties" "Vehicle SDK"
-        scaffold -> navi "Reads the current destination; sets a place of the fixed list as the destination and confirms it by reading back. No driving-restriction check yet" "NaviHelper getDestinationInfo, requestRoute"
+        scaffold -> navi "Reads the current destination; sets a place of the fixed list as the destination and confirms it by reading back. Navigation changes require fresh unrestricted Car UX and driver MAIN display mapping; unknown blocks" "NaviHelper getDestinationInfo, requestRoute"
         placeCheck -> navi "Sets each listed place, reads it back and cancels; each run approved" "NaviHelper requestRoute, getDestinationInfo, cancelRoute"
         mcp -> android "Reads via PC loopback and ADB forward" "HTTP POST /v2/vehicle-read :18765"
         android -> vehicle "Queries supported vehicle properties" "Vehicle SDK"
