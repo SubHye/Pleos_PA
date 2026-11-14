@@ -4,13 +4,12 @@
 - 런타임 흐름: [scenarios/](scenarios/appointment-departure.md) (Mermaid). 순서, 승인, 분기를 표현한다.
 - 결정: [ADR](../decisions/AGENTS.md).
 
-모델은 세 시스템을 구분한다. 구현이 이전되면 Current를 갱신하고, Target을 구현 사실로 표기하지 않는다.
+모델은 두 시스템을 구분한다. 구현하면 Current를 갱신하고, Target을 구현 사실로 표기하지 않는다.
 
 | 구분 | 의미 |
 | --- | --- |
 | Current | 이 저장소에 실제로 있는 것 |
 | Target | 2차 PT 전 목표 구조(기준 기획서 5.1, 5.2). 미구현 |
-| Reference | 참고 PoC에서 코드로 확인한 구조. 이전되었다는 뜻이 아님 |
 
 ## 검증
 

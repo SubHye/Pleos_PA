@@ -212,7 +212,3 @@ Android SDK 경로를 `local.properties`나 `ANDROID_HOME`으로 지정한 뒤 �
 ```
 
 APK는 `app\build\outputs\apk\debug\app-debug.apk`에 만들어진다.
-
-## 개발에 참여한다면
-
-협업 흐름, 검증 명령, 문서 위치, 앱의 세부 동작은 [AGENTS.md](AGENTS.md)에서 시작한다. 이 README는 프로젝트를 처음 보는 사람을 위한 소개이며, 개발용 세부 내용은 그쪽에 둔다.

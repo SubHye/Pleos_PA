@@ -1,6 +1,6 @@
 # 작업 지침
 
-대상은 `SubHye/Pleos_PA`다. 시작할 때 root, remote, branch, git status를 확인한다. `HyeeSeong/pleostest`는 읽기 전용 참고이며 수정하지 않는다.
+대상은 `SubHye/Pleos_PA`다. 시작할 때 root, remote, branch, git status를 확인한다.
 
 ## 작업 흐름
 
@@ -12,7 +12,6 @@ Linear Issue → Coding Agent(Codex, Claude Code) → 구현·테스트·검증�
 - 완료 기준: 수용 기준 증거, CI 통과, 상대 개발자 승인, main 병합, 코드와 문서 일치, Linear에 결과 링크. Agent 리뷰는 사람 리뷰를 대체하지 않는다.
 - 현재 저장소 요금제에서는 브랜치 보호를 쓸 수 없다. 병합하는 사람이 CI 통과와 상대 승인을 직접 확인한다.
 - Linear는 [wonsub의 COM 팀](https://linear.app/wonsub/team/COM/overview)을 쓴다. 커넥터가 다른 워크스페이스에 연결되어 있으면 추측하지 말고 알린다.
-- PR #1·#2가 Issue에 자동 연결되지 않았다. Linear–GitHub 연동의 설치 여부는 확인하지 않았고 자동화에 의존하지 않는다. PR 링크를 Issue에 직접 첨부한다.
 - Linear는 요구·우선순위·진행의 원천, 저장소는 코드·계약·아키텍처의 원천이다. 충돌하면 사실과 제안을 분리해 보고한다. 기준 기획서는 [제출 기획서 초안](https://linear.app/wonsub/document/공모전-제출-기획서-초안-익숙한-ai와-차량주행기록-활용-6838b0dd196c)이며, 옛 프로젝트 기획서와 기획 전략은 동결했다. 기획서와 요구사항 정의서가 다르면 요구사항 정의서를 우선한다.
 
 ## 환경과 검증
@@ -24,15 +23,6 @@ Linear Issue → Coding Agent(Codex, Claude Code) → 구현·테스트·검증�
 
 CI가 같은 검사를 실행한다. 실행하지 못한 검사, NO-SOURCE/skip, 모의 응답과 실제 SDK 결과를 구분해 보고한다. 빌드 성공을 차량 기능 완료로 보고하지 않는다.
 
-## 범위
-
-- 단계는 1차 제출 / 2차 PT 전 / 출시 준비 / 확장이다(기준 기획서 5.2, 6.6). 구현된 것은 1차 제출뿐이며 단계별 범위는 [README](README.md)의 표에 있다. 문서의 미래안을 구현 사실로 바꾸지 않는다. 출시 준비와 확장 단계의 기능은 Linear Issue가 생기기 전에는 구현하지 않는다.
-- MCP 서버는 차량 앱 안에 있다([ADR-0008](docs/decisions/0008-embedded-mcp-server.md)). AI 클라이언트는 개발 PC에서 `adb forward`로 연결한다. PC 없는 연결(중계 서버)은 2차 PT 전 범위이고 아직 없다. 경로·인증·공개 범위를 별도 ADR로 정한 뒤 구현한다(COM-17). AI별 필수 수준은 요구사항 6.2를 따른다.
-- Gleo 연동은 넣지 않는다. 차량 직접 제어는 확장 단계이며, 사전 승인 권한과 주행 중 제한 정책을 확인해 상대 개발자와 합의하기 전에는 넣지 않는다.
-- 콘솔이나 문서에 있는 SDK API를 동작한다고 간주하지 않는다. 실행 검증 후 채택하고, 미지원이면 모의 값을 실제 결과로 반환하지 않는다.
-- 폴더 이동, PoC 전체 복사를 하지 않는다. 버전 업그레이드는 다른 변경과 섞지 않고 별도 PR로 하며 상대 개발자와 합의한다. PoC는 기능 단위로 선택 이전하고, PoC 성공 기록을 신규 앱의 성공으로 옮기지 않는다.
-- 공통 도구 이름·입출력·오류·권한·통신 계약 또는 ADR 변경은 영향과 대안을 PR에 적고 상대 개발자와 합의한다. 양쪽 검사와 문서를 같은 PR에서 갱신한다.
-
 ## 안전
 
 - 토큰·API 키·서명키·개인 일정·연락처, 제출 규정상 공개가 제한되는 정보(개발자 실명 등)를 커밋이나 로그에 남기지 않는다.
@@ -40,17 +30,19 @@ CI가 같은 검사를 실행한다. 실행하지 못한 검사, NO-SOURCE/skip,
 
 ## 맵
 
-해당 영역을 작업하기 전에 그 AGENTS.md를 읽는다. 도구가 하위 파일을 자동으로 읽는다고 가정하지 않는다. CLAUDE.md에는 지침을 복제하지 않는다.
+해당 영역을 작업하기 전에 그 문서를 읽는다. 도구가 하위 파일을 자동으로 읽는다고 가정하지 않는다. CLAUDE.md에는 지침을 복제하지 않는다.
 
-- [README](README.md): 사람이 읽는 기술 소개. 단계별 범위, 구조, 제공하는 도구, 데모 실행 절차, 릴리스 정보를 둔다. 평가자는 Linear를 열 수 없으므로 실행과 평가에 필요한 기술 내용은 README에 둔다. [공모전 제출 안내](https://appdevchallenge.auto-hmg.io/guide/submission)가 README에 요구하는 다섯 항목(앱 이름과 한 줄 소개, 실행 방법, 테스트 환경과 필요한 설정, 에뮬레이터 버전과 화면 규격, APK 위치)을 빼지 않는다. 기획 배경과 고객 가치는 기준 기획서에 있으므로 README에 쓰지 않는다. agent용 세부 내용도 README에 쓰지 않고 아래 문서에 쓴다
-- [app/src](app/src/AGENTS.md): Android 소스, 실행 동작(연결 제어, 차량 화면과 요청 기록, 확인한 AI 클라이언트, MCP 서버 신뢰 경계)
-- [contracts/vehicle-read](contracts/vehicle-read/CONTRACT.md): 차량 조회 계약, 카탈로그, 공용 fixture
-- [contracts/navigation](contracts/navigation/CONTRACT.md): 내비 조회·목적지 설정·경유지 계약, 고정 장소 목록
-- [tools/vehicle-sweep](tools/vehicle-sweep/README.md): 에뮬레이터에서 도구 전체를 실행해 카탈로그 판정 근거를 만드는 도구
-- [tools/nav-place-check](tools/nav-place-check/README.md): 에뮬레이터에서 고정 장소 목록을 목적지로 설정·재조회해 목록 근거를 만드는 도구와 경유지 SDK 조사 도구(`WaypointActivity`). 내비를 바꾸므로 실행마다 승인받는다
-- [tools/departure-check](tools/departure-check/README.md): 약속 출발의 정상·지연 검수 절차와 읽기 전용 시간 비교 도구. 합성 자동 검사와 실제 E2E 증거를 구분한다
-- [scripts/COM5-WINDOWS.md](scripts/COM5-WINDOWS.md): Windows에서의 설치·화면 검사·프로세스 재시작 절차
-- [docs](docs/AGENTS.md): 문서
-- [docs/architecture](docs/architecture/AGENTS.md): C4 모델과 런타임 시나리오
-- [docs/decisions](docs/decisions/AGENTS.md): ADR
-- Linear: [공모전 1차 Project](https://linear.app/wonsub/project/pleos-pa-공모전-1차-29bf62b430ba), [공모전 2차 Project](https://linear.app/wonsub/project/pleos-pa-공모전-2차-106a0409819b), [제출 기획서 초안](https://linear.app/wonsub/document/공모전-제출-기획서-초안-익숙한-ai와-차량주행기록-활용-6838b0dd196c), [요구사항 정의서](https://linear.app/wonsub/document/요구사항-정의서-1b7e6fcd5721)
+| 위치 | 내용 |
+| --- | --- |
+| [README](README.md) | 사람이 읽는 기술 소개. 단계별 범위, 구조, 제공하는 도구, 데모 실행 절차, 릴리스 정보. [공모전 제출 안내](https://appdevchallenge.auto-hmg.io/guide/submission)가 요구하는 다섯 항목(앱 이름과 한 줄 소개, 실행 방법, 테스트 환경과 필요한 설정, 에뮬레이터 버전과 화면 규격, APK 위치)을 빼지 않는다. 기획 배경과 agent용 세부 내용은 쓰지 않는다 |
+| [app/src](app/src/AGENTS.md) | Android 소스의 구조와 지킬 것 |
+| [contracts/vehicle-read](contracts/vehicle-read/CONTRACT.md) | 차량 조회 계약, 카탈로그, 공용 fixture |
+| [contracts/navigation](contracts/navigation/CONTRACT.md) | 내비 조회·목적지 설정·경유지 계약, 고정 장소 목록 |
+| [tools/vehicle-sweep](tools/vehicle-sweep/README.md) | 에뮬레이터에서 도구 전체를 실행해 카탈로그 판정 근거를 만드는 도구 |
+| [tools/nav-place-check](tools/nav-place-check/README.md) | 고정 장소 목록을 목적지로 설정·재조회해 목록 근거를 만드는 도구와 경유지 SDK 조사 도구. 내비를 바꾸므로 실행마다 승인받는다 |
+| [tools/departure-check](tools/departure-check/README.md) | 약속 출발의 정상·지연 검수 절차와 읽기 전용 시간 비교 도구 |
+| [scripts/COM5-WINDOWS.md](scripts/COM5-WINDOWS.md) | Windows에서의 설치·화면 검사·프로세스 재시작 절차 |
+| [docs](docs/AGENTS.md) | 내용별 문서 위치 |
+| [docs/architecture](docs/architecture/AGENTS.md) | C4 모델과 런타임 시나리오 |
+| [docs/decisions](docs/decisions/AGENTS.md) | ADR |
+| Linear | [공모전 1차 Project](https://linear.app/wonsub/project/pleos-pa-공모전-1차-29bf62b430ba), [공모전 2차 Project](https://linear.app/wonsub/project/pleos-pa-공모전-2차-106a0409819b), [제출 기획서 초안](https://linear.app/wonsub/document/공모전-제출-기획서-초안-익숙한-ai와-차량주행기록-활용-6838b0dd196c), [요구사항 정의서](https://linear.app/wonsub/document/요구사항-정의서-1b7e6fcd5721) |
