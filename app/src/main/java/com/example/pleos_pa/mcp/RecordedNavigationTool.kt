@@ -1,6 +1,8 @@
 package com.example.pleos_pa.mcp
 
 import com.example.pleos_pa.contract.NavigationToolEntry
+import com.example.pleos_pa.navigation.DestinationReader
+import com.example.pleos_pa.navigation.DestinationSetter
 import com.example.pleos_pa.ui.RequestHistory
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
@@ -37,17 +39,15 @@ class RecordedNavigationTool(
     }
 
     private fun stateOf(structured: JsonObject?): String {
-        // Refused input is answered before any tool logic, with text only.
         if (structured == null) return "REJECTED"
         fun text(key: String) = (structured[key] as? JsonPrimitive)?.content
         if (text("ok") == "true") return if (text("status") == "PARTIAL") "PARTIAL" else "COMPLETE"
-        // Already handed to the stock navigation: neither applied nor failed is known.
         if (text("sent") == "true") return "RESULT_UNKNOWN"
         return when (text("code")) {
-            "BUSY" -> "BUSY"
-            "CONNECTION_STOPPED" -> "CONNECTION_STOPPED"
-            "DRIVING_RESTRICTED",
-            "DRIVING_STATE_UNKNOWN" -> "BLOCKED"
+            DestinationReader.BUSY -> "BUSY"
+            DestinationReader.CONNECTION_STOPPED -> "CONNECTION_STOPPED"
+            DestinationSetter.DRIVING_RESTRICTED,
+            DestinationSetter.DRIVING_STATE_UNKNOWN -> "BLOCKED"
             else -> "FAILED"
         }
     }

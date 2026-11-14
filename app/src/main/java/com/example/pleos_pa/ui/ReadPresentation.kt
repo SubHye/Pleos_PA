@@ -82,7 +82,6 @@ class HistoryPresentation(
         )
     }
 
-    /** The one value the screen names by itself: a confirmed battery percentage. */
     private fun batteryHeadline(response: VehicleReadResponse): String? {
         if (response.query != "energy_level") return null
         val percent =

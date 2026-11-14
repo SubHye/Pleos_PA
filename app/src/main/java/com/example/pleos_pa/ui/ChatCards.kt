@@ -54,9 +54,7 @@ class ChatCards(
                 }
         val phase =
             when (record.state) {
-                "RECEIVED",
-                "CHECKING",
-                "EXECUTING" -> ChatCard.Phase.WORKING
+                in RequestHistory.UNFINISHED -> ChatCard.Phase.WORKING
                 "COMPLETE",
                 "PARTIAL",
                 "SUCCEEDED" -> ChatCard.Phase.DONE

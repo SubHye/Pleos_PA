@@ -261,7 +261,6 @@ class BridgeService : Service() {
                         SystemClock::elapsedRealtime,
                     ),
                 )
-                // The screen shows each call and how it ended, never its arguments or answer.
                 .map { RecordedNavigationTool(it, DriverHistory.history) }
         return ConnectionSession(
             {

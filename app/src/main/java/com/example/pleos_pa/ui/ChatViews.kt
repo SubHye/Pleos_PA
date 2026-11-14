@@ -29,7 +29,6 @@ import com.example.pleos_pa.R
 internal object CardMotion {
     fun enabled(): Boolean = ValueAnimator.areAnimatorsEnabled()
 
-    /** A new bubble slides in from its own side once. */
     fun enter(view: View, fromStart: Boolean, distance: Float) {
         if (!enabled()) return
         view.alpha = 0f
@@ -43,7 +42,6 @@ internal object CardMotion {
             .start()
     }
 
-    /** The icon hops only while its request is being worked on. */
     fun hop(view: View, height: Float, drop: Boolean): Animator? {
         if (!enabled()) return null
         return ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 0f, -height).apply {
@@ -100,7 +98,6 @@ internal object CardMotion {
             }
     }
 
-    /** A slow ring around the indicator while the connection is on. */
     fun ring(view: View): Animator? {
         if (!enabled()) return null
         return ObjectAnimator.ofPropertyValuesHolder(
@@ -270,6 +267,7 @@ internal class ChatRow(context: Context, private val unit: Float, textScale: Flo
             gravity = Gravity.CENTER
         }
     private val card = LinearLayout(context).apply { gravity = Gravity.CENTER_VERTICAL }
+    private val bubble = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
     private val motions = mutableListOf<Animator>()
     private var shown: ChatCard? = null
 
@@ -277,15 +275,12 @@ internal class ChatRow(context: Context, private val unit: Float, textScale: Flo
     val response: View
 
     init {
-        val bubble =
-            LinearLayout(context).apply {
-                orientation = LinearLayout.VERTICAL
-                background =
-                    rounded(ContextCompat.getColor(context, R.color.bubble), px(14f).toFloat())
-                setPadding(px(14f), px(9f), px(14f), px(10f))
-                addView(caption)
-                addView(title)
-            }
+        bubble.apply {
+            background = rounded(ContextCompat.getColor(context, R.color.bubble), px(14f).toFloat())
+            setPadding(px(14f), px(9f), px(14f), px(10f))
+            addView(caption)
+            addView(title)
+        }
         request = sided(context, bubble, Gravity.START)
 
         iconBox.addView(battery, FrameLayout.LayoutParams(px(24f), px(15f), Gravity.CENTER))
@@ -325,14 +320,12 @@ internal class ChatRow(context: Context, private val unit: Float, textScale: Flo
             addView(child, FrameLayout.LayoutParams(WRAP, WRAP, side))
         }
 
-    /** Slides both views in. Called once, for a request that arrived while the screen was shown. */
     fun enter() {
-        CardMotion.enter(request.let { (it as FrameLayout).getChildAt(0) }, true, px(24f).toFloat())
+        CardMotion.enter(bubble, true, px(24f).toFloat())
         CardMotion.enter(card, false, px(24f).toFloat())
     }
 
-    /** [settle] plays the one-off end motion when a request finishes while the screen is shown. */
-    fun bind(next: ChatCard, requestCaption: String, settle: Boolean) {
+    fun bind(next: ChatCard, requestCaption: String, animateEnd: Boolean) {
         val previous = shown
         shown = next
         caption.text = requestCaption
@@ -356,7 +349,7 @@ internal class ChatRow(context: Context, private val unit: Float, textScale: Flo
         battery.fillColor = tone and 0x00FFFFFF or 0x66000000
         val icon: View = if (energy) battery else symbol
         icon.translationY = 0f
-        val finishing = settle && previous?.phase == ChatCard.Phase.WORKING
+        val finishing = animateEnd && previous?.phase == ChatCard.Phase.WORKING
         when (next.phase) {
             ChatCard.Phase.WORKING -> {
                 dots.visibility = View.VISIBLE
@@ -388,7 +381,6 @@ internal class ChatRow(context: Context, private val unit: Float, textScale: Flo
         }
     }
 
-    /** Ends every running motion and leaves the views at rest. */
     fun stop() {
         motions.forEach(Animator::cancel)
         motions.clear()
@@ -402,7 +394,7 @@ internal class ChatRow(context: Context, private val unit: Float, textScale: Flo
         card.alpha = 1f
         mark.scaleX = 1f
         mark.scaleY = 1f
-        (request as FrameLayout).getChildAt(0).apply {
+        bubble.apply {
             animate().cancel()
             translationX = 0f
             alpha = 1f

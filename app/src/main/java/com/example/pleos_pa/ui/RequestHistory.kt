@@ -61,7 +61,7 @@ class RequestHistory(private val capacity: Int = 100) {
         items: Int? = null,
     ): Boolean {
         val row = records.firstOrNull { it.token === token } ?: return false
-        if (row.state !in setOf("RECEIVED", "CHECKING", "EXECUTING")) return false
+        if (row.state !in UNFINISHED) return false
         val next =
             row.copy(
                 state = state.take(40),
@@ -81,7 +81,7 @@ class RequestHistory(private val capacity: Int = 100) {
     @Synchronized
     fun progress(token: Token, state: String): Boolean {
         val row = records.firstOrNull { it.token === token } ?: return false
-        if (row.state !in setOf("RECEIVED", "CHECKING", "EXECUTING")) return false
+        if (row.state !in UNFINISHED) return false
         val updated = records.map {
             if (it.token === token) row.copy(state = state.take(40)) else it
         }
@@ -118,6 +118,8 @@ class RequestHistory(private val capacity: Int = 100) {
         if (text.length <= MAX_DETAILS) text else text.take(MAX_DETAILS - 20) + "\n[일부 내용 생략]"
 
     companion object {
+        val UNFINISHED = setOf("RECEIVED", "CHECKING", "EXECUTING")
+
         // Working limit for OQ-09. A device UI/heap review is still needed before final adoption.
         const val MAX_DETAILS = 16_384
     }

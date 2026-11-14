@@ -80,8 +80,7 @@ open class MainActivity : AppCompatActivity() {
     private var down = true
     private var visible = false
 
-    /** The first drawing after the screen appears is not animated; later arrivals are. */
-    private var settled = false
+    private var drawnOnce = false
     private var unit = 1f
     private var textScale = 1f
     private var ux = UiRestrictions.UNKNOWN
@@ -126,8 +125,10 @@ open class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         restrictionSource = createRestrictionSource()
-        // The vehicle display is far larger than a phone; one scale keeps both readable.
-        textScale = if (resources.configuration.smallestScreenWidthDp >= 900) 1.5f else 1f
+        textScale =
+            if (resources.configuration.smallestScreenWidthDp >= VEHICLE_DISPLAY_MIN_DP)
+                VEHICLE_DISPLAY_SCALE
+            else 1f
         unit = resources.displayMetrics.density * textScale
         val padding = px(20f)
         val root =
@@ -285,7 +286,7 @@ open class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         visible = true
-        settled = false
+        drawnOnce = false
         rowList.removeAllViews()
         rows.clear()
         ConnectionStatusBoard.observe(observer)
@@ -379,16 +380,15 @@ open class MainActivity : AppCompatActivity() {
                 color(if (permitted) R.color.accent_container else R.color.bubble),
                 px(8f).toFloat(),
             )
-        // Newest first in the record; oldest first on the screen.
-        val records = history.snapshot().take(MAX_ROWS).asReversed()
-        val keep = records.mapTo(HashSet()) { it.token.sequence }
+        val oldestFirst = history.snapshot().take(MAX_ROWS).asReversed()
+        val keep = oldestFirst.mapTo(HashSet()) { it.token.sequence }
         for (sequence in rows.keys.filter { it !in keep }) {
             val row = rows.remove(sequence) ?: continue
             row.stop()
             rowList.removeView(row.request)
             rowList.removeView(row.response)
         }
-        for (record in records) {
+        for (record in oldestFirst) {
             val card = cards.of(record, permitted)
             val existing = rows[card.sequence]
             val row =
@@ -402,17 +402,18 @@ open class MainActivity : AppCompatActivity() {
                 card,
                 if (card.time.isEmpty()) getString(R.string.chat_request)
                 else getString(R.string.chat_request_at, card.time),
-                settled,
+                drawnOnce,
             )
-            if (existing == null && settled) row.enter()
+            if (existing == null && drawnOnce) row.enter()
         }
-        empty.visibility = if (records.isEmpty()) View.VISIBLE else View.GONE
-        settled = true
+        empty.visibility = if (oldestFirst.isEmpty()) View.VISIBLE else View.GONE
+        drawnOnce = true
     }
 
     companion object {
-        /** Requests kept on the screen. Older ones leave; the record itself is not browsed here. */
         private const val MAX_ROWS = 5
+        private const val VEHICLE_DISPLAY_MIN_DP = 900
+        private const val VEHICLE_DISPLAY_SCALE = 1.5f
         private const val WRAP = LinearLayout.LayoutParams.WRAP_CONTENT
         private const val FILL = LinearLayout.LayoutParams.MATCH_PARENT
     }
