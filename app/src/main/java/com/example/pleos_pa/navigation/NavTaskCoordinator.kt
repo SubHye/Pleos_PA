@@ -24,8 +24,16 @@ interface NavAction {
 /**
  * The one navigation result the user asked for, with every action it needs decided before it is
  * submitted. Nothing is added once the task runs.
+ *
+ * [conditions] are this request's own execution conditions. Several features share one coordinator
+ * so that only one change runs at a time (BUSY), and each brings the conditions that fit its
+ * change. A request without them is checked by the coordinator's own conditions.
  */
-class NavTaskRequest(val requestId: String, actions: List<NavAction>) {
+class NavTaskRequest(
+    val requestId: String,
+    actions: List<NavAction>,
+    val conditions: NavConditions? = null,
+) {
     val actions: List<NavAction> = actions.toList()
 }
 
@@ -127,7 +135,7 @@ class NavTaskCoordinator(
         val token = Any()
         task.awaited = token
         try {
-            conditions.check(task.request) { block ->
+            (task.request.conditions ?: conditions).check(task.request) { block ->
                 if (!consume(task, token)) return@check
                 if (block == null) {
                     if (move(task, NavTaskState.EXECUTING)) runNext(task)
@@ -219,5 +227,14 @@ class NavTaskCoordinator(
         const val CONNECTION_STOPPED = "CONNECTION_STOPPED"
         const val CHECK_FAILED = "CHECK_FAILED"
         const val ACTION_FAILED = "ACTION_FAILED"
+        const val NO_CONDITIONS = "NO_CONDITIONS"
+
+        /**
+         * A coordinator for features that each bring their own conditions. A request that brings
+         * none is blocked with [NO_CONDITIONS]: nothing runs unchecked.
+         */
+        fun shared(
+            onState: (requestId: String, state: NavTaskState) -> Unit = { _, _ -> }
+        ): NavTaskCoordinator = NavTaskCoordinator({ _, done -> done(NO_CONDITIONS) }, onState)
     }
 }

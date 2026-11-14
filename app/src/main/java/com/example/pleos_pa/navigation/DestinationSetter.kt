@@ -45,9 +45,14 @@ class DestinationSetter(
      * policy integration blocks admission; it never silently permits navigation.
      */
     private val restriction: () -> String? = { DRIVING_STATE_UNKNOWN },
+    /**
+     * The coordinator shared with the other navigation changes, so that one change at a time runs
+     * across all of them. Without one, this setter makes its own and reports to [onState].
+     */
+    shared: NavTaskCoordinator? = null,
     onState: (requestId: String, state: NavTaskState) -> Unit = { _, _ -> },
 ) {
-    private val coordinator = NavTaskCoordinator(::check, onState)
+    private val coordinator = shared ?: NavTaskCoordinator(::check, onState)
     @Volatile private var admissionClosed = false
     private var running: Route? = null
 
@@ -59,7 +64,7 @@ class DestinationSetter(
                 return@execute
             }
             val route = Route(place)
-            val request = NavTaskRequest(requestId, listOf(route))
+            val request = NavTaskRequest(requestId, listOf(route), ::check)
             val refusal =
                 when (coordinator.submit(request) { reply(outcomeOf(it, route.sent)) }) {
                     is NavAdmission.Accepted -> null

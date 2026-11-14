@@ -29,11 +29,16 @@ import com.example.pleos_pa.mcp.EmbeddedMcpServer
 import com.example.pleos_pa.mcp.NavigationDestinationTool
 import com.example.pleos_pa.mcp.NavigationPlaceTool
 import com.example.pleos_pa.mcp.NavigationSetDestinationTool
+import com.example.pleos_pa.mcp.NavigationWaypointChangeTool
+import com.example.pleos_pa.mcp.NavigationWaypointsTool
 import com.example.pleos_pa.mcp.VehicleReadTool
 import com.example.pleos_pa.navigation.CarNavigationGuard
 import com.example.pleos_pa.navigation.DestinationReader
 import com.example.pleos_pa.navigation.DestinationSetter
+import com.example.pleos_pa.navigation.NavTaskCoordinator
 import com.example.pleos_pa.navigation.PleosNaviSdk
+import com.example.pleos_pa.navigation.WaypointChanger
+import com.example.pleos_pa.navigation.WaypointReader
 import com.example.pleos_pa.navigation.guardRestrictionCode
 import com.example.pleos_pa.ui.DriverHistory
 import com.example.pleos_pa.ui.HistoryPresentation
@@ -157,9 +162,24 @@ class BridgeService : Service() {
             )
         val tool = VehicleReadTool(catalog, gateway, events, SystemClock::elapsedRealtime)
         val naviSdk = PleosNaviSdk(this)
-        val destinations =
-            DestinationReader(naviSdk, scheduler, source, navigationCatalog.staleHoldMs) { connected
-                ->
+        // Both change tools share one coordinator, so one change at a time runs across them.
+        val coordinator = NavTaskCoordinator.shared { requestId, state ->
+            // Only fixed fields reach the log, never a place.
+            Log.i(TAG, "requestId=$requestId navTask=$state")
+        }
+        lateinit var destinations: DestinationReader
+        val waypoints =
+            WaypointReader(naviSdk, scheduler, navigationCatalog.staleHoldMs) {
+                destinations.unavailable()
+            }
+        destinations =
+            DestinationReader(
+                naviSdk,
+                scheduler,
+                source,
+                navigationCatalog.staleHoldMs,
+                waypoints::delivered,
+            ) { connected ->
                 Log.i(TAG, if (connected) "NAVI_CONNECTED" else "NAVI_CONNECT_FAILED")
             }
         // Outside the Pleos emulator every read is refused, so the SDK is not even connected.
@@ -176,10 +196,22 @@ class BridgeService : Service() {
                 navigationCatalog.confirmPollMs,
                 navigationCatalog.matchToleranceDegrees,
                 restriction = { guardRestrictionCode(driving?.let { it::blockCode }) },
-            ) { requestId, state ->
-                // Only fixed fields reach the log, never a place.
-                Log.i(TAG, "requestId=$requestId navTask=$state")
-            }
+                shared = coordinator,
+            )
+        val changer =
+            WaypointChanger(
+                naviSdk,
+                destinations,
+                waypoints,
+                scheduler,
+                coordinator,
+                navigationCatalog.baselineDeadlineMs,
+                navigationCatalog.confirmTimeoutMs,
+                navigationCatalog.confirmPollMs,
+                navigationCatalog.matchToleranceDegrees,
+                navigationCatalog.maxWaypoints,
+                restriction = { guardRestrictionCode(driving?.let { it::blockCode }) },
+            )
         val navigation =
             listOf(
                 NavigationDestinationTool(
@@ -203,17 +235,43 @@ class BridgeService : Service() {
                     events,
                     SystemClock::elapsedRealtime,
                 ),
+                NavigationWaypointsTool(
+                    navigationCatalog,
+                    places,
+                    waypoints,
+                    source,
+                    events,
+                    SystemClock::elapsedRealtime,
+                ),
+                NavigationWaypointChangeTool.add(
+                    navigationCatalog,
+                    places,
+                    changer,
+                    source,
+                    events,
+                    SystemClock::elapsedRealtime,
+                ),
+                NavigationWaypointChangeTool.remove(
+                    navigationCatalog,
+                    places,
+                    changer,
+                    source,
+                    events,
+                    SystemClock::elapsedRealtime,
+                ),
             )
         return ConnectionSession(
             {
                 gateway.close()
                 // Before the read slot closes, so a change still being checked ends as blocked.
                 setter.close()
+                changer.close()
                 driving?.close()
                 destinations.closeAdmission()
             },
             EmbeddedMcpServer(catalog, tool, navigation),
             { released ->
+                waypoints.close()
                 reader.close { destinations.close { main.post(released) } }
             },
             bindExecutor,
