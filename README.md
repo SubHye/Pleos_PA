@@ -185,16 +185,21 @@ AI가 호출할 수 있는 도구는 26개다. 모두 에뮬레이터에서 실�
 
 ## 릴리스
 
-공모전 제출 규정에 따라 실행 가능한 release APK를 저장소의 `apk/` 폴더에 `팀명_앱이름_release.apk` 이름으로 둔다. 1차 제출 버전을 확정하면 아래를 채운다.
+공모전 제출 규정에 따라 실행 가능한 release APK를 저장소의 `apk/` 폴더에 `팀명_앱이름_release.apk` 이름으로 둔다.
 
 | 항목 | 내용 |
 | --- | --- |
-| APK 위치 | 미정 (`apk/` 폴더. 용량이 넘으면 GitHub Releases) |
-| 버전(tag) | 미정 |
-| APK를 빌드한 커밋 | 미정 |
-| 빌드 종류와 서명 | 미정 |
-| APK SHA-256 | 미정 |
-| 빌드한 날 | 미정 |
+| APK 위치 | [apk/CometOne_Pleos_PA_release.apk](apk/CometOne_Pleos_PA_release.apk) |
+| 버전(tag) | 1.0 (versionCode 1). tag `v1.0`은 main에 병합한 뒤 붙인다 |
+| APK를 빌드한 커밋 | `4a383593950ddcd1c2c5069f1180cdb057b9ca34` |
+| 빌드 종류와 서명 | release(R8 최적화), APK Signature Scheme v2. 개발 PC의 Android debug 키로 서명했다(인증서 `CN=Android Debug`) |
+| APK SHA-256 | `7e05b5efc3a02555e7326727155eb96432308bb333c598e370f4d43c5891d97a` |
+| 빌드한 날 | 2026-11-14 |
+
+- 이 APK는 위 커밋에서 `.\gradlew.bat :app:assembleRelease`로 만들었다. APK를 저장소에 넣은 커밋은 그 다음 커밋이며 소스는 같다.
+- 같은 커밋에서 다시 빌드해도 파일이 바이트 단위로 같지 않았다(SHA-256이 달랐다). 소스에서 빌드한 APK의 해시는 위 값과 다르다.
+- 서명에 쓴 debug 키는 저장소에 없다. 다른 PC에서 빌드하면 서명이 달라서 이 APK 위에 덮어 설치되지 않는다. 그때는 먼저 설치된 앱을 지운다.
+- Pleos Connect 에뮬레이터 `Pleos_Connect_v2.1.0`에 이 APK를 설치해 연결 시작·중지, 도구 26개 목록, 차량 조회 2종, 내비 조회 2종을 실행했다. 내비 변경 도구는 이 APK로 실행하지 않았다.
 
 ## 소스에서 빌드
 
@@ -212,3 +217,5 @@ Android SDK 경로를 `local.properties`나 `ANDROID_HOME`으로 지정한 뒤 �
 ```
 
 APK는 `app\build\outputs\apk\debug\app-debug.apk`에 만들어진다.
+
+release APK는 `.\gradlew.bat :app:assembleRelease`로 만든다. 루트에 `keystore.properties`가 있으면 그 키로 서명한 `app\build\outputs\apk\release\app-release.apk`가, 없으면 서명 없는 `app-release-unsigned.apk`가 나온다. 양식은 [keystore.properties.example](keystore.properties.example)에 있다.
