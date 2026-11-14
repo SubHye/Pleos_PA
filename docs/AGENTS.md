@@ -7,6 +7,9 @@
 | 차량 조회 계약 | [contracts](../contracts/vehicle-read/CONTRACT.md) |
 | 내비 조회·목적지 설정·경유지 계약 | [contracts](../contracts/navigation/CONTRACT.md) |
 | 협업, 환경, 검증 지침 | [루트 AGENTS.md](../AGENTS.md) |
+| 단계별 범위, 구조, 도구 목록, 데모 실행 절차, 릴리스 정보(사람이 읽는 기술 소개) | [루트 README.md](../README.md) |
+| 기획 배경, 고객 가치, 사용 시나리오 | Linear의 기준 기획서 (README에 옮겨 적지 않음) |
+| Android 소스의 구조와 지킬 것 | [app/src/AGENTS.md](../app/src/AGENTS.md) |
 | 요구사항, 진행, 후속 작업 | Linear (저장소에 복제하지 않음) |
 | 일회성 검증 결과 | PR 본문 |
 
