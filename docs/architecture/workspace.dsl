@@ -1,4 +1,4 @@
-workspace "Pleos_PA" "Current app, first-phase target and separately identified reference implementation; only what the current system describes has been migrated." {
+workspace "Pleos_PA" "Current app, the target structure planned before the second-round presentation and a separately identified reference implementation; only what the current system describes exists in the repository." {
     model {
         current = softwareSystem "Pleos_PA - current" "Android connection app whose embedded MCP server offers adopted vehicle read tools and navigation tools over the Vehicle SDK and NaviHelper (ADR-0008)." {
             scaffold = container "Android app" "Connection and bounded process-memory vehicle request history with display Car UX restrictions; Foreground Service owns the MCP server on loopback 127.0.0.1:18766/mcp (no authentication), SDK adapters and the fresh Car UX guard before navigation changes." "Kotlin / MCP Kotlin SDK / Ktor CIO / Vehicle SDK 2.3.2"
@@ -21,20 +21,26 @@ workspace "Pleos_PA" "Current app, first-phase target and separately identified 
         mcp -> android "Reads via PC loopback and ADB forward" "HTTP POST /v2/vehicle-read :18765"
         android -> vehicle "Queries supported vehicle properties" "Vehicle SDK"
 
-        driver = person "Driver - target" "Asks for departure help and approves destination changes and messages."
-        targetSystem = softwareSystem "Pleos_PA - first-phase target (not implemented)" "Goal structure; nothing here exists in the repository yet." {
-            targetApp = container "Android app - target" "Serves MCP and owns SDK permissions, execution, session lifecycle, driving restrictions and result display through Service, MCP server and Adapter. Keeps call records in memory only." "Kotlin / Vehicle SDK, NaviHelper"
+        driver = person "Driver - target" "Asks the AI they already use for navigation, vehicle status and driving records. On the vehicle screen only links or unlinks the AI and turns recording on or off."
+        targetSystem = softwareSystem "Pleos_PA - target before the second-round presentation (not implemented)" "Goal structure from the submission plan, sections 5.1 and 5.2. The relay server, record store, plugins, location recorder, account linking and auto start do not exist in the repository yet." {
+            targetApp = container "Android app - target" "Serves the embedded MCP tools, opens the connection to the relay server first, shows a one-time code and QR code to link an AI account, starts on boot after the first launch, and records the route and trip summary only while the driver has recording on. Encrypts records kept on the device and deletes them after upload." "Kotlin / Vehicle SDK, NaviHelper, FusedLocation"
+            targetRelay = container "Relay server - target" "Remote MCP endpoint for AI apps. Accepts the connection opened by the vehicle app and forwards only authenticated requests within the allowed tools. Hosting, authentication and exposure are undecided and go to a separate ADR (COM-17)." "Undecided"
+            targetStore = container "Record store - target" "Keeps the last vehicle status with its timestamp, trip summaries and routes under a pseudonymised vehicle identifier. Storage technology and retention period are undecided." "Undecided"
+            targetPlugin = container "AI app plugin - target" "ChatGPT and Claude plugins that bundle the relay MCP connection settings and a basic skill. Distributed from the team repository before any official directory listing." "Plugin with SKILL.md"
         }
-        targetAi = softwareSystem "ChatGPT or Claude - target" "Interprets schedule, selects tools and runs approval dialogue. Exact product, version and connection path must be verified per client."
+        targetAi = softwareSystem "ChatGPT or Claude - target" "Interprets the request, selects tools, explains results and runs approval dialogue. Supported plans, apps and write actions must be verified per client (COM-64)."
         targetCalendar = softwareSystem "Calendar service - target" "Schedule source connected to the AI; account data is not copied into the vehicle app."
         targetMessaging = softwareSystem "Messaging service - target" "Sends only after explicit approval; support must be verified."
-        targetVehicle = softwareSystem "Pleos navigation and vehicle services - target" "Destination, ETA and vehicle data; support must be verified."
-        driver -> targetAi "Requests departure help and approves actions"
-        driver -> targetApp "Checks results and stops or resumes the connection"
+        targetVehicle = softwareSystem "Pleos navigation, vehicle and location services - target" "Destination, ETA, vehicle data and vehicle location. Verified on the emulator only, to the extent the contracts record."
+        driver -> targetAi "Requests and approves actions"
+        driver -> targetApp "Links or unlinks the AI, turns recording on or off and checks results"
         targetAi -> targetCalendar "Reads appointment"
         targetAi -> targetMessaging "Sends approved message"
-        targetAi -> targetApp "Calls tools" "MCP; adb forward from a development PC. A path without PC (COM-15) is undecided"
-        targetApp -> targetVehicle "Sets destination and reads ETA and vehicle data" "Vehicle SDK / NaviHelper"
+        targetAi -> targetPlugin "Uses the installed connection settings and skill"
+        targetAi -> targetRelay "Calls tools" "Remote MCP over HTTPS"
+        targetApp -> targetRelay "Opens the connection first and executes forwarded tool calls" "TLS 1.2 or later; protocol undecided"
+        targetRelay -> targetStore "Stores and reads the last vehicle status, trip summaries and routes"
+        targetApp -> targetVehicle "Sets destination and waypoints and reads ETA, vehicle data and location" "Vehicle SDK / NaviHelper / FusedLocation"
 
         deploymentEnvironment "Scaffold installation target - unverified" {
             deploymentNode "Development Android device or emulator" "Intended APK installation target, not a confirmed deployment." "Android" {
