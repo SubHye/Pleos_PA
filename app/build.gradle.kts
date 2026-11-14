@@ -1,6 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
 }
+
+/**
+ * Release signing values. The file is not committed; without it the release build stays unsigned,
+ * so CI and other checkouts keep building.
+ */
+val keystoreProperties =
+    Properties().apply {
+        val file = rootProject.file("keystore.properties")
+        if (file.isFile) file.inputStream().use { load(it) }
+    }
 
 /** Puts only the contracts' catalogs in the APK, without committing a second copy of them. */
 abstract class CatalogAsset : DefaultTask() {
@@ -70,6 +82,17 @@ android {
 
     buildFeatures { resValues = true }
 
+    signingConfigs {
+        if (keystoreProperties.containsKey("storeFile")) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             val com5Diagnostic = providers.gradleProperty("com5Diagnostic").orNull == "true"
@@ -88,6 +111,7 @@ android {
             }
         }
         release {
+            signingConfig = signingConfigs.findByName("release")
             optimization {
                 enable = true
             }

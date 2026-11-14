@@ -20,8 +20,9 @@ Linear Issue → Coding Agent(Codex, Claude Code) → 구현·테스트·검증�
 
 - 구현 중, 커밋 전: `.\gradlew.bat :spotlessApply`
 - PR 제출 전: `.\gradlew.bat :spotlessCheck :app:assembleDebug :app:testDebugUnitTest :app:lintDebug :vehicle-sweep:test :nav-place-check:assembleDebug :nav-place-check:testDebugUnitTest`
+- 제출용 APK: `.\gradlew.bat :app:assembleRelease`. 루트에 `keystore.properties`가 있으면 그 키로 서명하고, 없으면 서명 없는 APK를 만든다. 형식은 [keystore.properties.example](keystore.properties.example)에 있다. 키 파일과 `keystore.properties`는 커밋하지 않는다.
 
-CI가 같은 검사를 실행한다. 실행하지 못한 검사, NO-SOURCE/skip, 모의 응답과 실제 SDK 결과를 구분해 보고한다. 빌드 성공을 차량 기능 완료로 보고하지 않는다.
+CI가 같은 검사를 실행한다. release 빌드는 CI가 실행하지 않는다. 실행하지 못한 검사, NO-SOURCE/skip, 모의 응답과 실제 SDK 결과를 구분해 보고한다. 빌드 성공을 차량 기능 완료로 보고하지 않는다.
 
 ## 안전
 
