@@ -14,6 +14,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  departure-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check host departure decisions with synthetic data
+        run: python3 -m unittest discover -s tools/departure-check -p 'test_*.py' -v
+
   android:
     runs-on: ubuntu-latest
     timeout-minutes: 25

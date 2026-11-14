@@ -113,6 +113,7 @@ adb -s <기기 serial> forward --remove tcp:18766   # 끝나면
 - [결정 기록](docs/decisions/AGENTS.md): ADR
 - [차량 조회 계약](contracts/vehicle-read/CONTRACT.md): 도구, 요청·응답 형식, 요청 생명주기
 - [vehicle-sweep](tools/vehicle-sweep/README.md): 에뮬레이터 전수 실행과 카탈로그 판정 근거
+- [약속 출발 검수](tools/departure-check/README.md): Notion 일정·실제 내비·Slack 정상/지연 검수 절차와 읽기 전용 시간 비교 도구. 합성 자동 검사와 실제 E2E 증거를 구분한다
 - [Linear 팀](https://linear.app/wonsub/team/COM/overview): 요구사항과 진행 관리
   - [공모전 1차 Project](https://linear.app/wonsub/project/pleos-connect-mcp-공모전-1차-29bf62b430ba) · [프로젝트 기획서](https://linear.app/wonsub/document/프로젝트-기획서-e1e6374c0bbb) · [요구사항 정의서](https://linear.app/wonsub/document/요구사항-정의서-1b7e6fcd5721) (둘이 충돌하면 최신 결정을 반영한 요구사항 정의서 우선)
 
