@@ -19,6 +19,8 @@ local.properties
 .kotlin/
 **/build/
 *.apk
+# The contest asks for the release APK in apk/
+!/apk/*.apk
 *.aab
 *.ap_
 *.hprof

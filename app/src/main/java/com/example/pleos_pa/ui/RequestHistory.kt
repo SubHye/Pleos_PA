@@ -16,6 +16,10 @@ class RequestHistory(private val capacity: Int = 100) {
         val state: String = "RECEIVED",
         val source: String? = null,
         val details: String = "",
+        /** One short line that carries a vehicle value. The screen hides it like [details]. */
+        val headline: String? = null,
+        /** How many items were confirmed; null when the request got no answer to count. */
+        val items: Int? = null,
     )
 
     private val records = ArrayDeque<Record>()
@@ -48,11 +52,24 @@ class RequestHistory(private val capacity: Int = 100) {
      * revive.
      */
     @Synchronized
-    fun finish(token: Token, state: String, source: String?, details: String): Boolean {
+    fun finish(
+        token: Token,
+        state: String,
+        source: String?,
+        details: String,
+        headline: String? = null,
+        items: Int? = null,
+    ): Boolean {
         val row = records.firstOrNull { it.token === token } ?: return false
-        if (row.state !in setOf("RECEIVED", "CHECKING", "EXECUTING")) return false
+        if (row.state !in UNFINISHED) return false
         val next =
-            row.copy(state = state.take(40), source = source?.take(40), details = bounded(details))
+            row.copy(
+                state = state.take(40),
+                source = source?.take(40),
+                details = bounded(details),
+                headline = headline?.take(40),
+                items = items,
+            )
         val updated = records.map { if (it.token === token) next else it }
         records.clear()
         records.addAll(updated)
@@ -60,11 +77,21 @@ class RequestHistory(private val capacity: Int = 100) {
         return true
     }
 
+    /**
+     * Removes an unfinished attempt that turned out to be no request at all, such as refused input.
+     */
+    @Synchronized
+    fun discard(token: Token): Boolean {
+        val removed = records.removeAll { it.token === token && it.state in UNFINISHED }
+        if (removed) notifyChanged()
+        return removed
+    }
+
     /** Navigation progress may advance only an unfinished attempt; removed rows never revive. */
     @Synchronized
     fun progress(token: Token, state: String): Boolean {
         val row = records.firstOrNull { it.token === token } ?: return false
-        if (row.state !in setOf("RECEIVED", "CHECKING", "EXECUTING")) return false
+        if (row.state !in UNFINISHED) return false
         val updated = records.map {
             if (it.token === token) row.copy(state = state.take(40)) else it
         }
@@ -101,6 +128,8 @@ class RequestHistory(private val capacity: Int = 100) {
         if (text.length <= MAX_DETAILS) text else text.take(MAX_DETAILS - 20) + "\n[일부 내용 생략]"
 
     companion object {
+        val UNFINISHED = setOf("RECEIVED", "CHECKING", "EXECUTING")
+
         // Working limit for OQ-09. A device UI/heap review is still needed before final adoption.
         const val MAX_DETAILS = 16_384
     }

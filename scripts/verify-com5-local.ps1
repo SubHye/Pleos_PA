@@ -134,7 +134,7 @@ try {
             $history.validToolCalls -ne 2 -or $history.rejectedToolCalls -ne 1 -or ($history.queries -join ',') -ne 'energy_level,display_units' -or
             -not ($history.sdkOkValueObserved -is [bool]) -or @($history.mcpCodes).Count -ne 2 -or @($history.responseSources).Count -ne 2 -or
             ($history.sdkOkValueObserved -and 'pleos_emulator' -notin $history.responseSources -and 'real_vehicle' -notin $history.responseSources)) { throw 'Production MCP history evidence is incomplete.' }
-        foreach ($field in @('requestIdsCorrelated','distinctServerRequestIds','activityRecreationPreservedRecords','resumeLabelRestored','restrictedDetailsHidden','explicitUiClear','stoppedConnectionRefused')) {
+        foreach ($field in @('requestIdsCorrelated','distinctServerRequestIds','activityRecreationPreservedRecords','resumeLabelRestored','restrictedDetailsHidden','stoppedConnectionRefused')) {
             if (-not ($history.$field -is [bool]) -or -not $history.$field) { throw 'Production MCP history evidence is incomplete.' }
         }
         $report['history_tests'] = 1

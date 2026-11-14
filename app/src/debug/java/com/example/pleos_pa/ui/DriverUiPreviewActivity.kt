@@ -73,12 +73,20 @@ class DriverUiPreviewActivity : MainActivity() {
                 "DOOR_POSITION",
                 "2026-11-04T00:00:01Z",
             )
-        history.finish(second, "COMPLETE", "simulation", "DOOR_POSITION: OK · fixture-door-value")
+        history.finish(
+            second,
+            "COMPLETE",
+            "simulation",
+            "DOOR_POSITION: OK · fixture-door-value",
+            items = 1,
+        )
         history.finish(
             first,
             "PARTIAL",
             "simulation",
             "EV_BATTERY_PERCENT: OK · fixture-energy-value 42 %\nFUEL_PERCENT: PROPERTY_UNSUPPORTED",
+            "fixture-energy-value 42%",
+            1,
         )
     }
 

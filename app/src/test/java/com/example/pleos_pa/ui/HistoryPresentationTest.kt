@@ -83,5 +83,74 @@ class HistoryPresentationTest {
         presentation.finish(first, "CANCELLED", null)
         assertEquals(listOf("BUSY", "CANCELLED"), history.snapshot().map { it.state })
         assertTrue(history.snapshot().all { it.source == null })
+        assertTrue(history.snapshot().all { it.items == null && it.headline == null })
+    }
+
+    @Test
+    fun aConfirmedBatteryBecomesTheHeadlineAndOkItemsAreCounted() {
+        val token = presentation.begin(request)
+        presentation.finish(
+            token,
+            "PARTIAL",
+            VehicleReadResponse(
+                request.requestId,
+                request.query,
+                Outcome.PARTIAL,
+                "pleos_emulator",
+                "2.3.2",
+                listOf(
+                    VehicleReadItem("EV_BATTERY_PERCENT", null, ItemStatus.OK, rawValue = 72.0),
+                    VehicleReadItem("FUEL_PERCENT", null, ItemStatus.PROPERTY_UNSUPPORTED),
+                ),
+            ),
+        )
+        val row = history.snapshot().single()
+        assertEquals("배터리 72%", row.headline)
+        assertEquals(1, row.items)
+    }
+
+    @Test
+    fun anUnconfirmedBatteryAndOtherQueriesHaveNoHeadline() {
+        val energy = presentation.begin(request)
+        presentation.finish(
+            energy,
+            "FAILED",
+            VehicleReadResponse(
+                request.requestId,
+                request.query,
+                Outcome.FAILED,
+                "pleos_emulator",
+                "2.3.2",
+                listOf(
+                    VehicleReadItem(
+                        "EV_BATTERY_PERCENT",
+                        null,
+                        ItemStatus.UNKNOWN_VALUE,
+                        rawValue = 5,
+                    )
+                ),
+            ),
+        )
+        val doors = presentation.begin(request.copy(query = "door_status"))
+        presentation.finish(
+            doors,
+            "COMPLETE",
+            VehicleReadResponse(
+                request.requestId,
+                "door_status",
+                Outcome.COMPLETE,
+                "pleos_emulator",
+                "2.3.2",
+                listOf(
+                    VehicleReadItem("DOOR_POSITION", "ROW_1_LEFT", ItemStatus.OK, rawValue = 0),
+                    VehicleReadItem("DOOR_POSITION", "ROW_1_RIGHT", ItemStatus.OK, rawValue = 0),
+                ),
+            ),
+        )
+        val (doorRow, energyRow) = history.snapshot()
+        assertNull(energyRow.headline)
+        assertEquals(0, energyRow.items)
+        assertNull(doorRow.headline)
+        assertEquals(2, doorRow.items)
     }
 }

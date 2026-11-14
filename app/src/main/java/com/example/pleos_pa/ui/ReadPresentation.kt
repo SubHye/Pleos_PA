@@ -72,7 +72,24 @@ class HistoryPresentation(
                     item.errorCode?.let { append(" · ").append(it) }
                 }
             } ?: "조회 결과를 확인하지 못했습니다."
-        history.finish(token, code, response?.source, details)
+        history.finish(
+            token,
+            code,
+            response?.source,
+            details,
+            response?.let(::batteryHeadline),
+            response?.items?.count { it.status == ItemStatus.OK },
+        )
+    }
+
+    private fun batteryHeadline(response: VehicleReadResponse): String? {
+        if (response.query != "energy_level") return null
+        val percent =
+            response.items
+                .firstOrNull { it.property == "EV_BATTERY_PERCENT" && it.status == ItemStatus.OK }
+                ?.rawValue as? Number ?: return null
+        val value = percent.toDouble()
+        return "배터리 ${if (value % 1.0 == 0.0) value.toLong().toString() else value.toString()}%"
     }
 }
 

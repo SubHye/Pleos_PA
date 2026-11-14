@@ -18,16 +18,20 @@ import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.example.pleos_pa.AnimationsOff
 import com.example.pleos_pa.awaitFocusedActivity
 import org.hamcrest.CoreMatchers.sameInstance
 import org.json.JSONObject
 import org.junit.Assert.*
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 /** Real Android widgets with an explicitly fake UX source and values; no vehicle evidence. */
 @RunWith(AndroidJUnit4::class)
 class DriverUiTest {
+    @get:Rule val animations = AnimationsOff()
+
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
 
     private fun exercise(test: (DriverUiPreviewActivity) -> Unit) {
@@ -74,46 +78,40 @@ class DriverUiTest {
         return result
     }
 
-    private fun selectEnergy(activity: DriverUiPreviewActivity) {
+    private fun valueLine(activity: DriverUiPreviewActivity): TextView? {
+        var found: TextView? = null
         instrumentation.runOnMainSync {
-            all(activity)
-                .filterIsInstance<Button>()
-                .single { it.text.startsWith("get_energy_level ·") }
-                .performClick()
+            found =
+                all(activity).filterIsInstance<TextView>().singleOrNull {
+                    it.text.contains("fixture-energy-value")
+                }
         }
+        return found
     }
 
     @Test
-    fun restrictedAndUnknownModesRemoveDetailsWithoutRemovingStop() = exercise { activity ->
+    fun restrictedAndUnknownModesRemoveValuesWithoutRemovingStop() = exercise { activity ->
         click(activity, "시작")
         click(activity, "모의 기록 생성")
-        selectEnergy(activity)
-        assertTrue(text(activity).contains("fixture-energy-value"))
-        var selectedRow: Button? = null
-        instrumentation.runOnMainSync {
-            selectedRow =
-                all(activity).filterIsInstance<Button>().single {
-                    it.text.startsWith("get_energy_level ·")
-                }
-        }
-        Thread.sleep(1_100) // An unchanged UX refresh must not remove the selected row.
+        val shown = valueLine(activity)
+        assertNotNull("A permitted screen shows the value line", shown)
+        Thread.sleep(1_100) // An unchanged UX refresh must not rebuild the row.
         instrumentation.waitForIdleSync()
-        instrumentation.runOnMainSync { assertNotNull(selectedRow?.parent) }
+        assertSame(shown, valueLine(activity))
+        instrumentation.runOnMainSync { assertTrue(shown!!.isAttachedToWindow) }
         for (mode in listOf("모의: 규제 활성", "모의: 정보 상실")) {
             click(activity, mode)
             assertFalse(text(activity).contains("fixture-energy-value"))
             assertFalse(text(activity).contains("first-fixture"))
+            assertTrue(
+                "The request stays on the screen without its value",
+                text(activity).contains("에너지 잔량 · 일부만 확인"),
+            )
             instrumentation.runOnMainSync {
                 assertTrue(
                     all(activity).filterIsInstance<Button>().any {
                         it.text.toString() == "중지" && it.visibility == View.VISIBLE && it.isEnabled
                     }
-                )
-                assertFalse(
-                    all(activity)
-                        .filterIsInstance<Button>()
-                        .single { it.text.toString() == "이전 기록" }
-                        .isEnabled
                 )
             }
             // An off-screen view with VISIBLE set is insufficient: check touch reachability.
@@ -127,42 +125,50 @@ class DriverUiTest {
             .perform(click())
         assertTrue(text(activity).contains("중지됨. AI가 차량 값을 읽을 수 없습니다."))
         click(activity, "모의: 제한 없음")
-        selectEnergy(activity)
         assertTrue(text(activity).contains("fixture-energy-value"))
     }
 
     @Test
-    fun stalePermissionHidesAnAlreadyOpenedDetail() = exercise { activity ->
+    fun stalePermissionHidesAValueAlreadyShown() = exercise { activity ->
         click(activity, "모의 기록 생성")
-        selectEnergy(activity)
+        assertNotNull(valueLine(activity))
         click(activity, "모의: 갱신 중단")
         Thread.sleep(3_500)
         instrumentation.waitForIdleSync()
         assertFalse(text(activity).contains("fixture-energy-value"))
-        assertTrue(text(activity).contains("최근 조회: 조회 완료"))
+        assertTrue(text(activity).contains("에너지 잔량 · 일부만 확인"))
+        assertTrue(text(activity).contains("문 상태 · 1개 항목 확인"))
     }
 
     @Test
-    fun identityUndoAndClearDoNotInventCapabilitiesOrRestoreValues() = exercise { activity ->
-        assertTrue(text(activity).contains("연결된 AI: 알 수 없음"))
-        assertTrue(text(activity).contains("get_navigation_destination"))
-        assertTrue(text(activity).contains("find_navigation_place"))
-        assertTrue(text(activity).contains("set_navigation_destination"))
+    fun cardsShowCatalogTitlesAndStatesButNoIdentityArgumentsOrRawDetails() = exercise { activity ->
+        assertTrue(text(activity).contains("아직 받은 요청이 없습니다."))
+        click(activity, "모의 기록 생성")
+        val shown = text(activity)
+        assertTrue(shown.contains("에너지 잔량"))
+        assertTrue(shown.contains("문 상태 · 1개 항목 확인"))
+        assertTrue("A simulated value is labelled", shown.contains("모의 값"))
+        for (hidden in
+            listOf(
+                "first-fixture",
+                "second-fixture",
+                "EV_BATTERY_PERCENT",
+                "DOOR_POSITION",
+                "fixture-door-value",
+                "get_energy_level",
+            )) {
+            assertFalse(hidden, shown.contains(hidden))
+        }
         instrumentation.runOnMainSync {
-            assertFalse(
+            assertEquals(
+                "One control starts and stops the connection",
+                listOf("시작"),
                 all(activity)
                     .filterIsInstance<Button>()
-                    .single { it.text.toString() == "내비 변경 되돌리기" }
-                    .isEnabled
+                    .map { it.text.toString() }
+                    .filterNot { it.startsWith("모의") },
             )
         }
-        click(activity, "모의 기록 생성")
-        selectEnergy(activity)
-        assertTrue(text(activity).contains("모의 값 · 실제 차량 값 아님"))
-        click(activity, "메모리 기록 지우기")
-        assertFalse(text(activity).contains("fixture-energy-value"))
-        assertFalse(text(activity).contains("first-fixture"))
-        assertTrue(text(activity).contains("아직 받은 요청이 없습니다."))
     }
 
     @Test

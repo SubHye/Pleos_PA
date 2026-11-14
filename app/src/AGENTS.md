@@ -8,9 +8,9 @@ Kotlin 소스는 `main/java/com/example/pleos_pa/` 아래에 있다. 표의 앞 
 
 | 위치 | 맡는 일 |
 | --- | --- |
-| `MainActivity.kt`, `ui/` | 차량 화면. 연결 시작·중지, 연결 상태, 요청 기록, Car UX 제한에 따른 표시 |
+| `MainActivity.kt`, `ui/` | 차량 화면. 연결 시작·중지 버튼 하나, 연결 상태, AI 요청과 앱 응답을 대화 형식 카드로 보이기(`ChatCards`, `ChatViews`), Car UX 제한에 따른 값 숨김 |
 | `connection/` | Foreground Service, 알림, 세션과 명령 순서 |
-| `mcp/` | MCP 서버와 도구. 입력 스키마와 인자 검사, 결과 형식 |
+| `mcp/` | MCP 서버와 도구. 입력 스키마와 인자 검사, 결과 형식. `RecordedNavigationTool`은 내비 도구 호출과 끝난 상태를 화면 기록에 넘긴다 |
 | `bridge/` | 도구가 조회기를 부르는 게이트웨이와 응답 형식 |
 | `vehicle/` | Vehicle SDK 경계(`VehicleSdk`), 조회 슬롯, 속성 호출 표 |
 | `navigation/` | NaviHelper 경계(`NaviSdk`), 조회 슬롯, 목적지 설정, 경유지 변경, 변경 작업 조정기(`NavTaskCoordinator`), 주행 규제 가드(`CarNavigationGuard`) |
@@ -33,14 +33,14 @@ Kotlin 소스는 `main/java/com/example/pleos_pa/` 아래에 있다. 표의 앞 
 - MCP 서버는 사용자가 화면에서 시작할 때만 연다. 앱 실행이나 프로세스 재시작으로 자동으로 열지 않는다.
 - 서버는 `127.0.0.1`에만 묶는다. `Origin`이 있거나 Host가 `127.0.0.1`이 아닌 요청은 403으로 거절한다. 인증은 없다.
 - VIN과 제어 API는 도구로 내놓지 않는다.
-- 요청 기록은 메모리에만 두고 디스크와 로그에 쓰지 않는다. 요청의 선택 인자와 검증된 결과만 남기며, MCP 원문, 인증 헤더, SDK 오류 문장은 남기지 않는다.
-- 화면의 상세 기록 표시는 기본으로 막혀 있다. 실행 인자나 빌드 플래그로 풀지 않는다.
+- 요청 기록은 메모리에만 두고 디스크와 로그에 쓰지 않는다. 차량 조회는 요청의 선택 인자와 검증된 결과만 남기며, MCP 원문, 인증 헤더, SDK 오류 문장은 남기지 않는다. 내비 도구는 도구 이름과 끝난 상태만 남기고 인자, 장소, 결과 글은 남기지 않는다.
+- 화면은 최근 요청 5건의 도구 제목과 끝난 상태만 보이고 기록을 넘겨 보지 않는다. 차량 값이 든 줄(`headline`)은 기본으로 막혀 있다. 실행 인자나 빌드 플래그로 풀지 않는다.
 - `debug/`의 모의 화면은 실제 SDK, MCP 서버, 공용 기록과 분리해 둔다. 진단 화면은 값을 주입하거나 바꾸지 않는다.
 
 ## 알아 둘 것
 
 - 읽을 수 있는 속성은 카탈로그의 97개다. `SMART_GLASS_CONFIG`는 공개 capability API가 없어 읽지 않는다. `CAR_TOLL` 권한은 Manifest에 없어 `ETCS_VOICE_GUIDANCE_VOLUME`은 `PERMISSION_DENIED`가 된다.
-- `ui/NavTaskHistory`는 내비 작업 상태를 요청 기록에 전달하는 어댑터다. 아직 실제 내비 실행 경로에 연결되지 않았다.
+- `ui/NavTaskHistory`는 내비 작업 상태를 요청 기록에 전달하는 어댑터다. 아직 실제 내비 실행 경로에 연결되지 않았다. 화면의 내비 카드는 `mcp/RecordedNavigationTool`이 만든다.
 - 클라이언트가 조회 도중 연결을 끊거나 `adb forward`가 해제돼도 앱은 알지 못한다. 그 조회는 데드라인까지 슬롯을 쓰고, 그동안 다른 호출은 `BUSY`를 받는다.
 - 화면의 "연결됨"은 서버가 요청을 받을 수 있다는 뜻이며, AI가 연결됐다는 뜻이 아니다.
 - 서버가 열려 있는 동안에는 같은 기기의 다른 앱과 `adb forward`가 있는 PC의 프로그램도 조회 값을 읽을 수 있다. SDK는 조회 값을 logcat에 남긴다.
