@@ -248,7 +248,7 @@ Codex CLI 0.166.0(`codex exec`, 비대화형)이 adb forward로 제품 앱(debug
 | AI 쪽 관찰 | "판교로 가자."만으로는 내비 도구를 쓰지 않고 이동 수단을 물었다. Codex의 MCP 승인 정책이 `never`이면 `set_navigation_destination`(`destructiveHint: true`)이 클라이언트에서 거절되어 서버에 닿지 않는다. 이 서버만 `default_tools_approval_mode=approve`로 실행했다. Codex의 Computer Use 플러그인이 켜져 있으면, 연결이 끊긴 뒤 데스크톱 화면을 읽으려 했다 |
 | 소요 시간 | 요청부터 최종 답변까지 설정 22.9·25.5초, 조회 7.8~12.4초. 모두 5초를 넘는다. 설정 도구 한 번에 7.1~9.0초다 |
 
-확인하지 않은 것: 차량 앱 화면에 내비 변경 결과를 표시하는 것(연결되지 않음), Claude 계열 클라이언트(CLI 계정 크레딧 부족으로 BLOCKED), ChatGPT·Codex 앱 화면에서의 입력, release 빌드, `OUTCOME_UNKNOWN`·`TIMEOUT`.
+확인하지 않은 것: 차량 앱 화면에 내비 변경 결과를 표시하는 것(이 관찰 때는 연결되지 않았다. 지금의 화면 표시는 아래 한계에 있다), Claude 계열 클라이언트(CLI 계정 크레딧 부족으로 BLOCKED), ChatGPT·Codex 앱 화면에서의 입력, release 빌드, `OUTCOME_UNKNOWN`·`TIMEOUT`.
 
 ### 한계
 

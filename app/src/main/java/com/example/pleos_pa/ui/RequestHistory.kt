@@ -77,6 +77,16 @@ class RequestHistory(private val capacity: Int = 100) {
         return true
     }
 
+    /**
+     * Removes an unfinished attempt that turned out to be no request at all, such as refused input.
+     */
+    @Synchronized
+    fun discard(token: Token): Boolean {
+        val removed = records.removeAll { it.token === token && it.state in UNFINISHED }
+        if (removed) notifyChanged()
+        return removed
+    }
+
     /** Navigation progress may advance only an unfinished attempt; removed rows never revive. */
     @Synchronized
     fun progress(token: Token, state: String): Boolean {

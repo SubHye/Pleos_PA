@@ -11,6 +11,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.os.SystemClock
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -270,6 +271,8 @@ internal class ChatRow(context: Context, private val unit: Float, textScale: Flo
     private val bubble = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
     private val motions = mutableListOf<Animator>()
     private var shown: ChatCard? = null
+    private var workingSince = 0L
+    private var held: Runnable? = null
 
     val request: View
     val response: View
@@ -325,7 +328,24 @@ internal class ChatRow(context: Context, private val unit: Float, textScale: Flo
         CardMotion.enter(card, false, px(24f).toFloat())
     }
 
+    /**
+     * A read often ends within a few milliseconds. The working state then stays for
+     * [MIN_WORKING_MILLIS] so the request is seen arriving before its answer replaces it.
+     */
     fun bind(next: ChatCard, requestCaption: String, animateEnd: Boolean) {
+        held?.let(card::removeCallbacks)
+        held = null
+        val wait = workingSince + MIN_WORKING_MILLIS - SystemClock.uptimeMillis()
+        val ending = shown?.phase == ChatCard.Phase.WORKING && next.phase != ChatCard.Phase.WORKING
+        if (ending && animateEnd && wait > 0 && CardMotion.enabled()) {
+            held = Runnable { show(next, requestCaption, true) }.also { card.postDelayed(it, wait) }
+            return
+        }
+        show(next, requestCaption, animateEnd)
+    }
+
+    private fun show(next: ChatCard, requestCaption: String, animateEnd: Boolean) {
+        held = null
         val previous = shown
         shown = next
         caption.text = requestCaption
@@ -352,6 +372,7 @@ internal class ChatRow(context: Context, private val unit: Float, textScale: Flo
         val finishing = animateEnd && previous?.phase == ChatCard.Phase.WORKING
         when (next.phase) {
             ChatCard.Phase.WORKING -> {
+                workingSince = SystemClock.uptimeMillis()
                 dots.visibility = View.VISIBLE
                 mark.visibility = View.GONE
                 battery.fillTo(0.25f, false)
@@ -382,6 +403,8 @@ internal class ChatRow(context: Context, private val unit: Float, textScale: Flo
     }
 
     fun stop() {
+        held?.let(card::removeCallbacks)
+        held = null
         motions.forEach(Animator::cancel)
         motions.clear()
         battery.stop()
@@ -409,5 +432,6 @@ internal class ChatRow(context: Context, private val unit: Float, textScale: Flo
 
     private companion object {
         const val WRAP = FrameLayout.LayoutParams.WRAP_CONTENT
+        const val MIN_WORKING_MILLIS = 700L
     }
 }

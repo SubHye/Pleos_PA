@@ -34,12 +34,15 @@ class RecordedNavigationTool(
                 history.finish(token, "FAILED", null, "")
                 throw e
             }
-        history.finish(token, stateOf(result.structuredContent), null, "")
+        // Refused input is answered with text only. Like a refused vehicle read, it leaves no
+        // record.
+        val structured = result.structuredContent
+        if (structured == null) history.discard(token)
+        else history.finish(token, stateOf(structured), null, "")
         return result
     }
 
-    private fun stateOf(structured: JsonObject?): String {
-        if (structured == null) return "REJECTED"
+    private fun stateOf(structured: JsonObject): String {
         fun text(key: String) = (structured[key] as? JsonPrimitive)?.content
         if (text("ok") == "true") return if (text("status") == "PARTIAL") "PARTIAL" else "COMPLETE"
         if (text("sent") == "true") return "RESULT_UNKNOWN"

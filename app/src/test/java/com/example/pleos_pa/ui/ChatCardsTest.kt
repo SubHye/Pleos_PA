@@ -110,6 +110,12 @@ class ChatCardsTest {
     }
 
     @Test
+    fun aReadThatConfirmedNothingDoesNotReadAsDone() {
+        val card = cards.of(record("get_door_status", "COMPLETE", items = 0), showValues = true)
+        assertEquals("문 상태 · 확인된 항목 없음", card.line)
+    }
+
+    @Test
     fun anUnknownToolFallsBackToItsNameAndAnUnreadableTimeIsLeftOut() {
         val token = history.begin("id", "navigation_task", "", "synthetic_time")
         history.finish(token, "COMPLETE", null, "")

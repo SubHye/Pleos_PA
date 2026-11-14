@@ -84,6 +84,7 @@ class ChatCards(
         when {
             record.state == "PARTIAL" -> "일부만 확인"
             (record.items ?: 0) > 0 -> "${record.items}개 항목 확인"
+            record.items == 0 -> "확인된 항목 없음"
             else -> "완료"
         }
 

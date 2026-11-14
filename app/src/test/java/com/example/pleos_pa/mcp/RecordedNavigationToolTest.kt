@@ -13,6 +13,7 @@ import kotlinx.serialization.json.put
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 
@@ -108,11 +109,15 @@ class RecordedNavigationToolTest {
             "RESULT_UNKNOWN",
             stateAfter(NavigationToolResult.waypointNotChanged("OUTCOME_UNKNOWN", "id", true)),
         )
-        assertEquals(
-            "Refused input has no structured result",
-            "REJECTED",
-            stateAfter(NavigationToolResult.invalidInput(entry, "placeId: Required")),
-        )
+    }
+
+    @Test
+    fun refusedInputLeavesNoRecord() {
+        runBlocking {
+            recorded { NavigationToolResult.invalidInput(entry, "placeId: Required") }
+                .call(entry, null)
+        }
+        assertTrue(history.snapshot().isEmpty())
     }
 
     @Test
