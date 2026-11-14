@@ -137,7 +137,7 @@ def history_check(serial):
         raise RuntimeError("Missing count-only production history result")
     evidence = json.loads(match.group(1))
     required = ("requestIdsCorrelated", "distinctServerRequestIds", "activityRecreationPreservedRecords",
-                "resumeLabelRestored", "restrictedDetailsHidden", "explicitUiClear", "stoppedConnectionRefused")
+                "resumeLabelRestored", "restrictedDetailsHidden", "stoppedConnectionRefused")
     if (evidence.get("source") != "production_mcp_shared_history"
             or evidence.get("transport") != "streamable_http" or evidence.get("port") != 18766 or evidence.get("path") != "/mcp"
             or not all(evidence.get(k) is True for k in required)

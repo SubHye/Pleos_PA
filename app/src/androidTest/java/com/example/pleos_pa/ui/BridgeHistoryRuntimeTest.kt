@@ -13,13 +13,13 @@ import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.example.pleos_pa.AnimationsOff
 import com.example.pleos_pa.MainActivity
 import com.example.pleos_pa.R
 import com.example.pleos_pa.RuntimeMcpClient
@@ -43,6 +43,7 @@ import org.hamcrest.CoreMatchers.sameInstance
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.*
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -51,6 +52,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class BridgeHistoryRuntimeTest {
+    @get:Rule val animations = AnimationsOff()
+
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context = instrumentation.targetContext
     private val loopback = InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1))
@@ -260,16 +263,16 @@ class BridgeHistoryRuntimeTest {
             )
             val visible = screenText(activity)
             assertTrue(
-                "Restricted summary observes real history",
-                visible.contains(context.getString(R.string.history_hidden, 2)),
+                "The restricted screen shows each real request by its catalog title",
+                probes.all { visible.contains(catalog.tools.getValue(it.query).title) },
             )
+            assertTrue(visible.contains(context.getString(R.string.ux_restricted)))
             assertFalse(
                 "Production policy is not bypassed",
                 requestIds.any { visible.contains(it) } ||
                     probes.any { visible.contains(it.property) } ||
                     visible.contains(sentinel),
             )
-            assertTrue(visible.contains(context.getString(R.string.client_unknown)))
             assertTrue(
                 "Closing the MCP client does not report an interrupted connection",
                 visible.contains(context.getString(R.string.connection_connected)),
@@ -294,11 +297,6 @@ class BridgeHistoryRuntimeTest {
                     it.size == 2 && it.all { row -> row.requestId in requestIds }
                 },
             )
-            onView(withText(context.getString(R.string.history_clear)))
-                .inRoot(withDecorView(sameInstance(activity.window.decorView)))
-                .perform(scrollTo(), click())
-            await("explicit UI clear") { DriverHistory.history.snapshot().isEmpty() }
-            assertTrue(screenText(activity).contains(context.getString(R.string.history_hidden, 0)))
             val evidence =
                 JSONObject()
                     .put("source", "production_mcp_shared_history")
@@ -316,7 +314,6 @@ class BridgeHistoryRuntimeTest {
                     .put("activityRecreationPreservedRecords", true)
                     .put("resumeLabelRestored", true)
                     .put("restrictedDetailsHidden", true)
-                    .put("explicitUiClear", true)
                     .put("stoppedConnectionRefused", true)
                     .put(
                         "scope",

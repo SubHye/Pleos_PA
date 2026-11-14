@@ -18,6 +18,7 @@ import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.example.pleos_pa.AnimationsOff
 import com.example.pleos_pa.MainActivity
 import com.example.pleos_pa.R
 import com.example.pleos_pa.RuntimeMcpClient
@@ -31,6 +32,7 @@ import java.net.SocketException
 import org.hamcrest.CoreMatchers.sameInstance
 import org.json.JSONObject
 import org.junit.Assert.*
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -40,6 +42,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class BridgeServiceRuntimeTest {
+    @get:Rule val animations = AnimationsOff()
+
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context = instrumentation.targetContext
     private val manager

@@ -1,7 +1,7 @@
 workspace "Pleos_PA" "Current app and the target structure planned before the second-round presentation; only what the current system describes exists in the repository." {
     model {
         current = softwareSystem "Pleos_PA - current" "Android connection app whose embedded MCP server offers adopted vehicle read tools and navigation tools over the Vehicle SDK and NaviHelper (ADR-0008)." {
-            scaffold = container "Android app" "Connection and bounded process-memory vehicle request history with display Car UX restrictions; Foreground Service owns the MCP server on loopback 127.0.0.1:18766/mcp (no authentication), SDK adapters and the fresh Car UX guard before navigation changes." "Kotlin / MCP Kotlin SDK / Ktor CIO / Vehicle SDK 2.3.2"
+            scaffold = container "Android app" "Connection and a bounded process-memory record of vehicle reads and navigation tool states, shown as request and answer cards under display Car UX restrictions; Foreground Service owns the MCP server on loopback 127.0.0.1:18766/mcp (no authentication), SDK adapters and the fresh Car UX guard before navigation changes." "Kotlin / MCP Kotlin SDK / Ktor CIO / Vehicle SDK 2.3.2"
             sweep = container "vehicle-sweep" "Test support on the development PC: calls every offered tool and compares Virtual Console values to build catalog verification evidence." "Kotlin / JVM"
             placeCheck = container "nav-place-check" "Test support APK, not part of the app: started from adb, sets each fixed place as the destination and reads it back to build place list evidence. The only component that calls cancelRoute." "Kotlin / NaviHelper 3.0.5"
         }

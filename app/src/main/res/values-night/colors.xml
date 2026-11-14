@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="canvas">#FF121416</color>
+    <color name="surface">#FF1B1F23</color>
+    <color name="bubble">#FF262B30</color>
+    <color name="outline">#FF343A40</color>
+    <color name="text_primary">#FFECEFF1</color>
+    <color name="text_secondary">#FFB4BCC3</color>
+    <color name="text_muted">#FF8A949D</color>
+    <color name="accent">#FF5AD3A0</color>
+    <color name="accent_container">#FF173A2C</color>
+    <color name="danger">#FFF08A8A</color>
+    <color name="danger_container">#FF46201F</color>
+    <color name="indicator_off">#FF596169</color>
+    <color name="button">#FFECEFF1</color>
+    <color name="on_button">#FF1B1F23</color>
+</resources>
