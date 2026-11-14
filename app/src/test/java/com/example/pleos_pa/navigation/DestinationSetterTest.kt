@@ -22,6 +22,8 @@ class DestinationSetterTest {
     private val states = mutableListOf<NavTaskState>()
     private val outcomes = mutableListOf<SetDestination>()
     private var restricted: String? = null
+    private var policyThrows = false
+    private var executing: () -> Unit = {}
 
     private fun reader(source: String? = "simulation") =
         DestinationReader(sdk, scheduler, source, catalog.staleHoldMs)
@@ -35,9 +37,10 @@ class DestinationSetterTest {
             catalog.confirmTimeoutMs,
             catalog.confirmPollMs,
             catalog.matchToleranceDegrees,
-            { restricted },
+            { if (policyThrows) throw IllegalStateException() else restricted },
         ) { _, state ->
             states += state
+            if (state == NavTaskState.EXECUTING) executing()
         }
 
     private fun connected(): Pair<DestinationReader, DestinationSetter> {
@@ -220,6 +223,80 @@ class DestinationSetterTest {
         // Lifting it runs nothing on its own.
         restricted = null
         scheduler.advance(catalog.confirmTimeoutMs)
+        assertEquals(0, sdk.routes.size)
+    }
+
+    @Test
+    fun restrictionArrivingDuringBaselineReadPreventsSdkHandoff() {
+        val (_, setter) = connected()
+        setter.request("coex")
+        restricted = DestinationSetter.DRIVING_RESTRICTED
+        answer(FakeNaviSdk.OTHER)
+        assertEquals(
+            listOf<SetDestination>(
+                SetDestination.NotDone(DestinationSetter.DRIVING_RESTRICTED, false)
+            ),
+            outcomes,
+        )
+        assertEquals(0, sdk.routes.size)
+        restricted = null
+        scheduler.advance(catalog.confirmTimeoutMs)
+        assertEquals(0, sdk.routes.size)
+    }
+
+    @Test
+    fun restrictionAfterCheckingButBeforeSdkHandoffIsNotSent() {
+        val (_, setter) = connected()
+        executing = { restricted = DestinationSetter.DRIVING_RESTRICTED }
+        setter.request("coex")
+        answer(FakeNaviSdk.OTHER)
+        assertEquals(
+            listOf<SetDestination>(
+                SetDestination.NotDone(DestinationSetter.DRIVING_RESTRICTED, false)
+            ),
+            outcomes,
+        )
+        assertEquals(0, sdk.routes.size)
+    }
+
+    @Test
+    fun policyReadFailureDuringBaselineIsUnknownAndNotSent() {
+        val (_, setter) = connected()
+        setter.request("coex")
+        policyThrows = true
+        answer(FakeNaviSdk.OTHER)
+        assertEquals(
+            listOf<SetDestination>(
+                SetDestination.NotDone(DestinationSetter.DRIVING_STATE_UNKNOWN, false)
+            ),
+            outcomes,
+        )
+        assertEquals(0, sdk.routes.size)
+    }
+
+    @Test
+    fun missingPolicyIntegrationBlocksInsteadOfPermittingTheSdk() {
+        val reader = reader()
+        reader.open()
+        sdk.connect()
+        scheduler.runAll()
+        val setter =
+            DestinationSetter(
+                sdk,
+                reader,
+                scheduler,
+                catalog.baselineDeadlineMs,
+                catalog.confirmTimeoutMs,
+                catalog.confirmPollMs,
+                catalog.matchToleranceDegrees,
+            )
+        setter.request("coex")
+        assertEquals(
+            listOf<SetDestination>(
+                SetDestination.NotDone(DestinationSetter.DRIVING_STATE_UNKNOWN, false)
+            ),
+            outcomes,
+        )
         assertEquals(0, sdk.routes.size)
     }
 

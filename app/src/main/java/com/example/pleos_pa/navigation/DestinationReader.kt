@@ -1,6 +1,7 @@
 package com.example.pleos_pa.navigation
 
 import com.example.pleos_pa.contract.DestinationFields
+import com.example.pleos_pa.contract.WaypointFields
 import com.example.pleos_pa.vehicle.ReadScheduler
 
 /** How one destination read ended. */
@@ -28,6 +29,13 @@ class DestinationReader(
     private val scheduler: ReadScheduler,
     private val source: String?,
     private val staleHoldMillis: Long,
+    /**
+     * Where each waypoint callback goes, on the scheduler thread. This reader owns the SDK
+     * connection, so it is the one listener; the waypoint slot ([WaypointReader]) takes the rest.
+     */
+    private val onWaypoints: (snapshot: List<WaypointFields>, receivedAtMillis: Long) -> Unit =
+        { _, _ ->
+        },
     private val onConnection: (connected: Boolean) -> Unit = {},
 ) {
     private enum class Connection {
@@ -64,6 +72,10 @@ class DestinationReader(
 
                 override fun destination(snapshot: DestinationFields, receivedAtMillis: Long) {
                     scheduler.execute { delivered(snapshot, receivedAtMillis) }
+                }
+
+                override fun waypoints(snapshot: List<WaypointFields>, receivedAtMillis: Long) {
+                    scheduler.execute { if (!closed) onWaypoints(snapshot, receivedAtMillis) }
                 }
             }
         )

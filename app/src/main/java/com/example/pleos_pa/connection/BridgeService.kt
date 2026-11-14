@@ -29,10 +29,19 @@ import com.example.pleos_pa.mcp.EmbeddedMcpServer
 import com.example.pleos_pa.mcp.NavigationDestinationTool
 import com.example.pleos_pa.mcp.NavigationPlaceTool
 import com.example.pleos_pa.mcp.NavigationSetDestinationTool
+import com.example.pleos_pa.mcp.NavigationWaypointChangeTool
+import com.example.pleos_pa.mcp.NavigationWaypointsTool
 import com.example.pleos_pa.mcp.VehicleReadTool
+import com.example.pleos_pa.navigation.CarNavigationGuard
 import com.example.pleos_pa.navigation.DestinationReader
 import com.example.pleos_pa.navigation.DestinationSetter
+import com.example.pleos_pa.navigation.NavTaskCoordinator
 import com.example.pleos_pa.navigation.PleosNaviSdk
+import com.example.pleos_pa.navigation.WaypointChanger
+import com.example.pleos_pa.navigation.WaypointReader
+import com.example.pleos_pa.navigation.guardRestrictionCode
+import com.example.pleos_pa.ui.DriverHistory
+import com.example.pleos_pa.ui.HistoryPresentation
 import com.example.pleos_pa.vehicle.PleosVehicleSdk
 import com.example.pleos_pa.vehicle.ReadScheduler
 import com.example.pleos_pa.vehicle.VehicleReader
@@ -55,10 +64,10 @@ private class MainLooperScheduler(private val handler: Handler) : ReadScheduler 
 }
 
 /**
- * Keeps the bridge running while the screen is closed. It exists only while the connection is up:
- * stopping ends the service and leaves a plain notification that can start it again. Never sticky,
- * so the system does not reopen a bridge the user did not start. Nothing binds to it, because a
- * binding would keep it alive after [stopSelf].
+ * Keeps the MCP server running while the screen is closed. It exists only while the connection is
+ * up: stopping ends the service and leaves a plain notification that can start it again. Never
+ * sticky, so the system does not reopen an MCP server the user did not start. Nothing binds to it,
+ * because a binding would keep it alive after [stopSelf].
  */
 class BridgeService : Service() {
     private val main = Handler(Looper.getMainLooper())
@@ -100,6 +109,9 @@ class BridgeService : Service() {
             controller.stop()
             return START_NOT_STICKY
         }
+        // A new connection replaces the plain terminal notification. Use a different ID:
+        // removal of the old foreground notification can complete asynchronously in Android.
+        getSystemService(NotificationManager::class.java).cancel(TERMINAL_NOTIFICATION_ID)
         // A foreground start must reach startForeground promptly, even during a teardown.
         try {
             ServiceCompat.startForeground(
@@ -137,16 +149,43 @@ class BridgeService : Service() {
             )
         val reader = VehicleReader(catalog, PleosVehicleSdk(this), scheduler, source)
         val events = Events()
-        val gateway = ReaderBridgeGateway(catalog, reader, scheduler, events)
+        val gateway =
+            ReaderBridgeGateway(
+                catalog,
+                reader,
+                scheduler,
+                events,
+                HistoryPresentation(
+                    DriverHistory.history,
+                    { query -> catalog.tools.getValue(query).name },
+                ),
+            )
         val tool = VehicleReadTool(catalog, gateway, events, SystemClock::elapsedRealtime)
         val naviSdk = PleosNaviSdk(this)
-        val destinations =
-            DestinationReader(naviSdk, scheduler, source, navigationCatalog.staleHoldMs) { connected
-                ->
+        // Both change tools share one coordinator, so one change at a time runs across them.
+        val coordinator = NavTaskCoordinator.shared { requestId, state ->
+            // Only fixed fields reach the log, never a place.
+            Log.i(TAG, "requestId=$requestId navTask=$state")
+        }
+        lateinit var destinations: DestinationReader
+        val waypoints =
+            WaypointReader(naviSdk, scheduler, navigationCatalog.staleHoldMs) {
+                destinations.unavailable()
+            }
+        destinations =
+            DestinationReader(
+                naviSdk,
+                scheduler,
+                source,
+                navigationCatalog.staleHoldMs,
+                waypoints::delivered,
+            ) { connected ->
                 Log.i(TAG, if (connected) "NAVI_CONNECTED" else "NAVI_CONNECT_FAILED")
             }
         // Outside the Pleos emulator every read is refused, so the SDK is not even connected.
         if (source != null) destinations.open()
+        val driving =
+            if (source != null) CarNavigationGuard(this, main).also { it.start() } else null
         val setter =
             DestinationSetter(
                 naviSdk,
@@ -156,10 +195,23 @@ class BridgeService : Service() {
                 navigationCatalog.confirmTimeoutMs,
                 navigationCatalog.confirmPollMs,
                 navigationCatalog.matchToleranceDegrees,
-            ) { requestId, state ->
-                // Only fixed fields reach the log, never a place.
-                Log.i(TAG, "requestId=$requestId navTask=$state")
-            }
+                restriction = { guardRestrictionCode(driving?.let { it::blockCode }) },
+                shared = coordinator,
+            )
+        val changer =
+            WaypointChanger(
+                naviSdk,
+                destinations,
+                waypoints,
+                scheduler,
+                coordinator,
+                navigationCatalog.baselineDeadlineMs,
+                navigationCatalog.confirmTimeoutMs,
+                navigationCatalog.confirmPollMs,
+                navigationCatalog.matchToleranceDegrees,
+                navigationCatalog.maxWaypoints,
+                restriction = { guardRestrictionCode(driving?.let { it::blockCode }) },
+            )
         val navigation =
             listOf(
                 NavigationDestinationTool(
@@ -183,16 +235,43 @@ class BridgeService : Service() {
                     events,
                     SystemClock::elapsedRealtime,
                 ),
+                NavigationWaypointsTool(
+                    navigationCatalog,
+                    places,
+                    waypoints,
+                    source,
+                    events,
+                    SystemClock::elapsedRealtime,
+                ),
+                NavigationWaypointChangeTool.add(
+                    navigationCatalog,
+                    places,
+                    changer,
+                    source,
+                    events,
+                    SystemClock::elapsedRealtime,
+                ),
+                NavigationWaypointChangeTool.remove(
+                    navigationCatalog,
+                    places,
+                    changer,
+                    source,
+                    events,
+                    SystemClock::elapsedRealtime,
+                ),
             )
         return ConnectionSession(
             {
                 gateway.close()
                 // Before the read slot closes, so a change still being checked ends as blocked.
                 setter.close()
+                changer.close()
+                driving?.close()
                 destinations.closeAdmission()
             },
             EmbeddedMcpServer(catalog, tool, navigation),
             { released ->
+                waypoints.close()
                 reader.close { destinations.close { main.post(released) } }
             },
             bindExecutor,
@@ -203,13 +282,7 @@ class BridgeService : Service() {
 
     /** Called on server threads; only fixed fields reach the log, never a vehicle value. */
     private inner class Events : BridgeEvents {
-        override fun requestReceived() {
-            main.post { controller.requestReceived() }
-        }
-
-        override fun peerClosedDuringRead() {
-            main.post { controller.peerClosedDuringRead() }
-        }
+        override fun requestReceived() = Unit
 
         override fun ownReplyRejected() {
             Log.e(TAG, "OWN_REPLY_REJECTED")
@@ -237,8 +310,12 @@ class BridgeService : Service() {
         ConnectionStatusBoard.publish(status)
         if (destroyed) return
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-        getSystemService(NotificationManager::class.java)
-            .notify(NOTIFICATION_ID, notification(status))
+        // Do not reuse the foreground ID: the platform can remove it during service teardown
+        // after notify() returns, losing the explicit Resume action while the app is backgrounded.
+        getSystemService(NotificationManager::class.java).apply {
+            cancel(NOTIFICATION_ID) // Also removes a pre-upgrade plain notification on a cold Stop.
+            notify(TERMINAL_NOTIFICATION_ID, notification(status))
+        }
         stopSelf()
     }
 
@@ -283,7 +360,9 @@ class BridgeService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(getString(R.string.notification_title))
-            .setContentText(statusText(this, status))
+            .setContentText(notificationText(this, status))
+            .setOnlyAlertOnce(true)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setContentIntent(open)
             .setOngoing(running)
             .addAction(action)
@@ -296,6 +375,7 @@ class BridgeService : Service() {
         private const val ACTION_STOP = "com.example.pleos_pa.action.STOP_BRIDGE"
         private const val CHANNEL_ID = "bridge"
         private const val NOTIFICATION_ID = 1
+        private const val TERMINAL_NOTIFICATION_ID = 2
         private const val FOREGROUND_NOT_ALLOWED = "FOREGROUND_NOT_ALLOWED"
         private const val PLACES_ASSET = "navigation-places.json"
 
@@ -319,18 +399,18 @@ class BridgeService : Service() {
             context.startService(stopIntent(context))
         }
 
+        /**
+         * Only connection state reaches notifications, never SDK/result text or arbitrary errors.
+         */
+        fun notificationText(context: Context, status: ConnectionStatus): String =
+            if (status is ConnectionStatus.Failed) context.getString(R.string.notification_failed)
+            else statusText(context, status)
+
         fun statusText(context: Context, status: ConnectionStatus): String =
             when (status) {
                 ConnectionStatus.Stopped -> context.getString(R.string.connection_stopped)
                 ConnectionStatus.Starting -> context.getString(R.string.connection_starting)
-                is ConnectionStatus.Connected ->
-                    context.getString(
-                        if (status.interrupted) {
-                            R.string.connection_interrupted
-                        } else {
-                            R.string.connection_connected
-                        }
-                    )
+                ConnectionStatus.Connected -> context.getString(R.string.connection_connected)
                 is ConnectionStatus.Failed ->
                     context.getString(R.string.connection_failed, status.code)
             }

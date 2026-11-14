@@ -11,4 +11,9 @@ object DestinationMatch {
     fun matches(place: Place, fields: DestinationFields, toleranceDegrees: Double): Boolean =
         abs(fields.latitude - place.latitude) <= toleranceDegrees &&
             abs(fields.longitude - place.longitude) <= toleranceDegrees
+
+    /** Whether two reads show the same destination, by coordinates alone. */
+    fun same(a: DestinationFields, b: DestinationFields, toleranceDegrees: Double): Boolean =
+        abs(a.latitude - b.latitude) <= toleranceDegrees &&
+            abs(a.longitude - b.longitude) <= toleranceDegrees
 }

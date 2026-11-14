@@ -4,7 +4,10 @@ import com.example.pleos_pa.contract.BridgeResult
 import com.example.pleos_pa.contract.ReadSelection
 import com.example.pleos_pa.contract.VehicleReadCatalog
 import com.example.pleos_pa.contract.VehicleReadRequest
+import com.example.pleos_pa.contract.VehicleReadResponse
 import com.example.pleos_pa.contract.VehicleReadValidator
+import com.example.pleos_pa.ui.ReadPresentation
+import com.example.pleos_pa.ui.RequestHistory
 import com.example.pleos_pa.vehicle.ReadAdmission
 import com.example.pleos_pa.vehicle.ReadScheduler
 import com.example.pleos_pa.vehicle.ReadTicket
@@ -27,8 +30,6 @@ fun interface BridgeGateway {
 interface BridgeEvents {
     fun requestReceived()
 
-    fun peerClosedDuringRead()
-
     fun ownReplyRejected()
 
     fun finished(requestId: String, query: String, result: String, elapsedMillis: Long)
@@ -43,6 +44,7 @@ class ReaderBridgeGateway(
     private val reader: VehicleReader,
     private val scheduler: ReadScheduler,
     private val events: BridgeEvents,
+    private val presentation: ReadPresentation = ReadPresentation.None,
 ) : BridgeGateway {
     private val validator = VehicleReadValidator(catalog)
     @Volatile private var open = true
@@ -54,7 +56,9 @@ class ReaderBridgeGateway(
     ): () -> Unit {
         val ticket = AtomicReference<ReadTicket?>()
         val abandoned = AtomicBoolean()
-        fun finish(reply: BridgeReply?, result: String) {
+        var record: RequestHistory.Token? = null
+        fun finish(reply: BridgeReply?, result: String, response: VehicleReadResponse? = null) {
+            presentation.finish(record, result, response)
             events.finished(
                 request.requestId,
                 request.query,
@@ -64,6 +68,7 @@ class ReaderBridgeGateway(
             respond(reply)
         }
         scheduler.execute {
+            record = presentation.begin(request)
             if (!open) {
                 finish(BridgeReplies.stopped(request.requestId), "CONNECTION_STOPPED")
                 return@execute
@@ -81,7 +86,7 @@ class ReaderBridgeGateway(
                     val verdict =
                         validator.validate(200, text, request.requestId, request.query, selection)
                     if (verdict is BridgeResult.Accepted) {
-                        finish(BridgeReply(200, text), response.outcome.name)
+                        finish(BridgeReply(200, text), response.outcome.name, response)
                     } else {
                         events.ownReplyRejected()
                         finish(null, "OWN_REPLY_REJECTED")

@@ -12,13 +12,21 @@ class NavigationCatalogTest {
     @Test
     fun everySdkCallIsAPublicNaviHelperMethod() {
         val helper = Class.forName("ai.pleos.playground.navi.helper.NaviHelper")
-        val routeInfo = Class.forName("ai.pleos.playground.navi.data.RouteInfo")
+        // A read takes no argument; each change hands over what its SDK call takes.
+        val arguments =
+            mapOf(
+                "requestRoute" to "ai.pleos.playground.navi.data.RouteInfo",
+                "addWaypoint" to "ai.pleos.playground.navi.data.RequestWaypointInfo",
+                "removeWaypoint" to "ai.pleos.playground.navi.constants.WaypointIndex",
+            )
         for (tool in catalog.tools) {
             val call = tool.sdkCall ?: continue
-            // A read takes no argument; the one change hands over a RouteInfo.
             val method =
-                if (tool.kind == NavigationCatalog.KIND_CHANGE) helper.getMethod(call, routeInfo)
-                else helper.getMethod(call)
+                if (tool.kind == NavigationCatalog.KIND_CHANGE) {
+                    helper.getMethod(call, Class.forName(arguments.getValue(call)))
+                } else {
+                    helper.getMethod(call)
+                }
             assertEquals(tool.name, Void.TYPE, method.returnType)
         }
     }
@@ -35,7 +43,10 @@ class NavigationCatalogTest {
                     assertEquals(tool.name, tool.sdkCall?.let { "NAVI_ROUTE" }, tool.permission)
                 }
                 NavigationCatalog.KIND_CHANGE -> {
-                    assertTrue(tool.name, tool.name.startsWith("set_"))
+                    assertTrue(
+                        tool.name,
+                        listOf("set_", "add_", "remove_").any { tool.name.startsWith(it) },
+                    )
                     assertEquals(tool.name, "NAVI_ROUTE_SEARCH", tool.permission)
                 }
                 else -> throw AssertionError("${tool.name}: unknown kind ${tool.kind}")
@@ -64,6 +75,7 @@ class NavigationCatalogTest {
         assertTrue(catalog.baselineDeadlineMs > 0)
         assertTrue(catalog.confirmPollMs > 0)
         assertTrue(catalog.confirmTimeoutMs > catalog.confirmPollMs)
+        assertEquals(2, catalog.maxWaypoints)
         assertEquals("NaviHelper 3.0.5", catalog.sdk)
     }
 

@@ -8,10 +8,8 @@ sealed interface ConnectionStatus {
 
     data object Starting : ConnectionStatus
 
-    /**
-     * The bridge can take requests. [interrupted] means a read lost its peer since the last one.
-     */
-    data class Connected(val interrupted: Boolean = false) : ConnectionStatus
+    /** The MCP endpoint is ready; this does not identify any connected AI client. */
+    data object Connected : ConnectionStatus
 
     /** Only a fixed code is kept. */
     data class Failed(val code: String) : ConnectionStatus
@@ -50,7 +48,7 @@ class ConnectionSession(
             if (synchronized(lock) { stopping }) return@execute
             onStatus(
                 this,
-                if (failure == null) ConnectionStatus.Connected()
+                if (failure == null) ConnectionStatus.Connected
                 else ConnectionStatus.Failed(failure),
             )
         }
@@ -90,7 +88,6 @@ class ConnectionController(
     private var current: ConnectionSession? = null
     private var tearingDown = false
     private var resumeAfterTeardown = false
-    private var lastReported: ConnectionStatus = ConnectionStatus.Stopped
 
     /** True until the connection has fully ended. */
     val active: Boolean
@@ -127,21 +124,7 @@ class ConnectionController(
         }
     }
 
-    /** A new request clears the mark a lost peer left. */
-    fun requestReceived() {
-        if (!tearingDown && lastReported == ConnectionStatus.Connected(interrupted = true)) {
-            publish(ConnectionStatus.Connected())
-        }
-    }
-
-    fun peerClosedDuringRead() {
-        if (!tearingDown && lastReported is ConnectionStatus.Connected) {
-            publish(ConnectionStatus.Connected(interrupted = true))
-        }
-    }
-
     private fun publish(status: ConnectionStatus) {
-        lastReported = status
         report(status)
     }
 

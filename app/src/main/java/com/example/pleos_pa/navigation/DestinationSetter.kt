@@ -41,13 +41,18 @@ class DestinationSetter(
     private val pollMillis: Long,
     private val toleranceDegrees: Double,
     /**
-     * The driving-restriction check: a fixed block code, or null when the change may run. Nothing
-     * is wired to it yet, so a restriction does not stop a change (FR-UI-04 is open).
+     * A fresh driving-policy check: a fixed block code, or null when the change may run. Missing
+     * policy integration blocks admission; it never silently permits navigation.
      */
-    private val restriction: () -> String? = { null },
+    private val restriction: () -> String? = { DRIVING_STATE_UNKNOWN },
+    /**
+     * The coordinator shared with the other navigation changes, so that one change at a time runs
+     * across all of them. Without one, this setter makes its own and reports to [onState].
+     */
+    shared: NavTaskCoordinator? = null,
     onState: (requestId: String, state: NavTaskState) -> Unit = { _, _ -> },
 ) {
-    private val coordinator = NavTaskCoordinator(::check, onState)
+    private val coordinator = shared ?: NavTaskCoordinator(::check, onState)
     @Volatile private var admissionClosed = false
     private var running: Route? = null
 
@@ -58,9 +63,10 @@ class DestinationSetter(
                 reply(SetDestination.NotDone(CONNECTION_STOPPED, sent = false))
                 return@execute
             }
-            val request = NavTaskRequest(requestId, listOf(Route(place)))
+            val route = Route(place)
+            val request = NavTaskRequest(requestId, listOf(route), ::check)
             val refusal =
-                when (coordinator.submit(request) { reply(outcomeOf(it)) }) {
+                when (coordinator.submit(request) { reply(outcomeOf(it, route.sent)) }) {
                     is NavAdmission.Accepted -> null
                     is NavAdmission.Busy -> BUSY
                     NavAdmission.Unavailable -> CONNECTION_STOPPED
@@ -86,7 +92,7 @@ class DestinationSetter(
 
     private fun check(request: NavTaskRequest, done: (String?) -> Unit) {
         val place = (request.actions.single() as Route).place
-        val blocked = reader.unavailable() ?: restriction()
+        val blocked = reader.unavailable() ?: restrictionCode()
         if (blocked != null) {
             done(blocked)
             return
@@ -98,16 +104,27 @@ class DestinationSetter(
                 done(CONNECTION_STOPPED)
                 return@read
             }
+            val currentBlock = restrictionCode()
             done(
-                when (read) {
-                    is DestinationRead.Failed ->
-                        if (read.code == CONNECTION_STOPPED) CONNECTION_STOPPED
-                        else BASELINE_UNAVAILABLE
-                    is DestinationRead.Received -> if (matches(place, read)) ALREADY_SET else null
-                }
+                if (currentBlock != null) currentBlock
+                else
+                    when (read) {
+                        is DestinationRead.Failed ->
+                            if (read.code == CONNECTION_STOPPED) CONNECTION_STOPPED
+                            else BASELINE_UNAVAILABLE
+                        is DestinationRead.Received ->
+                            if (matches(place, read)) ALREADY_SET else null
+                    }
             )
         }
     }
+
+    private fun restrictionCode(): String? =
+        try {
+            restriction()
+        } catch (_: Exception) {
+            DRIVING_STATE_UNKNOWN
+        }
 
     private fun matches(place: Place, read: DestinationRead.Received) =
         DestinationMatch.matches(place, read.snapshot, toleranceDegrees)
@@ -116,12 +133,20 @@ class DestinationSetter(
     private inner class Route(val place: Place) : NavAction {
         override val name = ACTION
 
+        var sent = false
+            private set
+
         private var over = false
         private var stopWatching: () -> Unit = {}
         private var cancelDeadline: () -> Unit = {}
         private var cancelPoll: () -> Unit = {}
 
         override fun start(done: (failure: String?) -> Unit) {
+            val block = if (admissionClosed) CONNECTION_STOPPED else restrictionCode()
+            if (block != null) {
+                done(block)
+                return
+            }
             running = this
             fun finish(failure: String?) {
                 if (over) return
@@ -133,6 +158,7 @@ class DestinationSetter(
                 if (DestinationMatch.matches(place, snapshot, toleranceDegrees)) finish(null)
             }
             cancelDeadline = scheduler.after(confirmMillis) { finish(OUTCOME_UNKNOWN) }
+            sent = true
             sdk.requestRoute(
                 RouteRequest(
                     latitude = place.latitude,
@@ -172,7 +198,7 @@ class DestinationSetter(
         }
     }
 
-    private fun outcomeOf(result: NavTaskResult): SetDestination =
+    private fun outcomeOf(result: NavTaskResult, sent: Boolean): SetDestination =
         when (result.state) {
             NavTaskState.SUCCEEDED -> SetDestination.Applied
             NavTaskState.BLOCKED ->
@@ -182,12 +208,16 @@ class DestinationSetter(
                 when (result.code) {
                     // Refused by the SDK before anything was sent.
                     PERMISSION_DENIED -> SetDestination.NotDone(PERMISSION_DENIED, sent = false)
-                    CONNECTION_STOPPED -> SetDestination.NotDone(CONNECTION_STOPPED, sent = true)
-                    else -> SetDestination.NotDone(OUTCOME_UNKNOWN, sent = true)
+                    CONNECTION_STOPPED -> SetDestination.NotDone(CONNECTION_STOPPED, sent = sent)
+                    else ->
+                        if (!sent) SetDestination.NotDone(result.code ?: CHECK_FAILED, sent = false)
+                        else SetDestination.NotDone(OUTCOME_UNKNOWN, sent = true)
                 }
         }
 
     companion object {
+        const val DRIVING_STATE_UNKNOWN = "DRIVING_STATE_UNKNOWN"
+        const val DRIVING_RESTRICTED = "DRIVING_RESTRICTED"
         const val ACTION = "set_destination"
         const val BUSY = "BUSY"
         const val ALREADY_SET = "ALREADY_SET"
