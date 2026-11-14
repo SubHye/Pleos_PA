@@ -117,8 +117,9 @@ class BridgeServiceRuntimeTest {
         }
         RuntimeMcpClient().use { client ->
             val names = client.toolNames()
-            assertEquals(23, names.size)
+            assertEquals(26, names.size)
             assertTrue(names.contains("get_energy_level"))
+            assertTrue(names.contains("add_navigation_waypoint"))
         }
         // Closing an MCP client is not a server/AI disconnection signal under ADR-0008.
         assertTrue(ConnectionStatusBoard.status is ConnectionStatus.Connected)
