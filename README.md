@@ -210,7 +210,7 @@ AI가 호출할 수 있는 도구는 26개다. 모두 에뮬레이터에서 실�
 | --- | --- |
 | APK 위치 | [apk/CometOne_Pleos_PA_release.apk](apk/CometOne_Pleos_PA_release.apk) |
 | 버전(tag) | 1.0 |
-| APK를 빌드한 커밋 | `4a383593950ddcd1c2c5069f1180cdb057b9ca34` |
+| 최종 커밋 | `d08f3da47659ba76b0e8fbcdf58ffd09af2fe734` |
 | 빌드 종류와 서명 | release(R8 최적화), APK Signature Scheme v2. 개발 PC의 Android debug 키로 서명했다(인증서 `CN=Android Debug`) |
 | APK SHA-256 | `7e05b5efc3a02555e7326727155eb96432308bb333c598e370f4d43c5891d97a` |
 | 빌드한 날 | 2026-11-14 |
